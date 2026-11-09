@@ -12,7 +12,8 @@ export const INITIAL_PROJECTS: Project[] = [
     start_date: '2026-10-01',
     deadline: '2026-11-20',
     status: 'ativo',
-    locked: false, // ⚡ Ativo (1/2)
+    slot: 'ancora', // Slot 1 | A Âncora (Projeto Primário ~70% de banda)
+    locked: false, // ⚡ Ativo (Slot 1 de 3)
     isLocked: false,
     unlockConditions: [],
     stages: [
@@ -37,7 +38,8 @@ export const INITIAL_PROJECTS: Project[] = [
     start_date: '2026-10-15',
     deadline: '2026-11-30',
     status: 'ativo',
-    locked: false, // ⚡ Ativo (2/2)
+    slot: 'satelite', // Slot 2 | O Satélite (Projeto Secundário - Tático / Sprints curtos)
+    locked: false, // ⚡ Ativo (Slot 2 de 3)
     isLocked: false,
     unlockConditions: [],
     stages: [
@@ -62,11 +64,12 @@ export const INITIAL_PROJECTS: Project[] = [
     start_date: '2026-09-01',
     deadline: '2026-12-05',
     status: 'ativo',
-    locked: true, // 🔒 Trancado no Estacionamento de Dopamina (Limite de 2 ativos)
+    slot: null,
+    locked: true, // 🔒 Trancado no Estacionamento de Ideias (Aguardando vaga nos 3 slots)
     isLocked: true,
     unlockConditions: [
       'Publicar v1.8 do Littera em produção',
-      'Liberar 1 dos 2 slots de foco ativo (Regra da Substituição)'
+      'Liberar 1 dos 3 slots de banda (Regra da Substituição)'
     ],
     stages: [
       { id: 'st_i1', title: 'Fichamento dos textos base e acórdãos', completed: true },

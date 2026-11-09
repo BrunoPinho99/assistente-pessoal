@@ -67,14 +67,14 @@ export const TradeoffModal: React.FC<TradeoffModalProps> = ({
               <div className="flex items-center gap-2">
                 <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 uppercase tracking-wider flex items-center gap-1">
                   <Lock className="w-2.5 h-2.5" />
-                  A Regra da Substituição
+                  Protocolo 1-1-1 · Regra da Substituição
                 </span>
                 <span className="text-[11px] font-semibold text-rose-400">
-                  (Máximo 2 Projetos Ativos)
+                  (Capacidade Máxima: 3/3 Slots Ocupados)
                 </span>
               </div>
               <h3 className="text-xl font-bold text-white tracking-tight mt-1">
-                Substituição Obrigatória de Projeto
+                Trava de Segurança: Substituição Obrigatória
               </h3>
             </div>
           </div>
@@ -91,10 +91,10 @@ export const TradeoffModal: React.FC<TradeoffModalProps> = ({
         {/* Contexto e Explicação TDAH */}
         <div className="my-5 p-4 rounded-2xl bg-[#151D31] border border-white/5 space-y-2">
           <p className="text-xs text-[#CBD5E1] leading-relaxed">
-            Você está tentando destrancar <strong className="text-white font-bold underline decoration-white/40">"{projectToUnlock.title}"</strong>, mas já possui 2 projetos ativos simultâneos.
+            Você está tentando destrancar <strong className="text-white font-bold underline decoration-white/40">"{projectToUnlock.title}"</strong>, mas os <strong>3 slots de banda cognitiva</strong> (Âncora, Satélite e Válvula) já estão ocupados.
           </p>
           <p className="text-[11px] text-[#8E9BB5] leading-relaxed">
-            Para impedir paralisia por sobrecarga de decisões, o Personal OS exige que você selecione <strong>qual projeto ativo atual será colocado no Estacionamento (trancado 🔒)</strong> para liberar a vaga.
+            O sistema repudia o acúmulo para proteger a função executiva e evitar burnout. Para o novo projeto entrar em produção, selecione <strong>qual projeto ativo voltará para o Estacionamento de Ideias (com cadeado 🔒)</strong> para liberar o slot.
           </p>
         </div>
 
@@ -120,9 +120,26 @@ export const TradeoffModal: React.FC<TradeoffModalProps> = ({
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-white/10 text-white border border-white/20">
-                      {actProj.area}
-                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-white/10 text-white border border-white/20">
+                        {actProj.area}
+                      </span>
+                      {actProj.slot === 'ancora' && (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40">
+                          Slot 1 | Âncora (~70%)
+                        </span>
+                      )}
+                      {actProj.slot === 'satelite' && (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40">
+                          Slot 2 | Satélite (Tático)
+                        </span>
+                      )}
+                      {actProj.slot === 'valvula' && (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                          Slot 3 | Válvula (Sandbox)
+                        </span>
+                      )}
+                    </div>
 
                     <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${
                       isSelected 

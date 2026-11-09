@@ -80,6 +80,55 @@ export type ProjectCategory =
   | 'pessoal' 
   | 'academico';
 
+// ==============================================================================
+// PROTOCOLO 1-1-1 DE ALOCAÇÃO DE BANDA (3 SLOTS COGNITIVOS SIMULTÂNEOS)
+// ==============================================================================
+export type BandwidthSlot = 'ancora' | 'satelite' | 'valvula';
+
+export interface BandwidthSlotDefinition {
+  id: BandwidthSlot;
+  slotNumber: 1 | 2 | 3;
+  name: string;
+  subtitle: string;
+  cognitiveLoad: string;
+  definition: string;
+  behavior: string;
+  badgeClass: string;
+}
+
+export const BANDWIDTH_SLOTS_CONFIG: Record<BandwidthSlot, BandwidthSlotDefinition> = {
+  ancora: {
+    id: 'ancora',
+    slotNumber: 1,
+    name: 'A Âncora',
+    subtitle: 'Projeto Primário',
+    cognitiveLoad: '~70% da banda mental',
+    definition: 'O núcleo operacional. Exige trabalho profundo, contínuo e estratégico.',
+    behavior: 'Consome a maior parte da banda mental (aprox. 70%) e dita a estrutura da rotina principal.',
+    badgeClass: 'border-blue-500/40 bg-blue-500/20 text-blue-300'
+  },
+  satelite: {
+    id: 'satelite',
+    slotNumber: 2,
+    name: 'O Satélite',
+    subtitle: 'Projeto Secundário',
+    cognitiveLoad: 'Tático / Sprints curtos',
+    definition: 'O projeto tático. Tem escopo fechado e blindado, com começo, meio e fim definidos.',
+    behavior: 'Funciona em sprints curtos ou manutenção. Existe para ser entregue e liberar o slot rápido.',
+    badgeClass: 'border-purple-500/40 bg-purple-500/20 text-purple-300'
+  },
+  valvula: {
+    id: 'valvula',
+    slotNumber: 3,
+    name: 'A Válvula',
+    subtitle: 'Projeto de Escape (Sandbox)',
+    cognitiveLoad: 'Dopamina pura / Zero pressão',
+    definition: 'O sandbox do hiperfoco. Curtíssimo prazo, zero pressão de entrega.',
+    behavior: 'Serve exclusivamente para hackear a dopamina, descarregar a mente e saciar a necessidade de novidade. Se virar obrigação, perde o status de Válvula.',
+    badgeClass: 'border-emerald-500/40 bg-emerald-500/20 text-emerald-300'
+  }
+};
+
 export interface Project {
   id: string;
   user_id?: string;
@@ -92,7 +141,8 @@ export interface Project {
   start_date?: string;
   deadline?: string | null;
   status: ProjectStatus;
-  locked: boolean; // 🔒 True = trancado no estacionamento de dopamina, False = ativo (máx 2)
+  slot?: BandwidthSlot | null; // Protocolo 1-1-1: ancora | satelite | valvula | null
+  locked: boolean; // 🔒 True = trancado no estacionamento de dopamina, False = ativo (máx 3 slots)
   isLocked?: boolean; // MongoDB Schema field
   unlockConditions?: string[]; // Critérios objetivos para o projeto poder ser destrancado no futuro
   stages: ProjectStage[];
@@ -107,6 +157,7 @@ export interface Project {
 export interface TradeoffCandidate {
   projectToUnlock: Project;
   activeProjects: Project[];
+  targetSlot?: BandwidthSlot;
 }
 
 export interface DopamineCaptureMessage {

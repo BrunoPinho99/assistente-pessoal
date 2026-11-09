@@ -17,7 +17,7 @@ import {
   Check,
   Play
 } from 'lucide-react';
-import { Project, Task, ContextFilter, ContextArea, ProjectStage, ProjectCategory } from '../../types';
+import { Project, Task, ContextFilter, ContextArea, ProjectStage, ProjectCategory, BandwidthSlot, BANDWIDTH_SLOTS_CONFIG } from '../../types';
 
 interface ProjectsViewProps {
   projects: Project[];
@@ -29,7 +29,8 @@ interface ProjectsViewProps {
   onUpdateProject?: (id: string, updates: Partial<Project>) => void;
   onDeleteProject: (id: string) => void;
   onStartFocus: (task: Task) => void;
-  onToggleLock?: (projectId: string) => void;
+  onToggleLock?: (projectId: string, targetSlot?: BandwidthSlot) => void;
+  onSetProjectSlot?: (projectId: string, slot: BandwidthSlot) => void;
   onOpenDopamineChat?: () => void;
 }
 
@@ -43,6 +44,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
   onDeleteProject,
   onStartFocus,
   onToggleLock,
+  onSetProjectSlot,
   onOpenDopamineChat
 }) => {
   const [showAddModal, setShowAddModal] = useState(false);
@@ -319,6 +321,25 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                   <option value="business" className="bg-[#101522] text-white">Business</option>
                   <option value="parking" className="bg-[#101522] text-white">Estacionamento</option>
                 </select>
+
+                {!projectDraft.locked ? (
+                  <select
+                    value={projectDraft.slot || 'ancora'}
+                    onChange={e => {
+                      const val = e.target.value as BandwidthSlot;
+                      setProjectDraft(prev => (prev ? { ...prev, slot: val } : null));
+                      if (onSetProjectSlot && projectDraft) {
+                        onSetProjectSlot(projectDraft.id, val);
+                      }
+                    }}
+                    className="px-3 py-1 rounded-lg text-xs font-bold bg-[#315DFF]/30 border border-[#315DFF]/60 text-white backdrop-blur-md cursor-pointer focus:outline-none"
+                    title="Alocação no Protocolo 1-1-1"
+                  >
+                    <option value="ancora" className="bg-[#101522] text-white">Slot 1 | Âncora (~70%)</option>
+                    <option value="satelite" className="bg-[#101522] text-white">Slot 2 | Satélite (Tático)</option>
+                    <option value="valvula" className="bg-[#101522] text-white">Slot 3 | Válvula (Sandbox)</option>
+                  </select>
+                ) : null}
 
                 <span
                   className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border backdrop-blur-md ${
@@ -678,120 +699,219 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
       </div>
 
       {/* ========================================================================
-          SEÇÃO 1: PROJETOS ATIVOS (MÁXIMO 2)
+          SEÇÃO 1: PROTOCOLO 1-1-1 DE ALOCAÇÃO DE BANDA (3 SLOTS SIMULTÂNEOS)
           ======================================================================== */}
       <section className="space-y-4">
-        <div className="flex items-center justify-between border-b border-[#E5EAF2] dark:border-[#263248] pb-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-[#E5EAF2] dark:border-[#263248] pb-3">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#315DFF]/15 text-[#315DFF] dark:text-blue-400 border border-[#315DFF]/30">
+                PROTOCOLO 1-1-1
+              </span>
+              <h2 className="text-base sm:text-lg font-bold text-[#171D38] dark:text-white tracking-tight">
+                Alocação de Banda Cognitiva ({activeProjects.length}/3 slots)
+              </h2>
+            </div>
+            <p className="text-xs text-[#747E98] dark:text-slate-400">
+              Apenas 3 frentes simultâneas: 1 Âncora (~70%) + 1 Satélite (Tático) + 1 Válvula (Sandbox). Protege a função executiva e evita burnout.
+            </p>
+          </div>
+
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <h2 className="text-base font-bold text-[#171D38] dark:text-white tracking-tight">
-              Projetos Ativos no Foco ({filteredActive.length}/2)
-            </h2>
-            <span className="text-xs text-[#747E98]">
-              (Renderizam tarefas no Meu Dia)
+            <span className="px-2.5 py-1 rounded-xl text-xs font-mono font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 shadow-xs">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Trava de Segurança Ativa</span>
             </span>
           </div>
-          <span className={`text-xs font-mono font-semibold ${isDarkMode ? 'text-slate-300' : 'text-[#315DFF]'}`}>
-            Regra da Substituição Ativa
-          </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {filteredActive.length === 0 ? (
-            <div className={`col-span-full text-center py-12 px-4 border border-dashed rounded-2xl ${
-              isDarkMode ? 'border-[#263248] bg-[#1C2333]/50' : 'border-[#E5EAF2] bg-[#FFFFFF]'
-            }`}>
-              <FolderKanban className={`w-8 h-8 mx-auto mb-2 ${isDarkMode ? 'text-[#64748B]' : 'text-[#9AA4B2]'}`} />
-              <p className={`text-xs ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
-                Nenhum projeto ativo para este contexto. Destranque um projeto do estacionamento abaixo.
-              </p>
-            </div>
-          ) : (
-            filteredActive.map((proj, idx) => {
-              const coverUrl = getProjectCover(proj.area, idx);
+        {/* Grid dos 3 Slots Rigorosamente Divididos por Carga Cognitiva */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {(['ancora', 'satelite', 'valvula'] as BandwidthSlot[]).map((slotKey, slotIdx) => {
+            const config = BANDWIDTH_SLOTS_CONFIG[slotKey];
+            
+            // Localiza o projeto pertencente a este slot
+            let slotProject = activeProjects.find(p => p.slot === slotKey);
+            if (!slotProject) {
+              // Se houver projetos ativos sem slot definido, distribui ordenadamente
+              const unslotted = activeProjects.filter(p => !p.slot);
+              if (slotKey === 'ancora' && unslotted[0]) slotProject = unslotted[0];
+              else if (slotKey === 'satelite' && unslotted[1]) slotProject = unslotted[1];
+              else if (slotKey === 'valvula' && unslotted[2]) slotProject = unslotted[2];
+            }
+
+            // Filtro por contexto de área, se aplicável
+            const isVisibleByContext = !slotProject || contextFilter === 'todos' || slotProject.area === contextFilter;
+            if (!isVisibleByContext) return null;
+
+            if (slotProject) {
+              const coverUrl = getProjectCover(slotProject.area, slotIdx);
 
               return (
-                <article
-                  key={proj.id}
-                  onClick={() => handleOpenProjectEditor(proj)}
-                  className="relative rounded-2xl overflow-hidden h-80 sm:h-92 flex flex-col justify-between p-6 sm:p-7 border border-[#315DFF]/40 shadow-[0_8px_25px_rgba(49,93,255,0.12)] hover:shadow-[0_16px_40px_rgba(49,93,255,0.2)] cursor-pointer group select-none transition-all duration-300 hover:scale-[1.01]"
-                  data-purpose="project-active-card"
-                >
-                  <img 
-                    src={coverUrl} 
-                    alt={proj.title}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                  />
-                  <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent z-20 pointer-events-none" />
-                  <div className="absolute top-0 inset-x-0 h-28 bg-gradient-to-b from-black/60 via-black/25 to-transparent z-10 pointer-events-none" />
-                  <div className="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-black/95 via-black/60 to-transparent z-10 pointer-events-none" />
+                <div key={slotKey} className="flex flex-col space-y-2">
+                  {/* Cabeçalho do Slot */}
+                  <div className="flex items-center justify-between text-xs px-1">
+                    <span className="font-bold text-[#171D38] dark:text-white flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      {config.name}
+                    </span>
+                    <span className="text-[11px] font-mono text-[#747E98] dark:text-slate-400">
+                      {config.cognitiveLoad}
+                    </span>
+                  </div>
 
-                  {/* Topo do Card: Badge de Ativo e Botão de Trancar */}
-                  <div className="relative z-20 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="px-3 py-1 rounded-lg text-xs font-semibold bg-black/40 backdrop-blur-md border border-white/20 text-white/95 shadow-sm">
-                        {proj.area}
-                      </span>
-                      <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 backdrop-blur-md flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        <span>ATIVO</span>
-                      </span>
-                    </div>
+                  {/* Card do Projeto Ocupando o Slot */}
+                  <article
+                    onClick={() => handleOpenProjectEditor(slotProject!)}
+                    className="relative rounded-2xl overflow-hidden h-80 sm:h-88 flex flex-col justify-between p-6 sm:p-7 border border-[#315DFF]/40 shadow-[0_8px_25px_rgba(49,93,255,0.12)] hover:shadow-[0_16px_40px_rgba(49,93,255,0.2)] cursor-pointer group select-none transition-all duration-300 hover:scale-[1.01]"
+                    data-purpose="project-active-card"
+                  >
+                    <img 
+                      src={coverUrl} 
+                      alt={slotProject.title}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                    />
+                    <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent z-20 pointer-events-none" />
+                    <div className="absolute top-0 inset-x-0 h-28 bg-gradient-to-b from-black/60 via-black/25 to-transparent z-10 pointer-events-none" />
+                    <div className="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-black/95 via-black/60 to-transparent z-10 pointer-events-none" />
 
-                    <div className="flex items-center gap-2">
-                      {onToggleLock && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onToggleLock(proj.id);
-                          }}
-                          className="px-2.5 py-1.5 rounded-xl bg-black/40 hover:bg-rose-500/80 backdrop-blur-md border border-white/20 text-white text-[11px] font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-                          title="Trancar este projeto e colocar no Estacionamento"
-                        >
-                          <Lock className="w-3 h-3" />
-                          <span className="hidden sm:inline">Trancar</span>
-                        </button>
-                      )}
+                    {/* Topo do Card: Badge de Área, Slot e Botão de Trancar */}
+                    <div className="relative z-20 flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-black/50 backdrop-blur-md border border-white/20 text-white/95 shadow-sm">
+                          {slotProject.area}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border backdrop-blur-md ${config.badgeClass}`}>
+                          {config.subtitle}
+                        </span>
+                      </div>
 
-                      <div className="w-8 h-8 rounded-xl bg-black/30 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/90 group-hover:bg-[#245BFF] group-hover:text-white group-hover:border-[#245BFF] transition-all duration-200 shadow-sm">
-                        <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                      <div className="flex items-center gap-2">
+                        {onToggleLock && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onToggleLock(slotProject!.id);
+                            }}
+                            className="px-2.5 py-1.5 rounded-xl bg-black/50 hover:bg-rose-500/80 backdrop-blur-md border border-white/20 text-white text-[11px] font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                            title="Liberar este slot e enviar projeto para o Estacionamento"
+                          >
+                            <Lock className="w-3 h-3" />
+                            <span className="hidden sm:inline">Liberar Slot</span>
+                          </button>
+                        )}
+
+                        <div className="w-8 h-8 rounded-xl bg-black/30 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/90 group-hover:bg-[#245BFF] group-hover:text-white group-hover:border-[#245BFF] transition-all duration-200 shadow-sm">
+                          <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                        </div>
                       </div>
                     </div>
+
+                    {/* Base do Card */}
+                    <div className="relative z-20 space-y-1.5 text-left">
+                      <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug drop-shadow-md">
+                        {slotProject.title}
+                      </h2>
+                      <p className="text-xs font-medium text-white/80 tracking-wide line-clamp-2">
+                        Próximo passo: <span className="text-white font-semibold underline decoration-white/40">{slotProject.next_step}</span>
+                      </p>
+                    </div>
+                  </article>
+                </div>
+              );
+            }
+
+            // Caso o Slot Esteja Vago (0/1)
+            return (
+              <div key={slotKey} className="flex flex-col space-y-2">
+                <div className="flex items-center justify-between text-xs px-1">
+                  <span className="font-bold text-[#747E98] dark:text-slate-400 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-slate-400" />
+                    {config.name}
+                  </span>
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-500/15 text-slate-400 border border-slate-500/20">
+                    VAGO (0/1)
+                  </span>
+                </div>
+
+                <div className={`rounded-2xl border-2 border-dashed h-80 sm:h-88 p-6 flex flex-col justify-between text-left transition-all ${
+                  isDarkMode 
+                    ? 'border-[#263248] bg-[#141C2E]/40 hover:bg-[#141C2E]/70' 
+                    : 'border-[#CBD5E1] bg-[#F8FAFC] hover:bg-[#F1F5F9]'
+                }`}>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border ${config.badgeClass}`}>
+                        Slot {slotIdx + 1} • {config.subtitle}
+                      </span>
+                      <span className="text-xs text-[#8E9BB5] font-mono">
+                        {config.cognitiveLoad}
+                      </span>
+                    </div>
+
+                    <div className="space-y-1.5 pt-2">
+                      <h3 className={`text-base font-bold ${isDarkMode ? 'text-white' : 'text-[#171D38]'}`}>
+                        Slot Disponível
+                      </h3>
+                      <p className="text-xs text-[#8E9BB5] leading-relaxed">
+                        {config.definition}
+                      </p>
+                      <p className="text-[11px] text-[#747E98] italic pt-1">
+                        "{config.behavior}"
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Base do Card */}
-                  <div className="relative z-20 space-y-1.5 text-left">
-                    <h2 className="text-2xl sm:text-[26px] font-bold text-white tracking-tight leading-snug drop-shadow-md transition-colors">
-                      {proj.title}
-                    </h2>
-                    <p className="text-xs font-medium text-white/80 tracking-wide">
-                      Próximo passo: <span className="text-white font-semibold underline decoration-white/40">{proj.next_step}</span>
-                    </p>
+                  <div className="pt-4 border-t border-dashed border-white/10 space-y-2">
+                    {lockedProjects.length > 0 ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const firstLocked = lockedProjects[0];
+                          if (firstLocked && onToggleLock) {
+                            onToggleLock(firstLocked.id, slotKey);
+                          }
+                        }}
+                        className="w-full py-2.5 px-3 rounded-xl bg-[#315DFF]/15 hover:bg-[#315DFF]/25 border border-[#315DFF]/40 text-[#315DFF] dark:text-blue-300 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                      >
+                        <Unlock className="w-3.5 h-3.5" />
+                        <span>Destrancar "{lockedProjects[0].title.slice(0, 20)}..." para este Slot</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setShowAddModal(true)}
+                        className="w-full py-2.5 px-3 rounded-xl bg-[#315DFF] hover:bg-[#254BE0] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer shadow-xs"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Criar Projeto para este Slot</span>
+                      </button>
+                    )}
                   </div>
-                </article>
-              );
-            })
-          )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
       {/* ========================================================================
-          SEÇÃO 2: ESTACIONAMENTO DE DOPAMINA (PROJETOS TRANCADOS 🔒)
+          SEÇÃO 2: ESTACIONAMENTO DE IDEIAS (PROJETOS TRANCADOS 🔒)
           ======================================================================== */}
       <section className="space-y-4 pt-4 border-t border-[#E5EAF2] dark:border-[#263248]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#E5EAF2] dark:border-[#263248] pb-2">
           <div className="flex items-center gap-2">
             <Lock className="w-4 h-4 text-[#8E9BB5]" />
             <h2 className="text-base font-bold text-[#171D38] dark:text-white tracking-tight">
-              Estacionamento de Dopamina / Arquivo Morto ({filteredLocked.length})
+              Estacionamento de Ideias ({filteredLocked.length})
             </h2>
             <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#101522] text-[#8E9BB5] border border-white/10">
-              LOCKED 🔒
+              TRANCADOS 🔒
             </span>
           </div>
           <p className="text-xs text-[#747E98]">
-            Ideias salvas sem poluir o foco. Para destrancar, use o Trade-off.
+            Trava de Segurança: o sistema repudia o acúmulo. Ideias estacionadas só entram em produção quando um slot for liberado.
           </p>
         </div>
 
@@ -983,7 +1103,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                 />
               </div>
 
-              {/* Status de Bloqueio (Regra de foco) */}
+              {/* Status de Bloqueio (Protocolo 1-1-1) */}
               <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-2">
                 <div className="space-y-0.5">
                   <span className="font-bold text-amber-300 flex items-center gap-1">
@@ -991,7 +1111,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                     Criar como Trancado no Estacionamento
                   </span>
                   <p className="text-[10px] text-[#8E9BB5]">
-                    Protege o limite de 2 projetos ativos. Você pode destrancar via trade-off.
+                    Protege o limite dos 3 slots do Protocolo 1-1-1. Você pode destrancar via trade-off.
                   </p>
                 </div>
                 <input

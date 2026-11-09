@@ -47,6 +47,7 @@ export function App() {
     deleteProject,
     toggleProjectStage,
     toggleProjectLock,
+    setProjectSlot,
     executeProjectTradeoff,
     parkDopamineIdea,
     applyTaskSlice,
@@ -102,8 +103,8 @@ export function App() {
     setIsTaskModalOpen(true);
   };
 
-  const handleToggleProjectLock = (projectId: string) => {
-    const res = toggleProjectLock(projectId);
+  const handleToggleProjectLock = (projectId: string, targetSlot?: any) => {
+    const res = toggleProjectLock(projectId, targetSlot);
     if (res.requiresTradeoff && res.projectToUnlock) {
       setProjectToUnlockCandidate(res.projectToUnlock);
       setIsTradeoffOpen(true);
@@ -229,6 +230,7 @@ export function App() {
               onDeleteProject={deleteProject}
               onStartFocus={handleStartFocus}
               onToggleLock={handleToggleProjectLock}
+              onSetProjectSlot={setProjectSlot}
               onOpenDopamineChat={() => setIsDopamineChatOpen(true)}
             />
           )}

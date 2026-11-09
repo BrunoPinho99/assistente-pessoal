@@ -221,6 +221,7 @@ export async function processAssistantMessage(
                   category: isLocked ? 'parking' : 'business',
                   main_goal: act.description || act.title,
                   status: 'ativo',
+                  slot: isLocked ? null : (act.slot || 'valvula'),
                   locked: isLocked,
                   isLocked,
                   description: act.description || '',
@@ -256,6 +257,7 @@ export async function processAssistantMessage(
                   if (act.description !== undefined) updates.description = act.description;
                   if (act.nextStep !== undefined) updates.next_step = act.nextStep;
                   if (act.area) updates.area = act.area;
+                  if (act.slot) updates.slot = act.slot;
                   if (typeof act.locked === 'boolean') {
                     updates.locked = act.locked;
                     updates.isLocked = act.locked;

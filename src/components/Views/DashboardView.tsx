@@ -386,7 +386,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
         {/* Welcome Heading (Evita azul no modo escuro para máxima legibilidade) */}
         <h1 className={`text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight ${isDark ? 'text-white' : 'text-[#171D38]'}`}>
-          Bom dia, <span className={isDark ? 'text-white' : 'text-[#315DFF]'}>{userName}.</span>
+          Olá, <span className={isDark ? 'text-white' : 'text-[#315DFF]'}>{userName}.</span>
         </h1>
 
         {/* Subheading */}

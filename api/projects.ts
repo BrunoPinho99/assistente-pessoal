@@ -67,6 +67,7 @@ const ProjectSchema = new Schema(
     main_goal: { type: String, default: '' },
     next_step: { type: String, default: '' },
     status: { type: String, default: 'ativo' },
+    slot: { type: String, enum: ['ancora', 'satelite', 'valvula', null], default: null },
     locked: { type: Boolean, default: false },
     unlockConditions: { type: [String], default: [] },
     stages: [
@@ -117,6 +118,7 @@ const DEFAULT_SEED_PROJECTS = [
     category: 'profissional',
     main_goal: 'Lançar MVP de recomendação de leitura adaptativa com IA',
     status: 'ativo',
+    slot: 'ancora',
     locked: false,
     next_step: 'Finalizar testes de integração do pipeline de analytics',
     stages: [
@@ -136,6 +138,7 @@ const DEFAULT_SEED_PROJECTS = [
     category: 'profissional',
     main_goal: 'Estruturar esteira de entregas de design system e branding tech',
     status: 'ativo',
+    slot: 'satelite',
     locked: false,
     next_step: 'Revisar protótipo de alta fidelidade do dashboard v2',
     stages: [
@@ -153,10 +156,11 @@ const DEFAULT_SEED_PROJECTS = [
     category: 'academico',
     main_goal: 'Concluir módulo de pesquisa aplicada e laboratório de IA',
     status: 'pausado',
+    slot: null,
     locked: true,
     unlockConditions: [
       'Entregar milestone crítico do Littera',
-      'Liberar 1 vaga de foco ativo (Regra de Substituição)'
+      'Liberar 1 dos 3 slots de banda (Regra de Substituição)'
     ],
     next_step: 'Reavaliar no ciclo trimestral de estudos',
     stages: [
@@ -220,28 +224,45 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         docs = await ProjectModel.find({}).sort({ updatedAt: -1, createdAt: -1 }).lean();
       }
 
-      // Normaliza campos para compatibilidade com o frontend
-      const normalizedProjects = docs.map((doc: any) => ({
-        id: doc.id || String(doc._id),
-        title: doc.title || doc.name || 'Sem título',
-        description: doc.description || '',
-        area: doc.area || 'Littera',
-        category: doc.category || 'profissional',
-        main_goal: doc.main_goal || doc.mainGoal || '',
-        next_step: doc.next_step || doc.nextStep || '',
-        status: doc.status || 'ativo',
-        locked: doc.locked !== undefined ? Boolean(doc.locked) : Boolean(doc.isLocked),
-        unlockConditions: doc.unlockConditions || [],
-        stages: Array.isArray(doc.stages) ? doc.stages.map((st: any) => ({
-          id: st.id || String(st._id),
-          title: st.title,
-          completed: Boolean(st.completed)
-        })) : [],
-        documents: doc.documents || [],
-        decision_history: doc.decision_history || [],
-        created_at: doc.createdAt ? new Date(doc.createdAt).toISOString() : new Date().toISOString(),
-        updated_at: doc.updatedAt ? new Date(doc.updatedAt).toISOString() : new Date().toISOString()
-      }));
+      // Normaliza campos para compatibilidade com o frontend e Protocolo 1-1-1
+      const activeSlotsAssigned = new Set<string>();
+      const normalizedProjects = docs.map((doc: any) => {
+        const isLocked = doc.locked !== undefined ? Boolean(doc.locked) : Boolean(doc.isLocked);
+        let slot = doc.slot || null;
+
+        if (!isLocked) {
+          if (!slot || activeSlotsAssigned.has(slot)) {
+            const freeSlot = (['ancora', 'satelite', 'valvula'] as const).find(s => !activeSlotsAssigned.has(s)) || 'valvula';
+            slot = freeSlot;
+          }
+          activeSlotsAssigned.add(slot);
+        } else {
+          slot = null;
+        }
+
+        return {
+          id: doc.id || String(doc._id),
+          title: doc.title || doc.name || 'Sem título',
+          description: doc.description || '',
+          area: doc.area || 'Littera',
+          category: doc.category || 'profissional',
+          main_goal: doc.main_goal || doc.mainGoal || '',
+          next_step: doc.next_step || doc.nextStep || '',
+          status: doc.status || 'ativo',
+          slot,
+          locked: isLocked,
+          unlockConditions: doc.unlockConditions || [],
+          stages: Array.isArray(doc.stages) ? doc.stages.map((st: any) => ({
+            id: st.id || String(st._id),
+            title: st.title,
+            completed: Boolean(st.completed)
+          })) : [],
+          documents: doc.documents || [],
+          decision_history: doc.decision_history || [],
+          created_at: doc.createdAt ? new Date(doc.createdAt).toISOString() : new Date().toISOString(),
+          updated_at: doc.updatedAt ? new Date(doc.updatedAt).toISOString() : new Date().toISOString()
+        };
+      });
 
       return sendJson(200, {
         success: true,
@@ -271,6 +292,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         main_goal: body.main_goal || body.mainGoal || 'Entregar objetivos estratégicos',
         next_step: body.next_step || body.nextStep || 'Definir primeiro passo',
         status: body.status || 'ativo',
+        slot: body.slot || null,
         locked: body.locked !== undefined ? Boolean(body.locked) : Boolean(body.isLocked),
         unlockConditions: body.unlockConditions || [],
         stages: Array.isArray(body.stages) && body.stages.length > 0 
@@ -325,6 +347,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (body.next_step !== undefined) updates.next_step = body.next_step;
       if (body.nextStep !== undefined && body.next_step === undefined) updates.next_step = body.nextStep;
       if (body.status !== undefined) updates.status = body.status;
+      if (body.slot !== undefined) updates.slot = body.slot;
       if (body.locked !== undefined) updates.locked = Boolean(body.locked);
       if (body.isLocked !== undefined && body.locked === undefined) updates.locked = Boolean(body.isLocked);
       if (body.unlockConditions !== undefined) updates.unlockConditions = body.unlockConditions;
@@ -354,6 +377,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           main_goal: updated.main_goal || updated.mainGoal,
           next_step: updated.next_step || updated.nextStep,
           status: updated.status,
+          slot: updated.slot || null,
           locked: updated.locked !== undefined ? Boolean(updated.locked) : Boolean(updated.isLocked),
           unlockConditions: updated.unlockConditions || [],
           stages: updated.stages || [],

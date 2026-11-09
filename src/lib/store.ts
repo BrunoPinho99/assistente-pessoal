@@ -12,7 +12,8 @@ import {
   Priority,
   ThemeMode,
   ContextArea,
-  Subtask
+  Subtask,
+  BandwidthSlot
 } from '../types';
 import { 
   INITIAL_PROJECTS, 
@@ -149,9 +150,11 @@ export function usePersonalOS() {
     return raw === 'true';
   });
 
-  // Sincronização inicial com o MongoDB Atlas
+  // Sincronização contínua com o MongoDB Atlas (Projetos e Tarefas)
   useEffect(() => {
     let isMounted = true;
+
+    // 1. Carregar Projetos do MongoDB
     fetch('/api/projects')
       .then(res => {
         if (!res.ok) throw new Error('Falha HTTP');
@@ -159,12 +162,40 @@ export function usePersonalOS() {
       })
       .then(data => {
         if (isMounted && data.success && Array.isArray(data.projects) && data.projects.length > 0) {
-          setProjects(data.projects);
+          // Normaliza slots para garantir que o Protocolo 1-1-1 seja respeitado
+          const occupied = new Set<string>();
+          const normalized = data.projects.map((p: Project) => {
+            if (p.locked) return { ...p, slot: null };
+            if (p.slot && ['ancora', 'satelite', 'valvula'].includes(p.slot) && !occupied.has(p.slot)) {
+              occupied.add(p.slot);
+              return p;
+            }
+            const freeSlot = (['ancora', 'satelite', 'valvula'] as BandwidthSlot[]).find(s => !occupied.has(s)) || 'valvula';
+            occupied.add(freeSlot);
+            return { ...p, slot: freeSlot };
+          });
+          setProjects(normalized);
         }
       })
       .catch(err => {
         console.warn('Usando armazenamento local para projetos:', err.message);
       });
+
+    // 2. Carregar Tarefas do MongoDB
+    fetch('/api/tasks')
+      .then(res => {
+        if (!res.ok) throw new Error('Falha HTTP');
+        return res.json();
+      })
+      .then(data => {
+        if (isMounted && data.success && Array.isArray(data.tasks) && data.tasks.length > 0) {
+          setTasks(data.tasks);
+        }
+      })
+      .catch(err => {
+        console.warn('Usando armazenamento local para tarefas:', err.message);
+      });
+
     return () => { isMounted = false; };
   }, []);
 
@@ -211,7 +242,7 @@ export function usePersonalOS() {
   }, [isCalmMode]);
 
   // ----------------------------------------------------------------------------
-  // Tasks Actions
+  // Tasks Actions (com sincronização contínua com MongoDB Atlas)
   // ----------------------------------------------------------------------------
   const addTask = (taskData: Omit<Task, 'id' | 'created_at'>) => {
     const newTask: Task = {
@@ -220,6 +251,14 @@ export function usePersonalOS() {
       created_at: new Date().toISOString()
     };
     setTasks(prev => [newTask, ...prev]);
+
+    // Persistência contínua no MongoDB Atlas
+    fetch('/api/tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newTask)
+    }).catch(err => console.warn('Erro ao salvar tarefa no MongoDB Atlas:', err));
+
     return newTask;
   };
 
@@ -235,36 +274,69 @@ export function usePersonalOS() {
       }
       return t;
     }));
+
+    // Atualização contínua no MongoDB Atlas
+    fetch(`/api/tasks?id=${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates)
+    }).catch(err => console.warn('Erro ao atualizar tarefa no MongoDB Atlas:', err));
   };
 
   const deleteTask = (id: string) => {
     setTasks(prev => prev.filter(t => t.id !== id));
+
+    // Exclusão contínua no MongoDB Atlas
+    fetch(`/api/tasks?id=${encodeURIComponent(id)}`, {
+      method: 'DELETE'
+    }).catch(err => console.warn('Erro ao excluir tarefa no MongoDB Atlas:', err));
   };
 
   const toggleTaskStatus = (id: string) => {
+    let nextStatus: TaskStatus = 'a_fazer';
+    let completedAt: string | null = null;
+
     setTasks(prev => prev.map(t => {
       if (t.id === id) {
-        const nextStatus: TaskStatus = t.status === 'concluido' ? 'a_fazer' : 'concluido';
+        nextStatus = t.status === 'concluido' ? 'a_fazer' : 'concluido';
+        completedAt = nextStatus === 'concluido' ? new Date().toISOString() : null;
         return {
           ...t,
           status: nextStatus,
-          completed_at: nextStatus === 'concluido' ? new Date().toISOString() : null
+          completed_at: completedAt
         };
       }
       return t;
     }));
+
+    // Sincronização contínua no MongoDB Atlas
+    fetch(`/api/tasks?id=${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: nextStatus, completed_at: completedAt })
+    }).catch(err => console.warn('Erro ao alternar status da tarefa no MongoDB:', err));
   };
 
   const toggleSubtask = (taskId: string, subtaskId: string) => {
+    let updatedSubtasks: Subtask[] = [];
     setTasks(prev => prev.map(t => {
       if (t.id === taskId) {
         const nextSubtasks = t.subtasks.map(st => 
           st.id === subtaskId ? { ...st, completed: !st.completed } : st
         );
+        updatedSubtasks = nextSubtasks;
         return { ...t, subtasks: nextSubtasks };
       }
       return t;
     }));
+
+    if (updatedSubtasks.length > 0) {
+      fetch(`/api/tasks?id=${encodeURIComponent(taskId)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subtasks: updatedSubtasks })
+      }).catch(err => console.warn('Erro ao alternar subtarefa no MongoDB:', err));
+    }
   };
 
   const updateTaskResume = (taskId: string, resumeData: { wasDoing: string; stoppedAt: string; nextAction: string }) => {
@@ -351,13 +423,34 @@ export function usePersonalOS() {
   };
 
   // ----------------------------------------------------------------------------
-  // A Regra da Substituição: Limite de 2 Projetos Ativos (locked: false)
+  // PROTOCOLO 1-1-1 DE ALOCAÇÃO DE BANDA (3 Slots: Âncora, Satélite, Válvula)
+  // Trava de Segurança (Regra da Substituição): Se os 3 slots estiverem ocupados,
+  // novos projetos são bloqueados e direcionados para o Estacionamento com cadeado.
   // ----------------------------------------------------------------------------
-  const toggleProjectLock = (id: string): {
+  const setProjectSlot = (projectId: string, slot: BandwidthSlot) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === projectId) {
+        return { ...p, slot, locked: false, updated_at: new Date().toISOString() };
+      }
+      if (p.slot === slot && p.id !== projectId) {
+        return { ...p, slot: null, updated_at: new Date().toISOString() };
+      }
+      return p;
+    }));
+
+    fetch(`/api/projects?id=${encodeURIComponent(projectId)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slot, locked: false })
+    }).catch(err => console.warn('Erro ao atualizar slot no MongoDB Atlas:', err));
+  };
+
+  const toggleProjectLock = (id: string, targetSlot?: BandwidthSlot): {
     success: boolean;
     requiresTradeoff?: boolean;
     projectToUnlock?: Project;
     activeProjects?: Project[];
+    targetSlot?: BandwidthSlot;
   } => {
     const project = projects.find(p => p.id === id);
     if (!project) return { success: false };
@@ -366,31 +459,41 @@ export function usePersonalOS() {
     if (project.locked) {
       const activeProjects = projects.filter(p => !p.locked && p.id !== id);
       if (activeProjects.length >= MAX_ACTIVE_PROJECTS) {
-        // Disparar Modal de Trade-off Obrigatório
+        // Trava de Segurança: Disparar Modal de Trade-off Obrigatório
         return {
           success: false,
           requiresTradeoff: true,
           projectToUnlock: project,
-          activeProjects
+          activeProjects,
+          targetSlot
         };
       }
-      // Vaga livre: desbloqueia imediatamente
-      updateProject(id, { locked: false });
+
+      // Determina o slot livre
+      const occupiedSlots = activeProjects.map(p => p.slot).filter(Boolean);
+      const availableSlot = targetSlot && !occupiedSlots.includes(targetSlot)
+        ? targetSlot
+        : ((['ancora', 'satelite', 'valvula'] as BandwidthSlot[]).find(s => !occupiedSlots.includes(s)) || 'valvula');
+
+      updateProject(id, { locked: false, slot: availableSlot });
       return { success: true };
     } else {
-      // Trancar projeto ativo: permitido imediatamente
-      updateProject(id, { locked: true });
+      // Trancar projeto ativo: libera a vaga no slot imediatamente
+      updateProject(id, { locked: true, slot: null });
       return { success: true };
     }
   };
 
-  const executeProjectTradeoff = (projectToUnlockId: string, projectToLockId: string) => {
+  const executeProjectTradeoff = (projectToUnlockId: string, projectToLockId: string, targetSlot?: BandwidthSlot) => {
+    const projectToLock = projects.find(p => p.id === projectToLockId);
+    const assignedSlot = targetSlot || projectToLock?.slot || 'ancora';
+
     setProjects(prev => prev.map(p => {
       if (p.id === projectToLockId) {
-        return { ...p, locked: true, updated_at: new Date().toISOString() };
+        return { ...p, locked: true, slot: null, updated_at: new Date().toISOString() };
       }
       if (p.id === projectToUnlockId) {
-        return { ...p, locked: false, updated_at: new Date().toISOString() };
+        return { ...p, locked: false, slot: assignedSlot, updated_at: new Date().toISOString() };
       }
       return p;
     }));
@@ -399,13 +502,13 @@ export function usePersonalOS() {
     fetch(`/api/projects?id=${encodeURIComponent(projectToLockId)}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ locked: true })
+      body: JSON.stringify({ locked: true, slot: null })
     }).catch(() => {});
 
     fetch(`/api/projects?id=${encodeURIComponent(projectToUnlockId)}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ locked: false })
+      body: JSON.stringify({ locked: false, slot: assignedSlot })
     }).catch(() => {});
   };
 
@@ -422,11 +525,12 @@ export function usePersonalOS() {
       main_goal: structured.main_goal,
       next_step: structured.next_step,
       status: 'planejamento',
-      locked: true, // 🔒 IMEDIATAMENTE trancado para blindar o foco atual
+      slot: null,
+      locked: true, // 🔒 IMEDIATAMENTE trancado para blindar os 3 slots de banda
       isLocked: true,
       unlockConditions: [
         'Concluir entrega prioritária do Littera em produção',
-        'Liberar 1 dos 2 slots de foco ativo (Regra da Substituição)'
+        'Liberar 1 dos 3 slots de banda (Regra da Substituição)'
       ],
       stages: [
         { id: 'st_dp_1', title: 'Ideia capturada no Estacionamento de Dopamina', completed: true },
@@ -731,6 +835,7 @@ export function usePersonalOS() {
     deleteProject,
     toggleProjectStage,
     toggleProjectLock,
+    setProjectSlot,
     executeProjectTradeoff,
     parkDopamineIdea,
     applyTaskSlice,

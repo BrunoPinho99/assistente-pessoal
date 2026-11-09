@@ -85,7 +85,7 @@ export const ProjectSchema = new Schema<IProjectDocument, IProjectModel>(
         if (this.isLocked || this.category === 'parking') {
           return [
             'Concluir entrega prioritária do Littera em produção',
-            'Liberar 1 dos 2 slots de foco ativo (Regra da Substituição)'
+            'Liberar 1 dos 3 slots de banda (Regra da Substituição)'
           ];
         }
         return [];
@@ -137,13 +137,13 @@ ProjectSchema.pre('validate', function () {
     if (!this.unlockConditions || this.unlockConditions.length === 0) {
       this.unlockConditions = [
         'Concluir entrega prioritária do Littera em produção',
-        'Liberar 1 dos 2 slots de foco ativo (Regra da Substituição)'
+        'Liberar 1 dos 3 slots de banda (Regra da Substituição)'
       ];
     }
   }
 });
 
-// Middleware Pre-Save: Validação da Regra dos 2 Projetos Ativos
+// Middleware Pre-Save: Validação da Regra do Protocolo 1-1-1 (Máximo 3 Slots Ativos)
 ProjectSchema.pre('save', async function () {
   if (this.isModified('isLocked') && this.isLocked === false) {
     const ProjectModel = this.constructor as IProjectModel;
@@ -152,9 +152,9 @@ ProjectSchema.pre('save', async function () {
       isLocked: false
     });
 
-    if (activeCount >= 2) {
+    if (activeCount >= 3) {
       throw new Error(
-        'Regra da Substituição violada: limite máximo de 2 projetos ativos simultâneos atingido. Tranque um projeto antes de ativar outro.'
+        'Regra da Substituição violada: limite máximo de 3 slots simultâneos do Protocolo 1-1-1 atingido. Tranque um projeto antes de ativar outro.'
       );
     }
   }
@@ -193,7 +193,7 @@ ProjectSchema.statics.parkNewIdea = function (
     isLocked: true,
     unlockConditions: unlockConditions || [
       'Concluir entrega prioritária do Littera em produção',
-      'Liberar 1 dos 2 slots de foco ativo (Regra da Substituição)'
+      'Liberar 1 dos 3 slots de banda (Regra da Substituição)'
     ]
   });
 };

@@ -1,6 +1,6 @@
 import { Task, Project } from '../types';
 
-export const MAX_ACTIVE_PROJECTS = 2;
+export const MAX_ACTIVE_PROJECTS = 3; // Protocolo 1-1-1 de Alocação de Banda (Âncora, Satélite, Válvula)
 
 // Expressões ou palavras vagas que ativam paralisia por análise no TDAH
 const VAGUE_PATTERNS = [
