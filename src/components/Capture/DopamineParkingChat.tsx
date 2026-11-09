@@ -18,7 +18,243 @@ import {
 } from 'lucide-react';
 import { Project, ContextArea, Task, NavigationTab } from '../../types';
 import { processAssistantMessage, AssistantActionExecuted } from '../../lib/assistantAgent';
+import { playLockSnapSound } from '../../lib/audioSynthesizer';
 import confetti from 'canvas-confetti';
+
+interface PhysicalPadlockSealProps {
+  title: string;
+  description?: string;
+  details?: any;
+  onNavigateToProjects?: () => void;
+}
+
+/**
+ * Componente Visual de Fechamento Físico do Cadeado (TDAH Focus Seal)
+ * Executa a animação física de encaixe da haste de aço no corpo de titânio do cadeado,
+ * reproduzindo o som mecânico de trava ("*CH-LACK*") via Web Audio API.
+ * Proporciona fechamento psicológico instantâneo: a ideia está salva e segura no MongoDB,
+ * cortando a compulsão de abandonar o Littera para começar a codar a nova ideia.
+ */
+export const PhysicalPadlockSeal: React.FC<PhysicalPadlockSealProps> = ({
+  title,
+  description,
+  details,
+  onNavigateToProjects
+}) => {
+  const [lockStage, setLockStage] = useState<'open' | 'snapping' | 'locked'>('open');
+  const [pulseKey, setPulseKey] = useState(0);
+
+  const triggerSnap = () => {
+    setLockStage('open');
+    setTimeout(() => {
+      setLockStage('snapping');
+      playLockSnapSound();
+      setTimeout(() => {
+        setLockStage('locked');
+        setPulseKey(prev => prev + 1);
+        confetti({
+          particleCount: 28,
+          spread: 45,
+          origin: { x: 0.82, y: 0.8 },
+          colors: ['#F43F5E', '#3B82F6', '#10B981', '#F59E0B']
+        });
+      }, 150);
+    }, 280);
+  };
+
+  useEffect(() => {
+    triggerSnap();
+  }, []);
+
+  const isLocked = lockStage === 'locked';
+  const isSnapping = lockStage === 'snapping';
+  const isOpen = lockStage === 'open';
+
+  return (
+    <div 
+      className={`relative mt-2.5 p-3.5 rounded-2xl border transition-all duration-300 text-left overflow-hidden ${
+        isLocked
+          ? 'bg-gradient-to-b from-[#182035] to-[#0E1524] border-rose-500/50 shadow-[0_4px_24px_rgba(244,63,94,0.22)]'
+          : 'bg-[#151D31] border-amber-500/40 shadow-[0_4px_20px_rgba(245,158,11,0.15)]'
+      }`}
+    >
+      {/* Luz ambiente de fundo */}
+      <div 
+        className={`absolute -top-10 -right-10 w-28 h-28 rounded-full blur-2xl transition-opacity duration-500 pointer-events-none ${
+          isLocked ? 'bg-rose-500/20 opacity-80' : 'bg-amber-500/20 opacity-100'
+        }`} 
+      />
+
+      {/* Mecanismo do Cadeado Físico em SVG */}
+      <div className="relative z-10 flex items-center gap-3.5">
+        <div 
+          onClick={triggerSnap}
+          title="Clique para testar a trava física do cadeado"
+          className="relative w-12 h-12 shrink-0 cursor-pointer flex items-center justify-center group"
+        >
+          {/* Brilho de impacto quando a trava engata */}
+          <div 
+            key={pulseKey}
+            className={`absolute inset-0 rounded-2xl transition-all duration-300 ${
+              isLocked ? 'scale-110 ring-2 ring-rose-400/60 bg-rose-500/10' : ''
+            }`}
+          />
+
+          <svg 
+            className={`w-11 h-11 transition-transform duration-200 ${
+              isSnapping ? 'scale-90' : isLocked ? 'scale-100' : 'scale-95'
+            }`} 
+            viewBox="0 0 48 48" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <linearGradient id="shackleMetal" x1="14" y1="4" x2="34" y2="24" gradientUnits="userSpaceOnUse">
+                <stop stopColor={isLocked ? '#E2E8F0' : '#FEF08A'} />
+                <stop offset="0.5" stopColor={isLocked ? '#94A3B8' : '#F59E0B'} />
+                <stop offset="1" stopColor={isLocked ? '#475569' : '#B45309'} />
+              </linearGradient>
+              <linearGradient id="padlockBody" x1="8" y1="20" x2="40" y2="44" gradientUnits="userSpaceOnUse">
+                <stop stopColor={isLocked ? '#1E293B' : '#27272A'} />
+                <stop offset="0.6" stopColor={isLocked ? '#0F172A' : '#18181B'} />
+                <stop offset="1" stopColor={isLocked ? '#020617' : '#09090B'} />
+              </linearGradient>
+            </defs>
+
+            {/* Haste de Aço (Shackle) com Animação Física de Encaixe */}
+            <g 
+              style={{
+                transformOrigin: '16px 22px',
+                transition: 'transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1)'
+              }}
+              className={
+                isOpen
+                  ? '-translate-y-2.5 -rotate-12'
+                  : isSnapping
+                  ? 'translate-y-0.5 scale-95'
+                  : 'translate-y-0 rotate-0'
+              }
+            >
+              <path
+                d="M16 22V13C16 8.58172 19.5817 5 24 5C28.4183 5 32 8.58172 32 13V22"
+                stroke="url(#shackleMetal)"
+                strokeWidth="4.5"
+                strokeLinecap="round"
+              />
+            </g>
+
+            {/* Corpo Pesado de Metal do Cadeado */}
+            <rect
+              x="9"
+              y="20"
+              width="30"
+              height="24"
+              rx="6"
+              fill="url(#padlockBody)"
+              stroke={isLocked ? '#F43F5E' : '#F59E0B'}
+              strokeWidth="1.8"
+            />
+
+            {/* Placa Metálica de Reforço */}
+            <rect
+              x="13"
+              y="23"
+              width="22"
+              height="4"
+              rx="2"
+              fill={isLocked ? '#334155' : '#3F3F46'}
+              opacity="0.85"
+            />
+
+            {/* Orifício da Chave com Brilho de Segurança */}
+            <circle cx="24" cy="30" r="2.5" fill={isLocked ? '#F43F5E' : '#F59E0B'} />
+            <path
+              d="M22.5 31L21.5 37H26.5L25.5 31H22.5Z"
+              fill={isLocked ? '#F43F5E' : '#F59E0B'}
+            />
+          </svg>
+        </div>
+
+        {/* Textos de Identificação */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span 
+              className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono tracking-wider flex items-center gap-1 transition-colors duration-200 border ${
+                isLocked 
+                  ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' 
+                  : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+              }`}
+            >
+              <Lock className="w-2.5 h-2.5 shrink-0" />
+              <span>{isLocked ? 'CADEADO FECHADO [🔒]' : 'ENGASTANDO TRAVA...'}</span>
+            </span>
+
+            {isLocked && (
+              <span className="text-[9px] text-emerald-400 font-mono font-semibold flex items-center gap-0.5">
+                <span>✓ Salvo no Mongo</span>
+              </span>
+            )}
+          </div>
+
+          <h4 className="text-xs font-bold text-white mt-1 truncate">
+            {title}
+          </h4>
+        </div>
+      </div>
+
+      {/* Alívio Cognitivo TDAH & Proteção de Foco */}
+      <div className="relative z-10 mt-3 pt-2.5 border-t border-white/10 space-y-1.5 text-[11px]">
+        <div className="flex items-start gap-1.5 text-slate-200">
+          <span className="text-rose-400 font-bold shrink-0">🔒</span>
+          <p className="leading-tight">
+            <strong>Ideia blindada no cofre:</strong> Está 100% registrada. Seu cérebro não precisa se preocupar em esquecer, e você não precisa começar a codar agora.
+          </p>
+        </div>
+
+        <div className="flex items-start gap-1.5 text-emerald-300/90 text-[10px]">
+          <span className="shrink-0 font-bold">🎯</span>
+          <p className="leading-tight">
+            <strong>Foco mantido:</strong> Continue sua entrega prioritária no <strong>Littera</strong>.
+          </p>
+        </div>
+
+        {details?.unlockConditions && details.unlockConditions.length > 0 && (
+          <div className="mt-1 p-2 rounded-lg bg-black/40 border border-white/10 text-[10px] text-amber-200/90">
+            <span className="font-semibold block text-[9px] uppercase tracking-wider text-amber-300/80">
+              Desbloqueio futuro condicionado a:
+            </span>
+            <p className="truncate mt-0.5">
+              • {details.unlockConditions[0]}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Rodapé Interativo */}
+      <div className="relative z-10 mt-2 pt-2 border-t border-white/5 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={triggerSnap}
+          className="text-[10px] text-slate-400 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
+          title="Ouvir e rever a trava física"
+        >
+          <span>Testar trava [🔒]</span>
+        </button>
+
+        {onNavigateToProjects && (
+          <button
+            type="button"
+            onClick={onNavigateToProjects}
+            className="text-[10px] text-[#4D8DFF] hover:text-white transition-colors cursor-pointer flex items-center gap-1 underline decoration-[#4D8DFF]/40"
+          >
+            <span>Ver no Estacionamento</span>
+            <ExternalLink className="w-2.5 h-2.5" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
 
 interface DopamineParkingChatProps {
   isOpen: boolean;
@@ -340,7 +576,14 @@ Como posso te ajudar agora?`,
                     {isAsst ? renderFormattedText(msg.text) : <p className="text-xs">{msg.text}</p>}
 
                     {/* CARD DE AÇÃO EXECUTADA NO SISTEMA */}
-                    {msg.actionExecuted && (
+                    {msg.actionExecuted && msg.actionExecuted.type === 'idea_parked' ? (
+                      <PhysicalPadlockSeal
+                        title={msg.actionExecuted.title}
+                        description={msg.actionExecuted.description}
+                        details={msg.actionExecuted.details}
+                        onNavigateToProjects={onNavigateToProjects}
+                      />
+                    ) : msg.actionExecuted ? (
                       <div className="mt-2.5 p-3 rounded-xl bg-[#101522] border border-white/15 space-y-2 text-left animate-in fade-in duration-200">
                         {/* Header da Ação */}
                         <div className="flex items-center justify-between gap-2">
@@ -362,13 +605,6 @@ Como posso te ajudar agora?`,
                             <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-500/20 text-purple-200 border border-purple-500/40 flex items-center gap-1">
                               <Scissors className="w-3 h-3" />
                               <span>FATIADA EM MICRO-AÇÕES</span>
-                            </span>
-                          )}
-
-                          {msg.actionExecuted.type === 'idea_parked' && (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1">
-                              <Lock className="w-2.5 h-2.5" />
-                              <span>TRANCADO NO ESTACIONAMENTO</span>
                             </span>
                           )}
 
@@ -419,7 +655,7 @@ Como posso te ajudar agora?`,
                           </span>
                         </div>
                       </div>
-                    )}
+                    ) : null}
 
                     {/* Prompts Sugeridos Rápidos abaixo da mensagem */}
                     {isAsst && msg.suggestedPrompts && msg.suggestedPrompts.length > 0 && (

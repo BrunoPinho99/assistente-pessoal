@@ -124,5 +124,57 @@ class SoundSynthesizer {
   }
 }
 
+/**
+ * Efeito Sonoro de Trava Mecânica (Padlock Clasp Snap)
+ * Som metálico realista com duplo impacto:
+ * 1. Deslizamento inicial e engate (1400Hz -> 160Hz)
+ * 2. Batida de trava de aço pesada (thud seco em 180Hz -> 35Hz)
+ * Proporciona confirmação multissensorial para o cérebro TDAH de que a ideia foi trancada.
+ */
+export function playLockSnapSound() {
+  try {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+
+    const t = ctx.currentTime;
+
+    // 1. Click metálico agudo
+    const clickOsc = ctx.createOscillator();
+    const clickGain = ctx.createGain();
+    clickOsc.type = 'triangle';
+    clickOsc.frequency.setValueAtTime(1400, t);
+    clickOsc.frequency.exponentialRampToValueAtTime(160, t + 0.05);
+
+    clickGain.gain.setValueAtTime(0.35, t);
+    clickGain.gain.exponentialRampToValueAtTime(0.001, t + 0.07);
+
+    clickOsc.connect(clickGain);
+    clickGain.connect(ctx.destination);
+    clickOsc.start(t);
+    clickOsc.stop(t + 0.08);
+
+    // 2. Trava de aço pesada (Thud mecânico)
+    const thudOsc = ctx.createOscillator();
+    const thudGain = ctx.createGain();
+    thudOsc.type = 'sine';
+    thudOsc.frequency.setValueAtTime(180, t + 0.02);
+    thudOsc.frequency.exponentialRampToValueAtTime(35, t + 0.12);
+
+    thudGain.gain.setValueAtTime(0.45, t + 0.02);
+    thudGain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+
+    thudOsc.connect(thudGain);
+    thudGain.connect(ctx.destination);
+    thudOsc.start(t + 0.02);
+    thudOsc.stop(t + 0.16);
+  } catch (err) {
+    // Ignora se bloqueado por políticas de áudio antes de interação
+  }
+}
+
 export const soundSynthesizer = new SoundSynthesizer();
 
