@@ -1,0 +1,341 @@
+import React, { useState } from 'react';
+import confetti from 'canvas-confetti';
+import { NavigationTab, Task, Project, ThemeMode } from './types';
+import { usePersonalOS } from './lib/store';
+
+// Navigation Components
+import { Sidebar } from './components/Navigation/Sidebar';
+
+// Modals
+import { QuickCaptureModal } from './components/Modals/QuickCaptureModal';
+import { LostHelpModal } from './components/Modals/LostHelpModal';
+import { EmergencyTriageModal } from './components/Modals/EmergencyTriageModal';
+import { TaskModal } from './components/Modals/TaskModal';
+import { TradeoffModal } from './components/Modals/TradeoffModal';
+import { SliceTaskModal } from './components/Modals/SliceTaskModal';
+import { DopamineParkingChat } from './components/Capture/DopamineParkingChat';
+
+// Views estritas do Personal OS (Hoje, Tarefas, Projetos, Estudos)
+import { DashboardView } from './components/Views/DashboardView';
+import { TasksView } from './components/Views/TasksView';
+import { ProjectsView } from './components/Views/ProjectsView';
+import { StudiesView } from './components/Views/StudiesView';
+
+export function App() {
+  const {
+    // Data
+    projects,
+    tasks,
+    subjects,
+    flashcards,
+    habits,
+    // Preferences
+    themeMode,
+    setThemeMode,
+    isDarkMode,
+    setIsDarkMode,
+    isCalmMode,
+    setIsCalmMode,
+    // Tasks
+    addTask,
+    updateTask,
+    deleteTask,
+    toggleTaskStatus,
+    // Projects
+    addProject,
+    updateProject,
+    deleteProject,
+    toggleProjectStage,
+    toggleProjectLock,
+    executeProjectTradeoff,
+    parkDopamineIdea,
+    applyTaskSlice,
+    // Studies
+    addSubject,
+    updateSubject,
+    deleteSubject,
+    addFlashcard,
+    reviewFlashcard,
+    logStudyHours,
+    // Habits
+    toggleHabitDate,
+    // Metrics & Tools
+    isOverloaded,
+    todayEstimatedMinutes,
+    staleProjects,
+    quickCapture
+  } = usePersonalOS();
+
+  // Navigation State
+  const [activeTab, setActiveTab] = useState<NavigationTab>('hoje');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Modals State
+  const [isQuickCaptureOpen, setIsQuickCaptureOpen] = useState(false);
+  const [isLostHelpOpen, setIsLostHelpOpen] = useState(false);
+  const [isEmergencyTriageOpen, setIsEmergencyTriageOpen] = useState(false);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
+
+  // Estacionamento de Dopamina (Chat de Captura)
+  const [isDopamineChatOpen, setIsDopamineChatOpen] = useState(false);
+
+  // Trade-off Modal (A Regra da Substituição: Máx 2 Projetos)
+  const [isTradeoffOpen, setIsTradeoffOpen] = useState(false);
+  const [projectToUnlockCandidate, setProjectToUnlockCandidate] = useState<Project | null>(null);
+
+  // Fatiar Tarefa com IA (Bloco de 45m / Anti-Paralisia)
+  const [isSliceModalOpen, setIsSliceModalOpen] = useState(false);
+  const [taskToSlice, setTaskToSlice] = useState<Task | null>(null);
+
+  // Active Focus Task
+  const [, setActiveFocusTask] = useState<Task | null>(tasks[0] || null);
+
+  const handleStartFocus = (task: Task) => {
+    setActiveFocusTask(task);
+    setActiveTab('hoje');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleOpenTaskModal = (task?: Task | null) => {
+    setTaskToEdit(task || null);
+    setIsTaskModalOpen(true);
+  };
+
+  const handleToggleProjectLock = (projectId: string) => {
+    const res = toggleProjectLock(projectId);
+    if (res.requiresTradeoff && res.projectToUnlock) {
+      setProjectToUnlockCandidate(res.projectToUnlock);
+      setIsTradeoffOpen(true);
+    }
+  };
+
+  const handleRequestSliceTask = (task: Task) => {
+    setTaskToSlice(task);
+    setIsSliceModalOpen(true);
+  };
+
+  const handleSaveTask = (taskData: Omit<Task, 'id' | 'created_at'>) => {
+    if (taskToEdit) {
+      updateTask(taskToEdit.id, taskData);
+    } else {
+      addTask(taskData);
+      confetti({ particleCount: 30, spread: 40 });
+    }
+  };
+
+  const handleToggleTaskWithConfetti = (taskId: string) => {
+    const task = tasks.find(t => t.id === taskId);
+    toggleTaskStatus(taskId);
+    if (task && task.status !== 'concluido') {
+      confetti({
+        particleCount: 50,
+        spread: 60,
+        origin: { y: 0.75 },
+        colors: ['#2563eb', '#3b82f6', '#60a5fa', '#ffffff']
+      });
+    }
+  };
+
+  const filteredTasks = (tasks || []).filter(t => 
+    t && (
+      !searchQuery || 
+      (t.title && t.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (t.description && t.description.toLowerCase().includes(searchQuery.toLowerCase()))
+    )
+  );
+
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const handleToggleTheme = () => {
+    const nextMode: ThemeMode = themeMode === 'hybrid' ? 'dark' : themeMode === 'dark' ? 'light' : 'hybrid';
+    setThemeMode(nextMode);
+  };
+
+  return (
+    <div className={`h-full w-full flex overflow-hidden antialiased font-sans selection:bg-[#315DFF] selection:text-white transition-colors duration-150 ${
+      themeMode === 'dark' ? 'bg-[#101522] text-[#F3F5FC] dark' : 'bg-[#F3F5FC] text-[#171D38]'
+    }`}>
+      {/* Sidebar (250-270px) */}
+      <Sidebar
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        userName="Bruno Pinho"
+        userRole="Espaço pessoal"
+        themeMode={themeMode}
+        onChangeThemeMode={setThemeMode}
+        isCalmMode={isCalmMode}
+        onToggleCalmMode={() => setIsCalmMode(!isCalmMode)}
+        isMobileOpen={isMobileMenuOpen}
+        onCloseMobile={() => setIsMobileMenuOpen(false)}
+      />
+
+      {/* MainContent */}
+      <main className={`flex-1 flex flex-col h-full overflow-y-auto overflow-x-hidden min-w-0 transition-colors duration-150 relative ${
+        themeMode === 'dark' ? 'bg-[#101522]' : 'bg-[#F3F5FC]'
+      }`} data-purpose="main-content-scroll">
+        <div className="max-w-[1400px] w-full mx-auto px-6 sm:px-9 lg:px-10 py-6 flex flex-col gap-6 min-w-0">
+          {/* 1. MÓDULO HOJE (Meu Dia) */}
+          {activeTab === 'hoje' && (
+            <DashboardView
+              userName="Bruno"
+              tasks={filteredTasks}
+              projects={projects}
+              habits={habits}
+              subjects={subjects}
+              isCalmMode={isCalmMode}
+              themeMode={themeMode}
+              isDarkMode={isDarkMode}
+              onChangeThemeMode={setThemeMode}
+              onToggleTheme={handleToggleTheme}
+              onToggleTask={handleToggleTaskWithConfetti}
+              onStartFocus={handleStartFocus}
+              onToggleHabit={toggleHabitDate}
+              onOpenLostHelp={() => setIsLostHelpOpen(true)}
+              onOpenQuickCapture={() => setIsQuickCaptureOpen(true)}
+              onNavigateTab={setActiveTab}
+              onEditTask={handleOpenTaskModal}
+              onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
+              onRequestSliceTask={handleRequestSliceTask}
+              onOpenDopamineChat={() => setIsDopamineChatOpen(true)}
+            />
+          )}
+
+          {/* 2. MÓDULO TAREFAS */}
+          {activeTab === 'tarefas' && (
+            <TasksView
+              tasks={filteredTasks}
+              projects={projects}
+              isDarkMode={isDarkMode}
+              onToggleTask={handleToggleTaskWithConfetti}
+              onOpenTaskModal={handleOpenTaskModal}
+              onDeleteTask={deleteTask}
+              onUpdateTaskStatus={(id, status) => updateTask(id, { status })}
+              onStartFocus={handleStartFocus}
+              onRequestSliceTask={handleRequestSliceTask}
+            />
+          )}
+
+          {/* 3. MÓDULO PROJETOS */}
+          {activeTab === 'projetos' && (
+            <ProjectsView
+              projects={projects}
+              tasks={tasks}
+              staleProjects={staleProjects}
+              isDarkMode={isDarkMode}
+              onToggleStage={toggleProjectStage}
+              onAddProject={addProject}
+              onUpdateProject={updateProject}
+              onDeleteProject={deleteProject}
+              onStartFocus={handleStartFocus}
+              onToggleLock={handleToggleProjectLock}
+              onOpenDopamineChat={() => setIsDopamineChatOpen(true)}
+            />
+          )}
+
+          {/* 4. MÓDULO ESTUDOS & CURSOS */}
+          {activeTab === 'estudos' && (
+            <StudiesView
+              subjects={subjects}
+              flashcards={flashcards}
+              isDarkMode={isDarkMode}
+              onAddSubject={addSubject}
+              onUpdateSubject={updateSubject}
+              onDeleteSubject={deleteSubject}
+              onAddFlashcard={addFlashcard}
+              onReviewFlashcard={reviewFlashcard}
+              onLogStudyHours={logStudyHours}
+            />
+          )}
+        </div>
+      </main>
+
+      {/* 1. Assistente IA & Copiloto (Conversação, Ações no Sistema e Estacionamento) */}
+      <DopamineParkingChat
+        isOpen={isDopamineChatOpen}
+        onOpen={() => setIsDopamineChatOpen(true)}
+        onClose={() => setIsDopamineChatOpen(false)}
+        userName="Bruno"
+        tasks={tasks}
+        projects={projects}
+        parkedProjects={projects.filter(p => p.locked)}
+        activeProjects={projects.filter(p => !p.locked)}
+        onAddTask={addTask}
+        onToggleTask={handleToggleTaskWithConfetti}
+        onSliceTask={applyTaskSlice}
+        onParkIdea={parkDopamineIdea}
+        onStartFocus={handleStartFocus}
+        onNavigateTab={setActiveTab}
+        onNavigateToProjects={() => setActiveTab('projetos')}
+        isDarkMode={isDarkMode}
+      />
+
+      {/* 2. Modal de Trade-off (A Regra da Substituição: Máximo 2 Projetos Ativos) */}
+      <TradeoffModal
+        isOpen={isTradeoffOpen}
+        onClose={() => {
+          setIsTradeoffOpen(false);
+          setProjectToUnlockCandidate(null);
+        }}
+        projectToUnlock={projectToUnlockCandidate}
+        activeProjects={projects.filter(p => !p.locked)}
+        onConfirmTradeoff={executeProjectTradeoff}
+      />
+
+      {/* 3. Modal de Fatiar Tarefa com IA (Bloco 45m / Anti-Paralisia) */}
+      <SliceTaskModal
+        isOpen={isSliceModalOpen}
+        onClose={() => {
+          setIsSliceModalOpen(false);
+          setTaskToSlice(null);
+        }}
+        task={taskToSlice}
+        onApplySlice={applyTaskSlice}
+      />
+
+      {/* Modais Globais de Apoio */}
+      <QuickCaptureModal
+        isOpen={isQuickCaptureOpen}
+        isDarkMode={isDarkMode}
+        onClose={() => setIsQuickCaptureOpen(false)}
+        onCapture={(text, type) => quickCapture(text, type)}
+      />
+
+      <LostHelpModal
+        isOpen={isLostHelpOpen}
+        isDarkMode={isDarkMode}
+        onClose={() => setIsLostHelpOpen(false)}
+        tasks={tasks}
+        projects={projects}
+        subjects={subjects}
+        habits={habits}
+        onStartFocus={handleStartFocus}
+      />
+
+      <EmergencyTriageModal
+        isOpen={isEmergencyTriageOpen}
+        isDarkMode={isDarkMode}
+        onClose={() => setIsEmergencyTriageOpen(false)}
+        tasks={tasks}
+        onDeferTask={(id) => updateTask(id, { status: 'adiado' })}
+        onDeleteTask={deleteTask}
+        onCompleteTask={handleToggleTaskWithConfetti}
+      />
+
+      <TaskModal
+        isOpen={isTaskModalOpen}
+        isDarkMode={isDarkMode}
+        onClose={() => {
+          setIsTaskModalOpen(false);
+          setTaskToEdit(null);
+        }}
+        taskToEdit={taskToEdit}
+        projects={projects}
+        subjects={subjects}
+        onSave={handleSaveTask}
+      />
+    </div>
+  );
+}
+
+export default App;

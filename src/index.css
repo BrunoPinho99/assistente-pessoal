@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'Geist', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Geist Mono', 'Space Grotesk', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* REFINED PERSONAL OS DESIGN SYSTEM TOKENS */
+  --color-sidebar-bg: #101522;
+  --color-focus-bg: #111B36;
+  --color-deep-blue: #172D69;
+  --color-electric-blue: #315DFF;
+  --color-workspace-bg: #F3F5FC;
+  --color-surface: #FFFFFF;
+  --color-primary-text: #171D38;
+  --color-secondary-text: #747E98;
+  --color-border-subtle: #E3E8F3;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #F3F5FC;
+  color: #171D38;
+}
+
+/* Subtle, refined custom scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* ==============================================================================
+   REFINED COMPONENT SURFACES
+   ============================================================================== */
+
+/* Card de Foco: Clean Dark with single subtle internal radial glow */
+.card-focus-refined {
+  background: 
+    radial-gradient(circle at 85% 35%, rgba(49, 93, 255, 0.22) 0%, transparent 55%),
+    linear-gradient(145deg, #111B36 0%, #172D69 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
+  box-shadow: 0 4px 20px -2px rgba(17, 27, 54, 0.12);
+}
+
+/* Clean White Surface */
+.card-surface-clean {
+  background-color: #FFFFFF;
+  border: 1px solid #E3E8F3;
+  border-radius: 18px;
+  box-shadow: 0 1px 3px 0 rgba(23, 29, 56, 0.03);
+  transition: all 0.15s ease;
+}
+
+.card-surface-clean:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 4px 14px -2px rgba(23, 29, 56, 0.05);
+}
+
+/* Primary Electric Blue Button with Subtle Shadow */
+.btn-electric-clean {
+  background-color: #315DFF;
+  color: #FFFFFF;
+  font-weight: 600;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px 0 rgba(49, 93, 255, 0.25);
+  transition: all 0.15s ease;
+}
+
+.btn-electric-clean:hover {
+  background-color: #264ED8;
+  box-shadow: 0 4px 12px 0 rgba(49, 93, 255, 0.35);
+}
+
+.btn-electric-clean:active {
+  transform: scale(0.98);
+}

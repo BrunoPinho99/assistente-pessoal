@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CampusHub - Dashboard de Estudos e Produtividade</title>
+<!-- Tailwind CSS CDN v3 com plugins necessários -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Plus Jakarta Sans -->
+<link href="https://fonts.preconnect" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            campus: {
+              blue: '#1066FF',
+              'blue-light': '#EBF2FF',
+              'blue-hover': '#004FCF',
+              dark: '#0A0C10',
+              card: '#141722',
+              bg: '#0D0F17',
+              muted: '#8E9BAE',
+              border: '#232838',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-layout">
+    body {
+      background-color: #06070a;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* Estilo sutil de vidro para elementos hero */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #232838;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="min-h-screen p-3 md:p-6 lg:p-8 flex items-center justify-center text-slate-100 antialiased selection:bg-[#1066FF]/30 selection:text-white">
+<!-- BEGIN: MainContainer -->
+<!-- Container principal do Dashboard estilo app nativo com acabamento Dark Premium -->
+<div class="w-full max-w-[1440px] bg-[#0D0F17] border border-[#1E2333] rounded-[32px] md:rounded-[40px] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] p-4 md:p-6 lg:p-7 overflow-hidden text-slate-100 relative">
+<!-- Glow de ambient lighting suave -->
+<div class="absolute -top-32 -left-32 w-96 h-96 bg-[#1066FF]/15 rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute -bottom-32 -right-32 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+<!-- BEGIN: TopBar -->
+<header class="flex flex-col md:flex-row items-center justify-between gap-4 mb-6 relative z-10" data-purpose="top-navigation-bar">
+<!-- Marca / Logo -->
+<div class="flex items-center gap-3 w-full md:w-56">
+<div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#004FCF] via-[#1066FF] to-[#3B82F6] flex items-center justify-center text-white shadow-lg shadow-blue-600/30 font-extrabold text-lg">
+<svg class="w-5 h-5 fill-current" viewbox="0 0 24 24">
+<path d="M12 3L1 9L12 15L21 10.09V17H23V9M5 13.18V17.18L12 21L19 17.18V13.18L12 17L5 13.18Z"></path>
+</svg>
+</div>
+<span class="text-xl font-bold tracking-tight text-white">CampusHub</span>
+</div>
+<!-- Barra de busca com atalho de teclado -->
+<div class="relative flex-1 max-w-xl w-full">
+<span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</span>
+<input class="w-full pl-10 pr-12 py-2 text-sm bg-[#141722] border border-[#232838] text-slate-100 rounded-full focus:outline-none focus:ring-2 focus:ring-[#1066FF]/40 focus:border-[#1066FF] transition-all placeholder:text-slate-500 shadow-inner" placeholder="Search anything..." type="text"/>
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+<span class="text-[11px] font-medium text-slate-400 bg-[#1A1F2C] border border-[#2A3144] px-1.5 py-0.5 rounded">⌘ K</span>
+</div>
+</div>
+<!-- Controles Superiores: Toggle Dark/Light + Notificações + Perfil -->
+<div class="flex items-center gap-3 justify-end w-full md:w-auto">
+<!-- Interactive Dark/Light Mode Switch -->
+<div aria-label="Alterar Tema" class="flex items-center bg-[#141722] border border-[#232838] p-1 rounded-full cursor-pointer transition hover:border-slate-700" title="Dark mode active">
+<button class="w-7 h-7 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-200 transition">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="5"></circle>
+<path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<button class="w-7 h-7 rounded-full bg-[#1066FF] text-white flex items-center justify-center shadow-md shadow-blue-500/30 transition">
+<svg class="w-3.5 h-3.5" fill="currentColor" viewbox="0 0 20 20">
+<path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+</svg>
+</button>
+</div>
+<!-- Notificações -->
+<button aria-label="Notificações" class="relative p-2 rounded-full bg-[#141722] hover:bg-[#1A1F2C] border border-[#232838] text-slate-300 transition shadow-sm">
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-[#1066FF] rounded-full border-2 border-[#141722]"></span>
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<!-- Perfil do Usuário -->
+<div class="flex items-center gap-2.5 pl-1 cursor-pointer">
+<div class="w-9 h-9 rounded-full overflow-hidden bg-[#1E293B] border border-[#334155] shadow-sm flex items-center justify-center font-bold text-xs text-blue-400">
+            AR
+          </div>
+<div class="hidden sm:block text-left leading-tight">
+<h4 class="text-xs font-bold text-white flex items-center gap-1">
+              Alex Rudewel
+              <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</h4>
+<span class="text-[11px] text-slate-400">Student</span>
+</div>
+</div>
+</div>
+</header>
+<!-- END: TopBar -->
+<!-- BEGIN: DashboardBody -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start relative z-10">
+<!-- BEGIN: LeftSidebar -->
+<aside class="lg:col-span-2 flex flex-col justify-between gap-5" data-purpose="navigation-sidebar">
+<!-- Menu principal -->
+<nav class="space-y-1 bg-transparent">
+<a class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl bg-white text-slate-950 font-semibold text-xs tracking-wide shadow-md shadow-white/5 transition" href="#">
+<svg class="w-4 h-4 fill-current text-slate-950" viewbox="0 0 24 24"><path d="M4 13h6c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1zm0 8h6c.55 0 1-.45 1-1v-4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1zm10 0h6c.55 0 1-.45 1-1v-8c0-.55-.45-1-1-1h-6c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1zm0-18v4c0 .55.45 1 1 1h6c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1h-6c-.55 0-1 .45-1 1z"></path></svg>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3.5 py-2 rounded-2xl text-slate-400 hover:text-white hover:bg-[#161A26] border border-transparent hover:border-[#222736] font-medium text-xs transition" href="#">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span>Classes</span>
+</a>
+<a class="flex items-center gap-3 px-3.5 py-2 rounded-2xl text-slate-400 hover:text-white hover:bg-[#161A26] border border-transparent hover:border-[#222736] font-medium text-xs transition" href="#">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span>Schedule</span>
+</a>
+<a class="flex items-center gap-3 px-3.5 py-2 rounded-2xl text-slate-400 hover:text-white hover:bg-[#161A26] border border-transparent hover:border-[#222736] font-medium text-xs transition" href="#">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span>Assignments</span>
+</a>
+<a class="flex items-center gap-3 px-3.5 py-2 rounded-2xl text-slate-400 hover:text-white hover:bg-[#161A26] border border-transparent hover:border-[#222736] font-medium text-xs transition" href="#">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span>Campus Life</span>
+</a>
+<a class="flex items-center gap-3 px-3.5 py-2 rounded-2xl text-slate-400 hover:text-white hover:bg-[#161A26] border border-transparent hover:border-[#222736] font-medium text-xs transition" href="#">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span>Resources</span>
+</a>
+<a class="flex items-center gap-3 px-3.5 py-2 rounded-2xl text-slate-400 hover:text-white hover:bg-[#161A26] border border-transparent hover:border-[#222736] font-medium text-xs transition" href="#">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span>Messages</span>
+</a>
+<a class="flex items-center gap-3 px-3.5 py-2 rounded-2xl text-slate-400 hover:text-white hover:bg-[#161A26] border border-transparent hover:border-[#222736] font-medium text-xs transition" href="#">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span>Settings</span>
+</a>
+</nav>
+<!-- Card de Assinatura 'One pass. More perks.' -->
+<div class="relative overflow-hidden rounded-[26px] bg-gradient-to-br from-[#0B1528] via-[#0E2042] to-[#123068] border border-[#1E3A75] p-4 text-white shadow-xl mt-4 group">
+<div class="relative z-10">
+<div class="flex items-center gap-1.5 mb-2">
+<span class="w-4 h-4 rounded-md bg-[#1066FF] flex items-center justify-center text-[10px] font-black text-white">C</span>
+<span class="text-[11px] font-semibold text-blue-300">CampusHub</span>
+</div>
+<h5 class="text-sm font-extrabold leading-snug">One pass.<br/><span class="text-blue-400">More perks.</span></h5>
+<p class="text-[10px] text-slate-300 mt-1 mb-3 leading-relaxed">Subscribe and get access to exclusive offers, events and useful services.</p>
+<button aria-label="Acessar perks" class="w-7 h-7 rounded-full bg-white text-black flex items-center justify-center shadow hover:scale-105 transition-transform">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg>
+</button>
+</div>
+<div class="absolute -right-4 -bottom-6 w-24 h-24 bg-gradient-to-t from-blue-500/25 to-transparent rounded-full blur-md pointer-events-none"></div>
+</div>
+</aside>
+<!-- END: LeftSidebar -->
+<!-- BEGIN: MainContentGrid -->
+<main class="lg:col-span-10 space-y-5" data-purpose="primary-dashboard-view">
+<!-- Linha Superior: Hero Banner + Agenda Diária -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-stretch">
+<!-- Hero Banner: 'Make Today Count' -->
+<div class="xl:col-span-8 rounded-[28px] overflow-hidden relative min-h-[220px] bg-gradient-to-r from-[#071938] via-[#004FCF] to-[#1D72FE] p-6 text-white flex flex-col justify-between shadow-xl border border-blue-600/30">
+<!-- Gradiente suave de ambient glow -->
+<div class="absolute inset-0 opacity-30 mix-blend-overlay bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-cyan-200 via-blue-500 to-black pointer-events-none"></div>
+<div class="relative z-10 flex flex-col sm:flex-row justify-between items-start gap-4">
+<div>
+<span class="text-[10px] font-bold uppercase tracking-wider text-blue-200/90 mb-1 block">GOOD MORNING,</span>
+<h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight leading-none mb-2">Make Today<br/>Count</h2>
+<p class="text-xs text-blue-100/90 max-w-xs font-normal">Classes, friends, events and opportunities — all in one place.</p>
+</div>
+<!-- Cartão motivacional em vidro (Glassmorphism) -->
+<div class="glass-card rounded-2xl p-3.5 max-w-[190px] text-left hidden sm:block">
+<p class="text-xs font-medium leading-snug text-white/95">“A brighter you, a bolder tomorrow.”</p>
+<div class="w-5 h-0.5 bg-white/40 mt-2"></div>
+</div>
+</div>
+<!-- Ícone flutuante & Botão de Ação -->
+<div class="relative z-10 flex items-center justify-between mt-5">
+<a class="inline-flex items-center gap-2 bg-white text-slate-950 text-xs font-bold px-4 py-2.5 rounded-full hover:bg-slate-100 transition shadow-md" href="#">
+<span>Explore CampusHub</span>
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg>
+</a>
+<!-- Ícone estilo chapéu de formatura em badge glass -->
+<div class="w-12 h-12 rounded-2xl glass-card flex items-center justify-center shadow-lg">
+<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+</div>
+<!-- Card Agenda Diária (Mon, Oct 12) com visual escuro sleek -->
+<div class="xl:col-span-4 rounded-[28px] bg-[#141722] border border-[#232838] text-white p-5 flex flex-col justify-between shadow-xl relative overflow-hidden" data-purpose="daily-schedule">
+<!-- Cabeçalho da agenda -->
+<div class="flex items-center justify-between mb-3 border-b border-[#232838] pb-3">
+<div>
+<h3 class="text-sm font-bold tracking-tight text-white">Mon, Oct 12</h3>
+<span class="text-[10px] text-slate-400">4 activities scheduled</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="text-[10px] bg-[#1F2536] text-slate-300 px-2 py-0.5 rounded-full font-medium border border-[#2B3349]">Today</span>
+<button class="w-6 h-6 rounded-full bg-[#1F2536] hover:bg-[#2B3349] flex items-center justify-center text-slate-300 transition">
+<svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+<button class="w-6 h-6 rounded-full bg-[#1F2536] hover:bg-[#2B3349] flex items-center justify-center text-slate-300 transition">
+<svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+</div>
+<!-- Grade de Horários e Aulas / Compromissos -->
+<div class="space-y-2 text-[11px] relative">
+<!-- Horas guia de fundo discretas -->
+<div class="flex justify-between text-[9px] text-slate-500 mb-1 px-1">
+<span>8AM</span><span>10AM</span><span>12PM</span><span>2PM</span><span>4PM</span><span>6PM</span>
+</div>
+<!-- Bloco: CS101 Lecture -->
+<div class="bg-gradient-to-r from-[#004FCF] to-[#1066FF] text-white p-2.5 rounded-xl shadow-md flex items-center justify-between">
+<div>
+<span class="font-bold block text-white">CS101 Lecture</span>
+<span class="text-[9px] text-blue-100">8:00 - 9:30 AM · Hall A</span>
+</div>
+<span class="w-2 h-2 rounded-full bg-white shadow-sm animate-pulse"></span>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<!-- Bloco: Lunch -->
+<div class="bg-white text-slate-950 p-2.5 rounded-xl font-medium">
+<span class="font-bold block text-xs text-slate-900">Lunch</span>
+<span class="text-[9px] text-slate-600">12:30 - 1:30 PM</span>
+</div>
+<!-- Bloco: Club Meeting -->
+<div class="bg-[#1A1F2D] text-white p-2.5 rounded-xl border border-[#2B3348]">
+<span class="font-bold block text-xs text-slate-200">Club Meeting</span>
+<span class="text-[9px] text-slate-400">4:00 - 5:00 PM</span>
+</div>
+</div>
+<!-- Bloco: Design Workshop -->
+<div class="bg-[#189E5F] text-white p-2.5 rounded-xl shadow-md flex items-center justify-between">
+<div>
+<span class="font-bold block text-white">Design Workshop</span>
+<span class="text-[9px] text-emerald-100">5:30 - 7:00 PM · Studio 4</span>
+</div>
+<span class="text-[10px] bg-black/30 px-1.5 py-0.5 rounded text-white font-medium">Upcoming</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Linha Central: Focus Time + Study Rhythm -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+<!-- Card: Focus Time (Deep work) -->
+<div class="bg-[#141722] rounded-[26px] p-5 shadow-xl border border-[#232838] flex flex-col justify-between" data-purpose="metric-focus-time">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-white text-slate-950 flex items-center justify-center">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<div>
+<h4 class="text-xs font-bold text-white leading-tight">Focus Time</h4>
+<p class="text-[10px] text-[#8E9BAE]">Deep work sessions</p>
+</div>
+</div>
+<button class="text-[11px] font-semibold text-slate-300 bg-[#1D2230] border border-[#2B3247] px-2.5 py-1 rounded-full flex items-center gap-1 hover:bg-[#252C3E] transition">
+                This Week <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="text-2xl sm:text-3xl font-extrabold text-white">18h 24m</span>
+<span class="text-[11px] font-bold text-emerald-400 bg-emerald-950/70 border border-emerald-800/60 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+<svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 10l7-7m0 0l7 7m-7-7v18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+                +28%
+              </span>
+<span class="text-[10px] text-[#8E9BAE] ml-1">vs. last week</span>
+</div>
+<!-- Gráfico de onda estilizado em SVG com brilho neon suave azul -->
+<div class="w-full h-24 mt-2">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 300 90">
+<defs>
+<lineargradient id="focusWaveDark" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#1066FF" stop-opacity="0.45"></stop>
+<stop offset="100%" stop-color="#1066FF" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<path d="M0,75 C45,70 70,60 100,50 C130,40 160,18 200,22 C240,26 265,65 300,55 L300,90 L0,90 Z" fill="url(#focusWaveDark)"></path>
+<path d="M0,75 C45,70 70,60 100,50 C130,40 160,18 200,22 C240,26 265,65 300,55" fill="none" stroke="#1066FF" stroke-linecap="round" stroke-width="2.5"></path>
+</svg>
+</div>
+</div>
+<!-- Card: Study Rhythm (Padrão semanal com barras e linha) -->
+<div class="bg-[#141722] rounded-[26px] p-5 shadow-xl border border-[#232838] flex flex-col justify-between" data-purpose="metric-study-rhythm">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-white text-slate-950 flex items-center justify-center">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<div>
+<h4 class="text-xs font-bold text-white leading-tight">Study Rhythm</h4>
+<p class="text-[10px] text-[#8E9BAE]">Focus patterns this week</p>
+</div>
+</div>
+<button class="text-[11px] font-semibold text-slate-300 bg-[#1D2230] border border-[#2B3247] px-2.5 py-1 rounded-full flex items-center gap-1 hover:bg-[#252C3E] transition">
+                This Week <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+<!-- Gráfico de barras com linha e marcadores -->
+<div class="relative w-full h-28 pt-2 flex flex-col justify-end">
+<!-- Eixo Y e linhas pontilhadas de guia -->
+<div class="absolute inset-0 flex flex-col justify-between text-[9px] text-[#546074] pointer-events-none">
+<div class="border-b border-dashed border-[#232838] pb-0.5">8h</div>
+<div class="border-b border-dashed border-[#232838] pb-0.5">6h</div>
+<div class="border-b border-dashed border-[#232838] pb-0.5">2h</div>
+<div>0h</div>
+</div>
+<!-- Barras e picos por dia da semana -->
+<div class="relative z-10 grid grid-cols-7 gap-2 items-end h-20 pl-5 pr-1">
+<!-- Seg -->
+<div class="flex flex-col items-center gap-1.5 h-full justify-end">
+<div class="w-3.5 bg-[#1F2536] rounded-t-sm h-[40%]"></div>
+<span class="text-[9px] font-medium text-[#8E9BAE]">Mon</span>
+</div>
+<!-- Ter (Pico de foco Azul) -->
+<div class="flex flex-col items-center gap-1.5 h-full justify-end">
+<div class="w-3.5 bg-gradient-to-t from-[#004FCF] to-[#1066FF] rounded-t-sm h-[85%] shadow-[0_0_12px_rgba(16,102,255,0.45)] relative">
+<span class="absolute -top-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#60A5FA] rounded-full shadow-[0_0_6px_#60A5FA]"></span>
+</div>
+<span class="text-[9px] font-bold text-[#60A5FA]">Tue</span>
+</div>
+<!-- Qua -->
+<div class="flex flex-col items-center gap-1.5 h-full justify-end">
+<div class="w-3.5 bg-[#1F2536] rounded-t-sm h-[50%]"></div>
+<span class="text-[9px] font-medium text-[#8E9BAE]">Wed</span>
+</div>
+<!-- Qui -->
+<div class="flex flex-col items-center gap-1.5 h-full justify-end">
+<div class="w-3.5 bg-[#1F2536] rounded-t-sm h-[45%]"></div>
+<span class="text-[9px] font-medium text-[#8E9BAE]">Thu</span>
+</div>
+<!-- Sex (Pico de foco Azul) -->
+<div class="flex flex-col items-center gap-1.5 h-full justify-end">
+<div class="w-3.5 bg-gradient-to-t from-[#004FCF] to-[#1066FF] rounded-t-sm h-[75%] shadow-[0_0_12px_rgba(16,102,255,0.45)] relative">
+<span class="absolute -top-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#60A5FA] rounded-full shadow-[0_0_6px_#60A5FA]"></span>
+</div>
+<span class="text-[9px] font-bold text-[#60A5FA]">Fri</span>
+</div>
+<!-- Sáb -->
+<div class="flex flex-col items-center gap-1.5 h-full justify-end">
+<div class="w-3.5 bg-[#1F2536] rounded-t-sm h-[30%]"></div>
+<span class="text-[9px] font-medium text-[#8E9BAE]">Sat</span>
+</div>
+<!-- Dom -->
+<div class="flex flex-col items-center gap-1.5 h-full justify-end">
+<div class="w-3.5 bg-[#1F2536] rounded-t-sm h-[25%]"></div>
+<span class="text-[9px] font-medium text-[#8E9BAE]">Sun</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Linha Inferior de Métricas: Focus Map + Performance -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+<!-- Focus Map: Heatmap com pontos da semana -->
+<div class="lg:col-span-7 bg-[#141722] rounded-[26px] p-5 shadow-xl border border-[#232838]" data-purpose="metric-focus-heatmap">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-white text-slate-950 flex items-center justify-center">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<div>
+<h4 class="text-xs font-bold text-white leading-tight">Focus Map</h4>
+<p class="text-[10px] text-[#8E9BAE]">When you're most focused</p>
+</div>
+</div>
+<!-- Legenda do Heatmap -->
+<div class="flex items-center gap-3 text-[10px] text-[#8E9BAE]">
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#1066FF] shadow-[0_0_6px_#1066FF]"></span> High</span>
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#60A5FA]"></span> Medium</span>
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#202738]"></span> Low</span>
+</div>
+</div>
+<!-- Matriz de pontos de produtividade / hora e dia -->
+<div class="pt-2">
+<div class="grid grid-cols-8 gap-2 items-center text-[10px] text-[#8E9BAE]">
+<span class="text-right pr-2">8h</span>
+<div class="col-span-7 flex justify-between">
+<span class="w-2 h-2 rounded-full bg-[#202738]"></span>
+<span class="w-2 h-2 rounded-full bg-[#1066FF] shadow-[0_0_6px_#1066FF]"></span>
+<span class="w-2 h-2 rounded-full bg-[#60A5FA]"></span>
+<span class="w-2 h-2 rounded-full bg-[#202738]"></span>
+<span class="w-2 h-2 rounded-full bg-[#1066FF] shadow-[0_0_6px_#1066FF]"></span>
+<span class="w-2 h-2 rounded-full bg-[#1066FF] shadow-[0_0_6px_#1066FF]"></span>
+<span class="w-2 h-2 rounded-full bg-[#202738]"></span>
+</div>
+<span class="text-right pr-2">6h</span>
+<div class="col-span-7 flex justify-between">
+<span class="w-2 h-2 rounded-full bg-[#60A5FA]"></span>
+<span class="w-2 h-2 rounded-full bg-[#1066FF] shadow-[0_0_6px_#1066FF]"></span>
+<span class="w-2 h-2 rounded-full bg-[#202738]"></span>
+<span class="w-2 h-2 rounded-full bg-[#60A5FA]"></span>
+<span class="w-2 h-2 rounded-full bg-[#1066FF] shadow-[0_0_6px_#1066FF]"></span>
+<span class="w-2 h-2 rounded-full bg-[#202738]"></span>
+<span class="w-2 h-2 rounded-full bg-[#202738]"></span>
+</div>
+<span class="text-right pr-2">2h</span>
+<div class="col-span-7 flex justify-between">
+<span class="w-2 h-2 rounded-full bg-[#1066FF] shadow-[0_0_6px_#1066FF]"></span>
+<span class="w-2 h-2 rounded-full bg-[#202738]"></span>
+<span class="w-2 h-2 rounded-full bg-[#202738]"></span>
+<span class="w-2 h-2 rounded-full bg-[#1066FF] shadow-[0_0_6px_#1066FF]"></span>
+<span class="w-2 h-2 rounded-full bg-[#60A5FA]"></span>
+<span class="w-2 h-2 rounded-full bg-[#1066FF] shadow-[0_0_6px_#1066FF]"></span>
+<span class="w-2 h-2 rounded-full bg-[#202738]"></span>
+</div>
+<span class="text-right pr-2">0h</span>
+<div class="col-span-7 flex justify-between">
+<span class="w-2 h-2 rounded-full bg-[#202738]"></span>
+<span class="w-2 h-2 rounded-full bg-[#202738]"></span>
+<span class="w-2 h-2 rounded-full bg-[#60A5FA]"></span>
+<span class="w-2 h-2 rounded-full bg-[#202738]"></span>
+<span class="w-2 h-2 rounded-full bg-[#202738]"></span>
+<span class="w-2 h-2 rounded-full bg-[#202738]"></span>
+<span class="w-2 h-2 rounded-full bg-[#202738]"></span>
+</div>
+<!-- Dias da semana rotulados -->
+<span></span>
+<div class="col-span-7 flex justify-between pt-1 font-medium text-[#8E9BAE]">
+<span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Performance: Gráficos Donut Circulares (Productive, Neutral, Distracted) -->
+<div class="lg:col-span-5 bg-[#141722] rounded-[26px] p-5 border border-[#232838] shadow-xl flex flex-col justify-between" data-purpose="metric-performance">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-white text-slate-950 flex items-center justify-center">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path><path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<div>
+<h4 class="text-xs font-bold text-white leading-tight">Performance</h4>
+<p class="text-[10px] text-[#8E9BAE]">Your activity balance</p>
+</div>
+</div>
+<button class="text-[11px] font-semibold text-slate-300 bg-[#1D2230] border border-[#2B3247] px-2 py-0.5 rounded-full flex items-center gap-1 hover:bg-[#252C3E] transition">
+                This Week <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+<!-- Gráficos de rosca circulares com SVG no Dark Mode -->
+<div class="grid grid-cols-3 gap-2 text-center pt-2">
+<!-- 68% Productive -->
+<div class="flex flex-col items-center">
+<div class="relative w-14 h-14 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+<circle cx="18" cy="18" fill="none" r="14" stroke="#22283A" stroke-width="3.2"></circle>
+<circle cx="18" cy="18" fill="none" r="14" stroke="#1066FF" stroke-dasharray="87.96" stroke-dashoffset="28.14" stroke-linecap="round" stroke-width="3.2"></circle>
+</svg>
+<span class="absolute text-xs font-bold text-white">68%</span>
+</div>
+<span class="text-[10px] font-medium text-[#8E9BAE] mt-1">Productive</span>
+</div>
+<!-- 22% Neutral -->
+<div class="flex flex-col items-center">
+<div class="relative w-14 h-14 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+<circle cx="18" cy="18" fill="none" r="14" stroke="#22283A" stroke-width="3.2"></circle>
+<circle cx="18" cy="18" fill="none" r="14" stroke="#64748B" stroke-dasharray="87.96" stroke-dashoffset="68.6" stroke-linecap="round" stroke-width="3.2"></circle>
+</svg>
+<span class="absolute text-xs font-bold text-white">22%</span>
+</div>
+<span class="text-[10px] font-medium text-[#8E9BAE] mt-1">Neutral</span>
+</div>
+<!-- 10% Distracted -->
+<div class="flex flex-col items-center">
+<div class="relative w-14 h-14 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+<circle cx="18" cy="18" fill="none" r="14" stroke="#22283A" stroke-width="3.2"></circle>
+<circle cx="18" cy="18" fill="none" r="14" stroke="#38BDF8" stroke-dasharray="87.96" stroke-dashoffset="79.16" stroke-linecap="round" stroke-width="3.2"></circle>
+</svg>
+<span class="absolute text-xs font-bold text-white">10%</span>
+</div>
+<span class="text-[10px] font-medium text-[#8E9BAE] mt-1">Distracted</span>
+</div>
+</div>
+</div>
+</div>
+<!-- BEGIN: StudyStreakFooter -->
+<!-- Faixa Inferior de Streak e Gamificação de Estudos -->
+<div class="bg-[#141722] rounded-[26px] p-4 border border-[#232838] shadow-xl flex flex-col md:flex-row items-center justify-between gap-4" data-purpose="streak-banner">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-2xl bg-[#1E2435] border border-[#2E364F] text-blue-400 flex items-center justify-center shadow-inner">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<h4 class="text-xs font-bold text-white leading-tight">You're on a 5-day study streak!</h4>
+<p class="text-[11px] text-[#8E9BAE]">Keep it going — consistency leads to success.</p>
+</div>
+</div>
+<!-- Dias da semana com chamas de streak ativas em tom azul -->
+<div class="flex items-center gap-2.5">
+<!-- Mon - Ativo -->
+<div class="flex flex-col items-center gap-1">
+<span class="text-base text-blue-400 drop-shadow-[0_0_8px_rgba(16,102,255,0.7)]">⚡</span>
+<span class="text-[9px] font-semibold text-slate-300">Mon</span>
+</div>
+<!-- Tue - Ativo -->
+<div class="flex flex-col items-center gap-1">
+<span class="text-base text-blue-400 drop-shadow-[0_0_8px_rgba(16,102,255,0.7)]">⚡</span>
+<span class="text-[9px] font-semibold text-slate-300">Tue</span>
+</div>
+<!-- Wed - Ativo -->
+<div class="flex flex-col items-center gap-1">
+<span class="text-base text-blue-400 drop-shadow-[0_0_8px_rgba(16,102,255,0.7)]">⚡</span>
+<span class="text-[9px] font-semibold text-slate-300">Wed</span>
+</div>
+<!-- Thu - Ativo -->
+<div class="flex flex-col items-center gap-1">
+<span class="text-base text-blue-400 drop-shadow-[0_0_8px_rgba(16,102,255,0.7)]">⚡</span>
+<span class="text-[9px] font-semibold text-slate-300">Thu</span>
+</div>
+<!-- Fri - Ativo -->
+<div class="flex flex-col items-center gap-1">
+<span class="text-base text-blue-400 drop-shadow-[0_0_8px_rgba(16,102,255,0.7)]">⚡</span>
+<span class="text-[9px] font-semibold text-slate-300">Fri</span>
+</div>
+<!-- Sat - Inativo -->
+<div class="flex flex-col items-center gap-1 opacity-25">
+<span class="text-base grayscale text-slate-500">⚡</span>
+<span class="text-[9px] font-semibold text-slate-500">Sat</span>
+</div>
+<!-- Sun - Inativo -->
+<div class="flex flex-col items-center gap-1 opacity-25">
+<span class="text-base grayscale text-slate-500">⚡</span>
+<span class="text-[9px] font-semibold text-slate-500">Sun</span>
+</div>
+</div>
+<!-- Botão de Ação -->
+<button class="bg-white hover:bg-slate-200 text-slate-950 font-semibold text-xs px-4 py-2.5 rounded-full flex items-center gap-1.5 transition shadow-lg w-full md:w-auto justify-center">
+<span>Keep Learning</span>
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg>
+</button>
+</div>
+<!-- END: StudyStreakFooter -->
+</main>
+<!-- END: MainContentGrid -->
+</div>
+<!-- END: DashboardBody -->
+</div>
+<!-- END: MainContainer -->
+</body></html>

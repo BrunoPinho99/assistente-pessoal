@@ -1,0 +1,716 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Nexora - Project Management Dashboard</title>
+<!-- Tailwind CSS CDN with Forms & Container Queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Custom Configuration -->
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#0c0e14',
+              surface: '#12151f',
+              surfaceCard: '#161926',
+              border: '#1f2436',
+              borderLight: '#2a3148',
+              blue: '#3b82f6',
+              purple: '#8b5cf6',
+              accent: '#2563eb'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<!-- Phosphor Icons for Crisp UI Glyphs -->
+<script src="https://unpkg.com/@phosphor-icons/web"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/thin/style.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/light/style.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/bold/style.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/fill/style.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/duotone/style.css">
+<!-- Custom CSS for Glow Effects and Precise Layouts -->
+<style data-purpose="custom-styling">
+    body {
+      background-color: #0b0d13;
+      color: #94a3b8;
+    }
+
+    /* Subtle Glassmorphism Card Style */
+    .dashboard-card {
+      background: #151824;
+      border: 1px solid #1f2333;
+      border-radius: 1rem;
+    }
+
+    /* Glow backdrop utility */
+    .hero-glow-bg {
+      background: radial-gradient(circle at 65% 50%, rgba(99, 102, 241, 0.18) 0%, rgba(139, 92, 246, 0.08) 45%, rgba(21, 24, 36, 0.95) 85%);
+    }
+
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0d1017;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #242b3d;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="font-sans antialiased text-slate-300 min-h-screen flex selection:bg-blue-600 selection:text-white">
+<!-- BEGIN: Sidebar Navigation -->
+<aside class="w-64 bg-[#11141c] border-r border-[#1a1e2d] flex flex-col justify-between shrink-0 p-5 h-screen sticky top-0" data-purpose="sidebar-navigation">
+<div class="space-y-7">
+<!-- Logo Branding -->
+<div class="flex items-center space-x-3 px-2">
+<div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/25">
+<i class="ph-fill ph-shapes text-white text-xl"></i>
+</div>
+<span class="text-xl font-bold tracking-tight text-white">Nexora</span>
+</div>
+<!-- Main Navigation Menu -->
+<nav class="space-y-1.5" data-purpose="primary-navigation">
+<!-- Active Dashboard -->
+<a class="flex items-center space-x-3.5 px-3.5 py-2.5 rounded-xl bg-[#1d2334] text-white font-medium text-sm transition-all shadow-sm border border-blue-500/20" href="#">
+<i class="ph-fill ph-squares-four text-blue-400 text-lg"></i>
+<span class="">Dashboard</span>
+</a>
+<!-- Projects -->
+<a class="flex items-center space-x-3.5 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-[#161a26] text-sm font-medium transition-all" href="#">
+<i class="ph ph-folder text-slate-400 text-lg"></i>
+<span class="">Projects</span>
+</a>
+<!-- Tasks -->
+<a class="flex items-center space-x-3.5 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-[#161a26] text-sm font-medium transition-all" href="#">
+<i class="ph ph-check-square-offset text-slate-400 text-lg"></i>
+<span class="">Tasks</span>
+</a>
+<!-- Calendar -->
+<a class="flex items-center space-x-3.5 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-[#161a26] text-sm font-medium transition-all" href="#">
+<i class="ph ph-calendar text-slate-400 text-lg"></i>
+<span class="">Calendar</span>
+</a>
+<!-- Clients -->
+
+<!-- Analytics -->
+<a class="flex items-center space-x-3.5 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-[#161a26] text-sm font-medium transition-all" href="#">
+<i class="ph ph-chart-bar text-slate-400 text-lg"></i>
+<span class="">Analytics</span>
+</a>
+<!-- Team -->
+
+<!-- Inbox -->
+<a class="flex items-center space-x-3.5 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-[#161a26] text-sm font-medium transition-all" href="#">
+<i class="ph ph-tray text-slate-400 text-lg"></i>
+<span class="">Inbox</span>
+</a>
+</nav>
+</div>
+<!-- Sidebar Bottom Container -->
+<div class="space-y-4">
+<!-- Settings Link -->
+<a class="flex items-center space-x-3.5 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-[#161a26] text-sm font-medium transition-all" href="#">
+<i class="ph ph-gear text-slate-400 text-lg"></i>
+<span class="">Settings</span>
+</a>
+<!-- Upgrade to Pro Banner Box -->
+<div class="dashboard-card p-4 bg-gradient-to-b from-[#181c2b] to-[#121520] border-[#22273a] relative overflow-hidden">
+<div class="w-8 h-8 rounded-lg bg-blue-600/20 text-blue-400 flex items-center justify-center mb-3">
+<i class="ph-fill ph-crown text-base"></i>
+</div>
+<h4 class="text-white text-sm font-semibold mb-1">Upgrade to Pro</h4>
+<p class="text-xs text-slate-400 leading-relaxed mb-3.5">Unlock advanced features and more power.</p>
+<button class="w-full bg-white hover:bg-slate-100 text-slate-900 font-semibold text-xs py-2.5 px-3.5 rounded-xl flex items-center justify-center space-x-2 transition-all shadow-md">
+<span class="">Upgrade</span>
+<i class="ph-bold ph-arrow-right text-xs"></i>
+</button>
+</div>
+</div>
+</aside>
+<!-- END: Sidebar Navigation -->
+<!-- BEGIN: Main Dashboard Area -->
+<main class="flex-1 flex flex-col min-w-0 bg-[#0b0d13] overflow-y-auto">
+<!-- BEGIN: Topbar Header -->
+<header class="h-20 px-8 flex items-center justify-between border-b border-[#181c28] bg-[#0b0d13]/80 backdrop-blur-md sticky top-0 z-30" data-purpose="dashboard-topbar">
+<!-- Search Input Form -->
+<div class="relative w-96" data-purpose="search-box">
+<i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base"></i>
+<input class="w-full bg-[#151824] border border-[#202536] rounded-xl pl-10 pr-12 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 transition-colors" placeholder="Search anything..." type="text">
+<div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center space-x-0.5 px-1.5 py-0.5 rounded bg-[#1c2132] border border-[#272d42] text-[10px] text-slate-400 font-mono">
+<i class="ph ph-command text-[10px]"></i>
+<span class="">K</span>
+</div>
+</div>
+<!-- Right Header Actions -->
+<div class="flex items-center space-x-4">
+<!-- Notification Button -->
+<button aria-label="Notifications" class="w-10 h-10 rounded-xl bg-[#151824] border border-[#202536] text-slate-300 flex items-center justify-center hover:bg-[#1a1f30] relative transition-all">
+<i class="ph ph-bell text-lg"></i>
+<span class="w-2 h-2 bg-blue-500 rounded-full absolute top-2.5 right-2.5 ring-2 ring-[#151824]"></span>
+</button>
+<!-- Profile Widget -->
+<div class="flex items-center space-x-3 pl-2 py-1 pr-3 bg-[#151824] border border-[#202536] rounded-full">
+<div class="w-8 h-8 rounded-full bg-[#272d42] text-white flex items-center justify-center text-xs font-semibold tracking-wider">
+            AH
+          </div>
+<div class="text-left pr-2">
+<h5 class="text-xs font-semibold text-white leading-tight">Ali Hasnain</h5>
+<p class="text-[10px] text-slate-400 leading-tight">Personal Space</p>
+</div>
+</div>
+</div>
+</header>
+<!-- END: Topbar Header -->
+<!-- Content Workspace Container -->
+<div class="p-8 space-y-6 max-w-[1600px] w-full mx-auto">
+<!-- BEGIN: Hero Welcome Banner -->
+<section class="dashboard-card hero-glow-bg border-[#23293e] p-7 relative overflow-hidden rounded-2xl flex flex-col md:flex-row items-center justify-between" data-purpose="welcome-banner">
+<!-- Subtle Neon Radial Behind the 3D Cubes -->
+<div class="absolute right-1/3 top-1/2 -translate-y-1/2 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+<!-- Left Greeting Text -->
+<div class="space-y-2.5 max-w-md z-10">
+<span class="text-xs font-medium text-slate-400 tracking-wide flex items-center space-x-1.5">
+<span class="">Good morning, Ali</span>
+<span class="text-amber-400">✌️</span>
+</span>
+<h1 class="text-2xl lg:text-3xl font-bold text-white tracking-tight leading-snug">
+            Let's build something<br>great today.
+          </h1>
+<p class="text-xs text-slate-400 pt-1">Here's what needs your focus and execution today.</p>
+</div>
+<!-- Center 3D Glowing Glass Cubes Graphic (Vector/SVG Canvas representation) -->
+<div class="relative w-72 h-44 flex items-center justify-center z-10 pointer-events-none my-4 md:my-0">
+<svg class="w-full h-full drop-shadow-[0_10px_35px_rgba(99,102,241,0.35)]" viewBox="0 0 280 180">
+<defs>
+<linearGradient id="cubeGrad1" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#93c5fd" stop-opacity="0.85"></stop>
+<stop offset="60%" stop-color="#6366f1" stop-opacity="0.6"></stop>
+<stop offset="100%" stop-color="#3b82f6" stop-opacity="0.2"></stop>
+</linearGradient>
+<linearGradient id="cubeGrad2" x1="100%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#c4b5fd" stop-opacity="0.9"></stop>
+<stop offset="100%" stop-color="#4f46e5" stop-opacity="0.3"></stop>
+</linearGradient>
+<linearGradient id="glowRays" x1="0%" x2="100%" y1="100%" y2="0%">
+<stop offset="0%" stop-color="#60a5fa" stop-opacity="0"></stop>
+<stop offset="50%" stop-color="#a855f7" stop-opacity="0.4"></stop>
+<stop offset="100%" stop-color="#38bdf8" stop-opacity="0"></stop>
+</linearGradient>
+</defs>
+<!-- Abstract Ambient Luminous Waves -->
+<path d="M 10 140 Q 90 40 180 120 T 270 60" fill="none" filter="blur(8px)" opacity="0.35" stroke="url(#glowRays)" stroke-width="28"></path>
+<path d="M 20 130 C 80 50, 140 140, 260 70" fill="none" opacity="0.4" stroke="#818cf8" stroke-width="2"></path>
+<!-- Main Isometric Isometric Crystal Cube (Back Face) -->
+<polygon fill="#4338ca" opacity="0.3" points="140,30 200,60 200,120 140,90"></polygon>
+<polygon fill="#3730a3" opacity="0.4" points="140,30 80,60 80,120 140,90"></polygon>
+<!-- Main Crystal Cube (Front Top/Faces) -->
+<polygon fill="url(#cubeGrad1)" points="140,30 200,60 140,90 80,60" stroke="#e0e7ff" stroke-width="0.75"></polygon>
+<polygon fill="url(#cubeGrad2)" points="80,60 140,90 140,150 80,120" stroke="#c7d2fe" stroke-width="0.75"></polygon>
+<polygon fill="url(#cubeGrad1)" points="200,60 140,90 140,150 200,120" stroke="#e0e7ff" stroke-width="0.75"></polygon>
+<!-- Translucent Inner Structure / Secondary Floating Cube -->
+<polygon fill="#a5b4fc" opacity="0.6" points="110,65 145,45 180,65 145,85"></polygon>
+<polygon fill="#818cf8" opacity="0.5" points="110,65 145,85 145,125 110,105"></polygon>
+<polygon fill="#6366f1" opacity="0.4" points="180,65 145,85 145,125 180,105"></polygon>
+<!-- Foreground Floating Micro Cube -->
+<polygon fill="#93c5fd" opacity="0.75" points="65,95 85,82 105,95 85,108"></polygon>
+<polygon fill="#60a5fa" opacity="0.65" points="65,95 85,108 85,126 65,113"></polygon>
+<polygon fill="#3b82f6" opacity="0.7" points="105,95 85,108 85,126 105,113"></polygon>
+</svg>
+</div>
+<!-- Right Quote Callout -->
+<div class="text-right z-10 hidden lg:block max-w-[210px]">
+<p class="text-xs text-slate-300 italic font-medium leading-relaxed">
+            "Progress turns ideas into reality."
+          </p>
+<div class="w-8 h-0.5 bg-slate-600 ml-auto mt-2 rounded-full"></div>
+</div>
+</section>
+<!-- END: Hero Welcome Banner -->
+<!-- BEGIN: Quick Stat Cards (Row of 4) -->
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" data-purpose="quick-stats">
+<!-- Total Projects -->
+<div class="dashboard-card p-5 flex items-center justify-between">
+<div class="space-y-2">
+<div class="flex items-center space-x-2.5">
+<div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
+<i class="ph ph-folder-notch text-lg"></i>
+</div>
+<span class="text-xs font-medium text-slate-400">Total Projects</span>
+</div>
+<div class="text-2xl font-bold text-white tracking-tight">12</div>
+<div class="flex items-center text-[11px] font-semibold text-emerald-400">
+<i class="ph-bold ph-arrow-up mr-1 text-[10px]"></i>
+<span class="">20%</span>
+</div>
+</div>
+<!-- Sparkline Mini Chart (Blue) -->
+<div class="w-20 h-10">
+<svg class="w-full h-full overflow-visible" viewBox="0 0 80 40">
+<path d="M 0 35 Q 20 32, 35 20 T 60 22 T 80 5" fill="none" stroke="#3b82f6" stroke-linecap="round" stroke-width="2.5"></path>
+</svg>
+</div>
+</div>
+<!-- Active Tasks -->
+<div class="dashboard-card p-5 flex items-center justify-between">
+<div class="space-y-2">
+<div class="flex items-center space-x-2.5">
+<div class="w-8 h-8 rounded-lg bg-blue-600/15 text-blue-400 flex items-center justify-center">
+<i class="ph ph-check-square text-lg"></i>
+</div>
+<span class="text-xs font-medium text-slate-400">Active Tasks</span>
+</div>
+<div class="text-2xl font-bold text-white tracking-tight">28</div>
+<div class="flex items-center text-[11px] font-semibold text-emerald-400">
+<i class="ph-bold ph-arrow-up mr-1 text-[10px]"></i>
+<span class="">12%</span>
+</div>
+</div>
+<!-- Sparkline Mini Chart (Purple) -->
+<div class="w-20 h-10">
+<svg class="w-full h-full overflow-visible" viewBox="0 0 80 40">
+<path d="M 0 28 Q 25 36, 45 18 T 68 25 T 80 8" fill="none" stroke="#8b5cf6" stroke-linecap="round" stroke-width="2.5"></path>
+</svg>
+</div>
+</div>
+<!-- Team Members -->
+<div class="dashboard-card p-5 flex items-center justify-between"><div class="space-y-2"><div class="flex items-center space-x-2.5"><div class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center"><i class="ph ph-chart-bar text-lg"></i></div><span class="text-xs font-medium text-slate-400">Focus Hours</span></div><div class="text-2xl font-bold text-white tracking-tight">34h</div><div class="flex items-center text-[11px] font-semibold text-emerald-400"><i class="ph-bold ph-arrow-up mr-1 text-[10px]"></i><span class="">+6h this week</span></div></div><div class="w-20 h-10"><svg class="w-full h-full overflow-visible" viewBox="0 0 80 40"><path d="M 0 32 Q 22 28, 42 16 T 65 24 T 80 10" fill="none" stroke="#6366f1" stroke-linecap="round" stroke-width="2.5"></path></svg></div></div>
+<!-- Monthly Revenue -->
+<div class="dashboard-card p-5 flex items-center justify-between"><div class="space-y-2"><div class="flex items-center space-x-2.5"><div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center"><i class="ph ph-crown text-lg font-bold"></i></div><span class="text-xs font-medium text-slate-400">Daily Streak</span></div><div class="text-2xl font-bold text-white tracking-tight">14 Days</div><div class="flex items-center text-[11px] font-semibold text-emerald-400"><i class="ph-bold ph-arrow-up mr-1 text-[10px]"></i><span class="">Personal Best</span></div></div><div class="w-20 h-10"><svg class="w-full h-full overflow-visible" viewBox="0 0 80 40"><path d="M 0 35 Q 24 35, 45 22 T 68 18 T 80 6" fill="none" stroke="#10b981" stroke-linecap="round" stroke-width="2.5"></path></svg></div></div>
+</section>
+<!-- END: Quick Stat Cards -->
+<!-- BEGIN: Core Content Split Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Left Column: Activity Chart & Recent Projects (8 cols) -->
+<div class="lg:col-span-8 space-y-6">
+<!-- BEGIN: Project Activity Line Chart Card -->
+<div class="dashboard-card p-6" data-purpose="project-activity-chart">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+<div>
+<h3 class="text-base font-semibold text-white">Project Activity</h3>
+<p class="text-xs text-slate-400">Tasks completed vs. created over time</p>
+</div>
+<!-- Legend and Range Dropdown -->
+<div class="flex items-center space-x-5">
+<div class="flex items-center space-x-4 text-xs font-medium">
+<div class="flex items-center space-x-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+<span class="text-slate-300">Tasks Created</span>
+</div>
+<div class="flex items-center space-x-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+<span class="text-slate-300">Tasks Completed</span>
+</div>
+</div>
+<div class="relative">
+<button class="bg-[#1a1e2b] border border-[#262c3e] text-xs font-medium text-slate-300 px-3 py-1.5 rounded-lg flex items-center space-x-2 hover:bg-[#202638]">
+<span class="">This Year</span>
+<i class="ph ph-caret-down text-slate-400 text-xs"></i>
+</button>
+</div>
+</div>
+</div>
+<!-- Chart Visualization Area with Glowing Lines -->
+<div class="relative h-64 w-full">
+<!-- Y-Axis Labels & Gridlines -->
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none text-[11px] text-slate-500 font-mono">
+<div class="border-b border-[#1b2030] w-full flex items-center justify-between pb-1">
+<span class="">200</span>
+</div>
+<div class="border-b border-[#1b2030] w-full flex items-center justify-between pb-1">
+<span class="">150</span>
+</div>
+<div class="border-b border-[#1b2030] w-full flex items-center justify-between pb-1">
+<span class="">100</span>
+</div>
+<div class="border-b border-[#1b2030] w-full flex items-center justify-between pb-1">
+<span class="">50</span>
+</div>
+<div class="border-b border-[#1b2030] w-full flex items-center justify-between pb-1">
+<span class="">0</span>
+</div>
+</div>
+<!-- Main Neon SVG Chart Curves -->
+<svg class="absolute inset-0 w-full h-[85%] mt-2 overflow-visible" preserveAspectRatio="none" viewBox="0 0 700 210">
+<defs>
+<!-- Gradient Under Glow for Completed -->
+<linearGradient id="glowAreaBlue" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#3b82f6" stop-opacity="0.25"></stop>
+<stop offset="100%" stop-color="#3b82f6" stop-opacity="0.0"></stop>
+</linearGradient>
+<!-- Gradient Under Glow for Created -->
+<linearGradient id="glowAreaPurple" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#818cf8" stop-opacity="0.15"></stop>
+<stop offset="100%" stop-color="#818cf8" stop-opacity="0.0"></stop>
+</linearGradient>
+</defs>
+<!-- Area fill Completed -->
+<path d="M 0 170 C 50 165, 80 135, 130 145 C 190 155, 230 140, 290 120 C 350 100, 390 90, 440 95 C 500 100, 540 70, 600 80 C 650 90, 680 75, 700 70 L 700 200 L 0 200 Z" fill="url(#glowAreaBlue)"></path>
+<!-- Purple Curve: Tasks Created -->
+<path d="M 0 160 C 45 130, 85 130, 130 140 C 190 150, 230 130, 280 105 C 330 85, 380 90, 430 85 C 490 80, 540 50, 610 65 C 660 75, 685 85, 700 82" fill="none" stroke="#818cf8" stroke-linecap="round" stroke-width="2.5"></path>
+<!-- Blue Curve: Tasks Completed -->
+<path d="M 0 170 C 50 165, 80 135, 130 145 C 190 155, 230 140, 290 120 C 350 100, 390 90, 440 95 C 500 100, 540 70, 600 80 C 650 90, 680 75, 700 70" fill="none" stroke="#38bdf8" stroke-linecap="round" stroke-width="2.5"></path>
+<!-- July Active Vertical Guideline -->
+<line opacity="0.6" stroke="#3b82f6" stroke-dasharray="3 3" stroke-width="1.5" x1="390" x2="390" y1="20" y2="195"></line>
+<!-- July Marker Dot -->
+<circle cx="390" cy="95" fill="#38bdf8" r="5" stroke="#10131d" stroke-width="2.5"></circle>
+</svg>
+<!-- Jul 2026 Chart Tooltip Overlay -->
+<div class="absolute left-[51%] top-[8%] -translate-x-1/2 bg-[#191d2a] border border-[#2b3248] rounded-xl px-3.5 py-2.5 shadow-2xl z-20 pointer-events-none text-xs">
+<div class="text-[11px] font-semibold text-slate-400 mb-1.5">Jul 2026</div>
+<div class="space-y-1">
+<div class="flex items-center space-x-3 justify-between">
+<span class="flex items-center space-x-1.5 text-slate-300">
+<span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+<span class="">Created</span>
+</span>
+<span class="font-bold text-white text-[11px]">124</span>
+</div>
+<div class="flex items-center space-x-3 justify-between">
+<span class="flex items-center space-x-1.5 text-slate-300">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+<span class="">Completed</span>
+</span>
+<span class="font-bold text-white text-[11px]">96</span>
+</div>
+</div>
+</div>
+</div>
+<!-- X-Axis Months -->
+<div class="flex justify-between text-[11px] text-slate-500 font-medium pt-3 px-1 border-t border-[#181d2a]">
+<span class="">Jan</span><span class="">Feb</span><span class="">Mar</span><span class="">Apr</span><span class="">May</span><span class="">Jun</span><span class="">Jul</span><span class="">Aug</span><span class="">Sep</span><span class="">Oct</span><span class="">Nov</span><span class="">Dec</span>
+</div>
+</div>
+<!-- END: Project Activity Line Chart Card -->
+<!-- BEGIN: Recent Projects Table -->
+<div class="dashboard-card p-6" data-purpose="recent-projects-table">
+<div class="flex items-center justify-between mb-5">
+<h3 class="text-base font-semibold text-white">Recent Projects</h3>
+<a class="text-xs text-slate-400 hover:text-white flex items-center space-x-1 transition-colors" href="#">
+<span class="">View all</span>
+<i class="ph ph-arrow-right text-xs"></i>
+</a>
+</div>
+<!-- Projects Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left text-xs">
+<thead>
+<tr class="text-slate-500 font-medium border-b border-[#1b2030] pb-2">
+<th class="pb-3 font-medium">Project</th>
+<th class="pb-3 font-medium">Status</th>
+<th class="pb-3 font-medium">Progress</th>
+<th class="pb-3 font-medium">Category</th>
+<th class="pb-3 font-medium">Due Date</th>
+<th class="pb-3 text-right"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#181d2c]">
+<!-- Row 1: Nova Landing Page -->
+<tr class="hover:bg-[#181c28]/40 transition-colors">
+<td class="py-3.5 pr-3">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 rounded-lg bg-indigo-500/15 text-indigo-400 flex items-center justify-center shrink-0">
+<i class="ph ph-layout text-base"></i>
+</div>
+<div>
+<div class="font-semibold text-white">Nova Landing Page</div>
+<div class="text-[11px] text-slate-400">Marketing Website</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 pr-3">
+<span class="px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-medium">
+                        In Progress
+                      </span>
+</td>
+<td class="py-3.5 pr-4 w-36">
+<div class="flex items-center space-x-2.5">
+<span class="text-[11px] font-medium text-slate-300 w-7">70%</span>
+<div class="w-20 bg-[#1e2436] h-1.5 rounded-full overflow-hidden">
+<div class="bg-blue-500 h-full rounded-full" style="width: 70%"></div>
+</div>
+</div>
+</td>
+<td class="py-3.5 pr-3"><span class="px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[10px] font-medium">Side Project</span></td>
+<td class="py-3.5 text-slate-400 whitespace-nowrap text-[11px]">28 Oct</td>
+<td class="py-3.5 text-right">
+<button class="text-slate-500 hover:text-white p-1">
+<i class="ph ph-dots-three-vertical text-base"></i>
+</button>
+</td>
+</tr>
+<!-- Row 2: AI Dashboard -->
+<tr class="hover:bg-[#181c28]/40 transition-colors">
+<td class="py-3.5 pr-3">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0">
+<i class="ph ph-cube text-base"></i>
+</div>
+<div>
+<div class="font-semibold text-white">AI Dashboard</div>
+<div class="text-[11px] text-slate-400">SaaS Product</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 pr-3">
+<span class="px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-medium">
+                        In Progress
+                      </span>
+</td>
+<td class="py-3.5 pr-4 w-36">
+<div class="flex items-center space-x-2.5">
+<span class="text-[11px] font-medium text-slate-300 w-7">45%</span>
+<div class="w-20 bg-[#1e2436] h-1.5 rounded-full overflow-hidden">
+<div class="bg-blue-500 h-full rounded-full" style="width: 45%"></div>
+</div>
+</div>
+</td>
+<td class="py-3.5 pr-3"><span class="px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-medium">Development</span></td>
+<td class="py-3.5 text-slate-400 whitespace-nowrap text-[11px]">2 Nov</td>
+<td class="py-3.5 text-right">
+<button class="text-slate-500 hover:text-white p-1">
+<i class="ph ph-dots-three-vertical text-base"></i>
+</button>
+</td>
+</tr>
+<!-- Row 3: Client Portal -->
+<tr class="hover:bg-[#181c28]/40 transition-colors">
+<td class="py-3.5 pr-3">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 rounded-lg bg-blue-500/15 text-blue-400 flex items-center justify-center shrink-0">
+<i class="ph ph-stack text-base"></i>
+</div>
+<div>
+<div class="font-semibold text-white">Client Portal</div>
+<div class="text-[11px] text-slate-400">Web Application</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 pr-3">
+<span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-medium">
+                        Completed
+                      </span>
+</td>
+<td class="py-3.5 pr-4 w-36">
+<div class="flex items-center space-x-2.5">
+<span class="text-[11px] font-medium text-slate-300 w-7">100%</span>
+<div class="w-20 bg-[#1e2436] h-1.5 rounded-full overflow-hidden">
+<div class="bg-emerald-500 h-full rounded-full" style="width: 100%"></div>
+</div>
+</div>
+</td>
+<td class="py-3.5 pr-3"><span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-medium">Estudos</span></td>
+<td class="py-3.5 text-slate-400 whitespace-nowrap text-[11px]">18 Oct</td>
+<td class="py-3.5 text-right">
+<button class="text-slate-500 hover:text-white p-1">
+<i class="ph ph-dots-three-vertical text-base"></i>
+</button>
+</td>
+</tr>
+<!-- Row 4: Mobile App UI -->
+<tr class="hover:bg-[#181c28]/40 transition-colors">
+<td class="py-3.5 pr-3">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 rounded-lg bg-purple-500/15 text-purple-400 flex items-center justify-center shrink-0">
+<i class="ph ph-device-mobile text-base"></i>
+</div>
+<div>
+<div class="font-semibold text-white">Mobile App UI</div>
+<div class="text-[11px] text-slate-400">iOS &amp; Android</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 pr-3">
+<span class="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-medium">
+                        Review
+                      </span>
+</td>
+<td class="py-3.5 pr-4 w-36">
+<div class="flex items-center space-x-2.5">
+<span class="text-[11px] font-medium text-slate-300 w-7">80%</span>
+<div class="w-20 bg-[#1e2436] h-1.5 rounded-full overflow-hidden">
+<div class="bg-blue-500 h-full rounded-full" style="width: 80%"></div>
+</div>
+</div>
+</td>
+<td class="py-3.5 pr-3"><span class="px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[10px] font-medium">Design</span></td>
+<td class="py-3.5 text-slate-400 whitespace-nowrap text-[11px]">30 Oct</td>
+<td class="py-3.5 text-right">
+<button class="text-slate-500 hover:text-white p-1">
+<i class="ph ph-dots-three-vertical text-base"></i>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- END: Recent Projects Table -->
+</div>
+<!-- Right Column: Upcoming Tasks & Calendar (4 cols) -->
+<div class="lg:col-span-4 space-y-6">
+<!-- BEGIN: Upcoming Tasks Card -->
+<div class="dashboard-card p-6" data-purpose="upcoming-tasks">
+<div class="flex items-center justify-between mb-5">
+<h3 class="text-base font-semibold text-white">Upcoming Tasks</h3>
+<a class="text-xs text-slate-400 hover:text-white flex items-center space-x-1 transition-colors" href="#">
+<span class="">View all</span>
+<i class="ph ph-arrow-right text-xs"></i>
+</a>
+</div>
+<!-- Tasks List -->
+<div class="space-y-4">
+<!-- Task 1: Design landing page -->
+<div class="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#1a1e2c] transition-colors">
+<div class="flex items-start space-x-3">
+<div class="w-4 h-4 rounded-full border-2 border-slate-500 mt-0.5 relative flex items-center justify-center">
+<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+</div>
+<div>
+<h4 class="text-xs font-semibold text-white">Design landing page</h4>
+<p class="text-[11px] text-slate-400">Marketing • <span class="text-slate-300">Today</span></p>
+</div>
+</div>
+<span class="px-2 py-0.5 rounded text-[10px] font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                  High
+                </span>
+</div>
+<!-- Task 2: API Integration -->
+<div class="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#1a1e2c] transition-colors">
+<div class="flex items-start space-x-3">
+<div class="w-4 h-4 rounded-full border-2 border-slate-500 mt-0.5 relative flex items-center justify-center">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+</div>
+<div>
+<h4 class="text-xs font-semibold text-white">API Integration</h4>
+<p class="text-[11px] text-slate-400">Development • <span class="text-slate-300">Tomorrow</span></p>
+</div>
+</div>
+<span class="px-2 py-0.5 rounded text-[10px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                  Medium
+                </span>
+</div>
+<!-- Task 3: Client meeting -->
+<div class="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#1a1e2c] transition-colors">
+<div class="flex items-start space-x-3">
+<div class="w-4 h-4 rounded-full border-2 border-slate-500 mt-0.5 relative flex items-center justify-center">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+</div>
+<div>
+<h4 class="text-xs font-semibold text-white">Client meeting</h4>
+<p class="text-[11px] text-slate-400">Calls • <span class="text-slate-300">24 Oct</span></p>
+</div>
+</div>
+<span class="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  Low
+                </span>
+</div>
+<!-- Task 4: Finalize prototype -->
+<div class="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#1a1e2c] transition-colors">
+<div class="flex items-start space-x-3">
+<div class="w-4 h-4 rounded-full border-2 border-slate-500 mt-0.5 relative flex items-center justify-center">
+<span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+</div>
+<div>
+<h4 class="text-xs font-semibold text-white">Finalize prototype</h4>
+<p class="text-[11px] text-slate-400">Product • <span class="text-slate-300">25 Oct</span></p>
+</div>
+</div>
+<span class="px-2 py-0.5 rounded text-[10px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                  Medium
+                </span>
+</div>
+</div>
+</div>
+<!-- END: Upcoming Tasks Card -->
+<!-- BEGIN: Calendar Card -->
+<div class="dashboard-card p-6" data-purpose="monthly-calendar">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-base font-semibold text-white">Calendar</h3>
+<a class="text-xs text-slate-400 hover:text-white flex items-center space-x-1 transition-colors" href="#">
+<span class="">View all</span>
+<i class="ph ph-arrow-right text-xs"></i>
+</a>
+</div>
+<!-- Month Title and Nav -->
+<div class="flex items-center justify-between mb-4">
+<span class="text-xs font-semibold text-white">October 2026</span>
+<div class="flex items-center space-x-2 text-slate-400">
+<button aria-label="Previous Month" class="hover:text-white p-1">
+<i class="ph ph-caret-left text-xs"></i>
+</button>
+<button aria-label="Next Month" class="hover:text-white p-1">
+<i class="ph ph-caret-right text-xs"></i>
+</button>
+</div>
+</div>
+<!-- Calendar Days Header -->
+<div class="grid grid-cols-7 text-center text-[11px] font-medium text-slate-500 mb-2">
+<span class="">Mon</span><span class="">Tue</span><span class="">Wed</span><span class="">Thu</span><span class="">Fri</span><span class="">Sat</span><span class="">Sun</span>
+</div>
+<!-- Calendar Dates Grid -->
+<div class="grid grid-cols-7 text-center text-xs gap-y-2 font-medium">
+<!-- Row 1 -->
+<span class="text-slate-600">28</span>
+<span class="text-slate-600">29</span>
+<span class="text-slate-600">30</span>
+<span class="text-slate-300 py-1">1</span>
+<span class="text-slate-300 py-1">2</span>
+<span class="text-slate-300 py-1">3</span>
+<span class="text-slate-300 py-1">4</span>
+<!-- Row 2 -->
+<span class="text-slate-300 py-1">5</span>
+<span class="text-slate-300 py-1">6</span>
+<span class="text-slate-300 py-1">7</span>
+<span class="text-slate-300 py-1">8</span>
+<span class="text-slate-300 py-1">9</span>
+<span class="text-slate-300 py-1">10</span>
+<span class="text-slate-300 py-1">11</span>
+<!-- Row 3 -->
+<span class="text-slate-300 py-1">12</span>
+<span class="text-slate-300 py-1">13</span>
+<span class="text-slate-300 py-1">14</span>
+<span class="text-slate-300 py-1">15</span>
+<span class="text-slate-300 py-1">16</span>
+<span class="text-slate-300 py-1">17</span>
+<span class="text-slate-300 py-1">18</span>
+<!-- Row 4 -->
+<span class="text-slate-300 py-1">19</span>
+<span class="text-slate-300 py-1">20</span>
+<span class="text-slate-300 py-1">21</span>
+<span class="text-slate-300 py-1">22</span>
+<!-- Active Highlighted Day: 23 -->
+<div class="flex items-center justify-center">
+<span class="w-7 h-7 rounded-full bg-blue-600 text-white font-semibold flex items-center justify-center shadow-lg shadow-blue-500/40">
+                  23
+                </span>
+</div>
+<span class="text-slate-300 py-1">24</span>
+<span class="text-slate-300 py-1">25</span>
+<!-- Row 5 -->
+<span class="text-slate-300 py-1">26</span>
+<span class="text-slate-300 py-1">27</span>
+<span class="text-slate-300 py-1">28</span>
+<span class="text-slate-300 py-1">29</span>
+<span class="text-slate-300 py-1">30</span>
+<span class="text-slate-300 py-1">31</span>
+<span class="text-slate-600">1</span>
+</div>
+</div>
+<!-- END: Calendar Card -->
+</div>
+<!-- END: Right Column -->
+</div>
+<!-- END: Core Content Split Grid -->
+</div>
+</main>
+<!-- END: Main Dashboard Area -->
+
+
+</body></html>
