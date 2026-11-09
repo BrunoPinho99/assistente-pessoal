@@ -104,7 +104,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (geminiKey) {
         try {
           const testRes = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${geminiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${geminiKey}`,
             {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -212,11 +212,9 @@ DIRETRIZES DE FORMATAÇÃO:
         });
 
         const candidateModels = [
-          'gemini-flash-latest',
-          'gemini-2.5-flash-lite',
-          'gemini-3.8-flash',
-          'gemini-3.5-flash',
-          'gemini-2.5-flash'
+          'gemini-3.5-flash-lite',
+          'gemini-3.1-flash-lite',
+          'gemini-flash-latest'
         ];
 
         for (const model of candidateModels) {
