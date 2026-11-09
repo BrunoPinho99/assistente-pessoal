@@ -104,7 +104,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (geminiKey) {
         try {
           const testRes = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${geminiKey}`,
             {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -211,71 +211,58 @@ DIRETRIZES DE FORMATAÇÃO:
           parts: [{ text: message }]
         });
 
-        const geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              systemInstruction: {
-                parts: [{ text: systemPrompt }]
-              },
-              contents,
-              generationConfig: {
-                temperature: 0.7,
-                topP: 0.95,
-                maxOutputTokens: 1000
-              }
-            })
-          }
-        );
+        const candidateModels = [
+          'gemini-flash-latest',
+          'gemini-2.5-flash-lite',
+          'gemini-3.8-flash',
+          'gemini-3.5-flash',
+          'gemini-2.5-flash'
+        ];
 
-        if (geminiRes.ok) {
-          const geminiData = await geminiRes.json();
-          const reply = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
-
-          if (reply) {
-            return sendJson(200, {
-              success: true,
-              reply: reply.trim(),
-              provider: 'gemini',
-              model: 'gemini-1.5-flash',
-              suggestedPrompts: [
-                'Como destravar meu próximo passo?',
-                'O que priorizar no Littera hoje?',
-                'Me ajude a estruturar um plano de 3 passos'
-              ]
-            });
-          }
-        } else {
-          const errBody = await geminiRes.json().catch(() => ({}));
-          console.error('[Gemini API Error Status]:', geminiRes.status, errBody);
-          // Se erro de cota ou modelo 1.5-flash, tenta fallback com gemini-2.0-flash ou 1.5-pro
-          if (geminiRes.status === 404 || geminiRes.status === 400) {
-            const fallbackRes = await fetch(
-              `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+        for (const model of candidateModels) {
+          try {
+            const geminiRes = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
               {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  contents: [
-                    { role: 'user', parts: [{ text: `${systemPrompt}\n\nUsuário: ${message}` }] }
-                  ]
+                  systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                  },
+                  contents,
+                  generationConfig: {
+                    temperature: 0.7,
+                    topP: 0.95,
+                    maxOutputTokens: 1000
+                  }
                 })
               }
             );
-            if (fallbackRes.ok) {
-              const fbData = await fallbackRes.json();
-              const fbReply = fbData.candidates?.[0]?.content?.parts?.[0]?.text;
-              if (fbReply) {
+
+            if (geminiRes.ok) {
+              const geminiData = await geminiRes.json();
+              const reply = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+
+              if (reply) {
                 return sendJson(200, {
                   success: true,
-                  reply: fbReply.trim(),
+                  reply: reply.trim(),
                   provider: 'gemini',
-                  model: 'gemini-2.0-flash'
+                  model,
+                  suggestedPrompts: [
+                    'Como destravar meu próximo passo?',
+                    'O que priorizar no Littera hoje?',
+                    'Me ajude a estruturar um plano de 3 passos'
+                  ]
                 });
               }
+            } else {
+              const errBody = await geminiRes.json().catch(() => ({}));
+              console.warn(`[Gemini Model ${model} failed]:`, geminiRes.status, errBody?.error?.message);
             }
+          } catch (modelErr: any) {
+            console.warn(`[Gemini Model ${model} exception]:`, modelErr.message);
           }
         }
       } catch (geminiErr: any) {
