@@ -326,99 +326,8 @@ export async function processAssistantMessage(
   }
 
   // ============================================================================
-  // 6. CONVERSA & PLANEJAMENTO: PLANEJAR A SEMANA
-  // Exemplos: "Me ajude a planejar a semana", "Como planejar a semana", "Planejamento semanal"
-  // ============================================================================
-  const isPlanWeekIntent = 
-    lower.includes('planejar a semana') || 
-    lower.includes('planejamento da semana') || 
-    lower.includes('planejar semana') ||
-    lower.includes('organizar a semana');
-
-  if (isPlanWeekIntent) {
-    const litteraTasks = pendingTasks.filter(t => t.area === 'Littera' || t.project_id === 'proj_littera');
-    const auraTasks = pendingTasks.filter(t => t.area === 'Aura' || t.project_id === 'proj_aura');
-
-    return {
-      replyText: `### 🗓️ Planejamento Estratégico da Semana — Personal OS
-
-Olá, **${userName}**! Como você tem **TDAH**, a chave para uma semana produtiva não é fazer mais coisas, mas proteger sua energia e respeitar a **Regra dos 2 Projetos Ativos**.
-
----
-
-#### 1. Foco Principal: **Littera** (Operação & Deploy)
-- **Meta da semana:** Publicação e estabilização em produção.
-- **Entregas imediatas:** ${litteraTasks.slice(0, 2).map(t => `\n  • ${t.title} (~${t.estimated_minutes} min)`).join('') || '\n  • Finalizar release e validar checklist.'}
-- **Estratégia:** Agendar 2 blocos diários de **45 minutos** pela manhã, quando o córtex pré-frontal está com maior reserva dopaminérgica.
-
-#### 2. Foco Secundário: **Aura / Pinho Media** (Crescimento & Alinhamento)
-- **Meta da semana:** Alinhamento executivo e prospecção.
-- **Entregas imediatas:** ${auraTasks.slice(0, 2).map(t => `\n  • ${t.title} (~${t.estimated_minutes} min)`).join('') || '\n  • Alinhar métricas com a equipe.'}
-- **Estratégia:** Resolver no período da tarde em sessões de baixa resistência.
-
-#### 3. Blindagem de Foco (Anti-Paralisia TDAH)
-- Atualmente você tem **${parkedProjects.length} ideias guardadas no Estacionamento 🔒**. Não inicie nenhum projeto novo até validar a entrega do Littera!
-- Se surgir impulso de criar outra coisa, digite aqui para eu arquivar imediatamente.
-
----
-💡 **Quer que eu crie ou organize alguma tarefa prioritária para a sua semana agora?**`,
-      actionExecuted: {
-        type: 'plan_ready',
-        title: 'Plano Semanal Personal OS',
-        description: `Estruturado para ${activeProjects.map(p => p.title).join(' & ') || 'Littera e Aura'}`
-      },
-      suggestedPrompts: [
-        'Criar tarefa: Revisar checklist de release no Littera',
-        'O que devo fazer hoje primeiro?',
-        'Fatiar a maior tarefa da semana'
-      ]
-    };
-  }
-
-  // ============================================================================
-  // 7. CONVERSA & PLANEJAMENTO: PLANEJAR O DIA / O QUE FAZER AGORA
-  // Exemplos: "O que fazer hoje?", "Planejar meu dia", "Estou perdido"
-  // ============================================================================
-  const isPlanDayIntent =
-    lower.includes('planejar o dia') ||
-    lower.includes('planejar meu dia') ||
-    lower.includes('o que fazer hoje') ||
-    lower.includes('o que focar') ||
-    lower.includes('por onde começo') ||
-    lower.includes('estou perdido');
-
-  if (isPlanDayIntent) {
-    const urgent = pendingTasks.find(t => t.priority === 'urgente');
-    const heroTask = urgent || pendingTasks[0];
-
-    return {
-      replyText: `### 🎯 Prioridades Executivas para Hoje
-
-${userName}, analisando suas **${pendingTasks.length} tarefas pendentes**, montei uma rota sem atrito para vencer a inércia:
-
-1. **Hiperfoco Único (O Elefante do Dia):**
-   ${heroTask ? `👉 **${heroTask.title}** (${heroTask.area} • ${heroTask.estimated_minutes} min)` : '👉 Definir as 3 prioridades essenciais de hoje.'}
-   *Dica TDAH:* Não abra e-mails nem mensagens antes de rodar pelo menos 1 bloco de 45 min nessa entrega.
-
-2. **Apoio da Tarde:**
-   ${pendingTasks.slice(1, 3).map(t => `• ${t.title} (~${t.estimated_minutes} min)`).join('\n') || '• Nenhuma tarefa secundária restante.'}
-
-3. **Status das Empresas:**
-   • Littera: ${pendingTasks.filter(t => t.area === 'Littera').length} pendências ativas
-   • Aura: ${pendingTasks.filter(t => t.area === 'Aura').length} pendências ativas
-
-Deseja que eu inicie o timer agora na prioridade principal?`,
-      suggestedPrompts: [
-        `Iniciar foco em "${heroTask ? heroTask.title.slice(0, 22) : 'Hoje'}"`,
-        'Concluir primeira tarefa',
-        'Fatiar tarefa difícil'
-      ]
-    };
-  }
-
-  // ============================================================================
-  // 8. CONVERSA GERAL COM IA GENERATIVA REAL
-  // Envia histórico completo e contexto ao endpoint /api/chat
+  // 6. PROCESSAMENTO COM IA GENERATIVA REAL (/api/chat - Google Gemini)
+  // Envia contexto vivo do sistema e histórico completo da conversa
   // ============================================================================
   try {
     const savedGeminiKey = typeof window !== 'undefined' 
@@ -443,7 +352,7 @@ Deseja que eu inicie o timer agora na prioridade principal?`,
         context: {
           userName,
           activeProjects: activeProjects.map(p => p.title),
-          pendingTasks: pendingTasks.map(t => ({ title: t.title, area: t.area, minutes: t.estimated_minutes })),
+          pendingTasks: pendingTasks.map(t => ({ id: t.id, title: t.title, area: t.area, minutes: t.estimated_minutes })),
           parkedCount: parkedProjects.length
         }
       })
@@ -452,20 +361,87 @@ Deseja que eu inicie o timer agora na prioridade principal?`,
     if (chatRes.ok) {
       const data = await chatRes.json();
       if (data.reply) {
+        let cleanReply = data.reply;
+        let actionExecuted: AssistantActionExecuted | undefined = undefined;
+
+        // Extrai e executa ações de verdade geradas pela IA Generativa
+        const actionMatch = cleanReply.match(/```action\s*([\s\S]*?)\s*```/);
+        if (actionMatch && actionMatch[1]) {
+          try {
+            const parsedAction = JSON.parse(actionMatch[1].trim());
+            cleanReply = cleanReply.replace(actionMatch[0], '').trim();
+
+            if (parsedAction.type === 'create_task' && parsedAction.title) {
+              const created = onAddTask({
+                title: parsedAction.title,
+                area: parsedAction.area || 'Littera',
+                category: parsedAction.area === 'Pessoal' ? 'pessoal' : 'profissional',
+                description: `Criada pelo Copiloto IA a pedido de ${userName}.`,
+                priority: parsedAction.priority || 'media',
+                estimated_minutes: parsedAction.estimated_minutes || 25,
+                difficulty: 'medio',
+                energy_level: 'medium',
+                status: 'inbox',
+                subtasks: []
+              });
+              actionExecuted = {
+                type: 'task_created',
+                title: created.title,
+                description: `Área: ${created.area} • Estimativa: ${created.estimated_minutes} min`
+              };
+            } else if (parsedAction.type === 'complete_task') {
+              const target = pendingTasks.find(t => 
+                parsedAction.searchTitle ? t.title.toLowerCase().includes(parsedAction.searchTitle.toLowerCase()) : true
+              );
+              if (target) {
+                onToggleTask(target.id);
+                actionExecuted = {
+                  type: 'task_completed',
+                  title: target.title,
+                  description: 'Marcada como concluída no sistema'
+                };
+              }
+            } else if (parsedAction.type === 'start_focus') {
+              const target = pendingTasks.find(t => 
+                parsedAction.searchTitle ? t.title.toLowerCase().includes(parsedAction.searchTitle.toLowerCase()) : true
+              ) || pendingTasks[0];
+              if (target && onStartFocus) {
+                onStartFocus(target);
+                if (onNavigateTab) onNavigateTab('hoje');
+                actionExecuted = {
+                  type: 'focus_started',
+                  title: target.title,
+                  description: `Timer ativado para ${target.estimated_minutes} min`
+                };
+              }
+            } else if (parsedAction.type === 'park_idea' && parsedAction.title) {
+              const parked = onParkIdea(parsedAction.title);
+              actionExecuted = {
+                type: 'idea_parked',
+                title: parked.title || parsedAction.title,
+                description: 'Guardado no Estacionamento de Dopamina [🔒]'
+              };
+            }
+          } catch (parseErr) {
+            console.warn('[Action parse error]:', parseErr);
+          }
+        }
+
         return {
-          replyText: data.reply,
+          replyText: cleanReply,
+          actionExecuted,
           suggestedPrompts: data.suggestedPrompts || [
-            'O que devo focar hoje?',
-            'Quais tarefas faltam no Littera?',
-            'Me ajude a planejar a semana'
+            'Qual tarefa tem o maior impacto hoje?',
+            'Fatiar esta tarefa em passos menores',
+            'Iniciar bloco de foco de 25 min'
           ]
         };
       }
     }
   } catch (apiErr) {
-    // Continua para o motor cognitivo de fallback
+    console.warn('[AssistantAgent] Erro na API generativa, acionando fallback:', apiErr);
   }
 
-  // Motor Cognitivo Especializado (semântico, empático e situacional)
+  // Fallback para o motor cognitivo caso a API externa falhe
   return evaluateCognitiveIntent(query, context);
 }

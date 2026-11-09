@@ -358,24 +358,13 @@ export const DopamineParkingChat: React.FC<DopamineParkingChatProps> = ({
   const initialWelcomeMessage: ChatMessage = {
     id: 'msg_welcome',
     sender: 'assistant',
-    text: `Olá, **${userName}**! Sou seu Assistente Executivo e Copiloto com **Inteligência Artificial Generativa**.
-
-Estou conectado aos seus projetos (**${activeProjects.map(p => p.title).join(' e ') || 'Littera e Aura'}**) e ao seu backlog de tarefas.
-
-Podemos conversar naturalmente sobre:
-• 🧠 Estratégias e tomada de decisão para suas empresas
-• 📅 Planejamento semanal ou descompressão de rotina
-• 🎯 Fatiamento de tarefas complexas em micro-passos
-• 🔒 Estruturação de novas ideias no Estacionamento de Dopamina
-
-Como posso te ajudar agora?`,
+    text: `Copiloto operacional ativo. Conectado a **${activeProjects.map(p => p.title).join(' e ') || 'Littera e Aura'}** e ao seu banco de tarefas.\n\nPergunte sobre prioridades, estratégia de código/produto, peça para fatiar entregas complexas ou arquivar novas ideias [🔒].`,
     suggestedPrompts: [
-      'O que focar hoje no Littera?',
-      'Me ajude a planejar a semana',
-      'Como não procrastinar na tarefa atual?',
-      'Estacionar nova ideia [🔒]'
+      'Qual a prioridade inegociável de hoje?',
+      'Planejamento estratégico da semana',
+      'Fatiar tarefa difícil'
     ],
-    timestamp: 'Agora'
+    timestamp: 'Pronto'
   };
 
   const [messages, setMessages] = useState<ChatMessage[]>([initialWelcomeMessage]);
