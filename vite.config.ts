@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { processDopamineDump } from './server/services/dopamineService';
 import testDbHandler from './api/test-db';
+import chatHandler from './api/chat';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -12,6 +13,17 @@ function dopamineDumpMiddlewarePlugin(): Plugin {
     name: 'vite-plugin-dopamine-dump',
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
+        if (req.url === '/api/chat' && req.method === 'POST') {
+          try {
+            await chatHandler(req as any, res as any);
+          } catch (e: any) {
+            res.statusCode = 500;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: e.message }));
+          }
+          return;
+        }
+
         if (req.url === '/api/test-db' && req.method === 'GET') {
           try {
             dotenv.config();

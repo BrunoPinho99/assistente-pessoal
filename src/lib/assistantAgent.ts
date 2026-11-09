@@ -1,5 +1,6 @@
 import { Task, Project, ContextArea, NavigationTab } from '../types';
 import { structureDopamineIdea, sliceTaskWithAI } from './focusProtection';
+import { evaluateCognitiveIntent } from './cognitiveBrain';
 
 export interface AssistantActionExecuted {
   type: 'task_created' | 'task_completed' | 'task_sliced' | 'idea_parked' | 'focus_started' | 'plan_ready';
@@ -414,26 +415,41 @@ Deseja que eu inicie o timer agora na prioridade principal?`,
   }
 
   // ============================================================================
-  // 8. CONVERSA GERAL / DIÁLOGO COM O ASSISTENTE
-  // Resposta inteligente, contextual e prestativa
+  // 8. CONVERSA GERAL & RACIOCÍNIO COGNITIVO COM IA
+  // Conecta ao endpoint /api/chat ou utiliza o motor cognitivo local
   // ============================================================================
-  return {
-    replyText: `Olá, **${userName}**! Estou pronto para ajudar você a executar suas metas sem dispersão.
+  try {
+    const chatRes = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: query,
+        context: {
+          userName,
+          activeProjects: activeProjects.map(p => p.title),
+          pendingTasks: pendingTasks.map(t => ({ title: t.title, area: t.area, minutes: t.estimated_minutes })),
+          parkedCount: parkedProjects.length
+        }
+      })
+    });
 
-Você pode conversar comigo ou me dar ordens diretas para eu implementar no sistema:
-- 📅 *"Me ajude a planejar a semana"* ou *"Planejar meu dia"*
-- ➕ *"Criar tarefa [nome da tarefa] no Littera"*
-- 🎯 *"Concluir tarefa [nome]"*
-- ✂️ *"Fatiar tarefa [nome] com IA"*
-- ⏱️ *"Iniciar foco em [nome da tarefa]"*
-- 🔒 *"Tive uma ideia de [novo negócio]"* (para descarrego no Estacionamento)
+    if (chatRes.ok) {
+      const data = await chatRes.json();
+      if (data.reply) {
+        return {
+          replyText: data.reply,
+          suggestedPrompts: data.suggestedPrompts || [
+            'O que devo focar hoje?',
+            'Quais tarefas faltam no Littera?',
+            'Me ajude a planejar a semana'
+          ]
+        };
+      }
+    }
+  } catch (apiErr) {
+    // Continua para o motor cognitivo local
+  }
 
-Como posso te ajudar agora?`,
-    suggestedPrompts: [
-      'Me ajude a planejar a semana',
-      'O que focar hoje?',
-      'Criar tarefa rápida',
-      'Estacionar ideia [🔒]'
-    ]
-  };
+  // Motor Cognitivo Especializado (semântico, empático e situacional)
+  return evaluateCognitiveIntent(query, context);
 }
