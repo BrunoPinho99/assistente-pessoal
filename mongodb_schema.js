@@ -115,3 +115,4 @@ db.projects.insertMany([
 ]);
 
 print("✅ Coleção 'projects' criada no MongoDB com validação $jsonSchema e seeds iniciais inseridos com sucesso!");
+

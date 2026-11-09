@@ -270,14 +270,48 @@ export async function processAssistantMessage(
       .replace(/(estacionar ideia|estacione a ideia|estacionar|estacione|guardar ideia|tive uma ideia de|tive uma ideia:|nova ideia de negócio:|nova ideia de negócio|nova ideia de negocio|novo projeto:|ideia de app:|ideia de saas:)/i, '')
       .trim() || query;
 
-    const parked = onParkIdea(cleanIdea);
+    let replyText = 'Escopo estruturado e trancado no arquivo morto 🔒. Foco mantido no Littera.';
+    let parked = onParkIdea(cleanIdea);
+    let structuredDetails: any = null;
+
+    try {
+      // Chamada à rota backend /api/dopamine-dump
+      const response = await fetch('/api/dopamine-dump', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: cleanIdea })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.reply) {
+          replyText = data.reply;
+        }
+        if (data.project) {
+          parked = {
+            ...parked,
+            id: data.project.id || parked.id,
+            name: data.project.name || parked.title,
+            title: data.project.name || parked.title,
+            locked: true,
+            isLocked: true,
+            category: 'parking',
+            unlockConditions: data.project.unlockConditions || parked.unlockConditions,
+            description: data.project.description || parked.description
+          };
+        }
+        structuredDetails = data.structuredIdea;
+      }
+    } catch (apiErr) {
+      console.warn('[AssistantAgent] API /api/dopamine-dump offline, usando persistência local segura:', apiErr);
+    }
 
     return {
-      replyText: `Ideia capturada e protegida com cadeado [🔒]! Ela foi enviada para o **Estacionamento de Dopamina (Arquivo Morto)** para que você não perca a inspiração e, ao mesmo tempo, não disperse seu foco das empresas ativas (${activeProjects.map(p => p.title).join(' e ') || 'Littera & Aura'}).`,
+      replyText: `${replyText}\n\n• **Projeto:** ${parked.title || parked.name}\n• **Status:** Cadeado Ativo [🔒]\n• **Destranca após:** ${parked.unlockConditions?.[0] || 'Concluir entrega prioritária do Littera'}`,
       actionExecuted: {
         type: 'idea_parked',
-        title: parked.title,
-        description: `Status: TRANCADO [🔒] • Área: ${parked.area} • Hipótese arquivada.`,
+        title: parked.title || parked.name || 'Nova Ideia',
+        description: `Status: TRANCADO [🔒] • Categoria: parking • Foco mantido no Littera.`,
         details: parked
       },
       suggestedPrompts: [
