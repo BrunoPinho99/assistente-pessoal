@@ -14,7 +14,10 @@ import {
   Calendar, 
   PlusCircle,
   Zap,
-  CornerDownLeft
+  CornerDownLeft,
+  KeyRound,
+  Key,
+  Check
 } from 'lucide-react';
 import { Project, ContextArea, Task, NavigationTab } from '../../types';
 import { processAssistantMessage, AssistantActionExecuted } from '../../lib/assistantAgent';
@@ -304,25 +307,73 @@ export const DopamineParkingChat: React.FC<DopamineParkingChatProps> = ({
 }) => {
   const [inputMessage, setInputMessage] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showKeyModal, setShowKeyModal] = useState(false);
+  const [apiKeyInput, setApiKeyInput] = useState(() => {
+    return localStorage.getItem('personal_os_gemini_key') || localStorage.getItem('personal_os_ai_key') || '';
+  });
+  const [keySaved, setKeySaved] = useState(() => {
+    return Boolean(localStorage.getItem('personal_os_gemini_key') || localStorage.getItem('personal_os_ai_key'));
+  });
+  const [isTestingKey, setIsTestingKey] = useState(false);
+  const [keyFeedback, setKeyFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const handleTestAndSaveKey = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const key = apiKeyInput.trim();
+    if (!key) {
+      setKeyFeedback({ type: 'error', message: 'Por favor, insira uma chave de API válida.' });
+      return;
+    }
+
+    setIsTestingKey(true);
+    setKeyFeedback(null);
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'verify_key',
+          geminiApiKey: key
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        localStorage.setItem('personal_os_gemini_key', key);
+        localStorage.setItem('personal_os_ai_key', key);
+        setKeySaved(true);
+        setKeyFeedback({ type: 'success', message: 'IA Generativa conectada com sucesso (Gemini 1.5 Flash)!' });
+        setTimeout(() => setShowKeyModal(false), 1500);
+      } else {
+        setKeyFeedback({ type: 'error', message: data.error || 'Chave inválida. Verifique e tente novamente.' });
+      }
+    } catch (err: any) {
+      setKeyFeedback({ type: 'error', message: 'Erro ao conectar à API. Verifique sua conexão.' });
+    } finally {
+      setIsTestingKey(false);
+    }
+  };
 
   const initialWelcomeMessage: ChatMessage = {
     id: 'msg_welcome',
     sender: 'assistant',
-    text: `Olá, **${userName}**! Sou seu Assistente Executivo e Copiloto de Foco.
+    text: `Olá, **${userName}**! Sou seu Assistente Executivo e Copiloto com **Inteligência Artificial Generativa**.
 
-Posso **conversar**, te ajudar a **planejar a semana/dia** ou **executar ações reais no sistema**:
-• 📅 *Me ajude a planejar a semana*
-• ➕ *Criar tarefa [X] no Littera ou Aura*
-• 🎯 *Concluir tarefa [X]*
-• ✂️ *Fatiar tarefa longa com IA*
-• 🔒 *Tive uma ideia de negócio...* (salva no Estacionamento)
+Estou conectado aos seus projetos (**${activeProjects.map(p => p.title).join(' e ') || 'Littera e Aura'}**) e ao seu backlog de tarefas.
+
+Podemos conversar naturalmente sobre:
+• 🧠 Estratégias e tomada de decisão para suas empresas
+• 📅 Planejamento semanal ou descompressão de rotina
+• 🎯 Fatiamento de tarefas complexas em micro-passos
+• 🔒 Estruturação de novas ideias no Estacionamento de Dopamina
 
 Como posso te ajudar agora?`,
     suggestedPrompts: [
+      'O que focar hoje no Littera?',
       'Me ajude a planejar a semana',
-      'O que focar hoje?',
-      'Criar tarefa rápida',
-      'Estacionar ideia [🔒]'
+      'Como não procrastinar na tarefa atual?',
+      'Estacionar nova ideia [🔒]'
     ],
     timestamp: 'Agora'
   };
@@ -345,6 +396,12 @@ Como posso te ajudar agora?`,
     const query = (customText || inputMessage).trim();
     if (!query || isProcessing) return;
 
+    // Se o usuário clicar em prompt de configurar chave
+    if (query.toLowerCase().includes('configurar') && query.toLowerCase().includes('chave')) {
+      setShowKeyModal(true);
+      return;
+    }
+
     // 1. Mensagem do Usuário
     const userMsg: ChatMessage = {
       id: 'user_' + Date.now(),
@@ -357,14 +414,20 @@ Como posso te ajudar agora?`,
     setInputMessage('');
     setIsProcessing(true);
 
-    // 2. Processamento Inteligente do Assistente (Conversação + Execução no Sistema)
-    setTimeout(async () => {
+    // 2. Processamento com IA Generativa Real (passando histórico conversacional)
+    try {
+      const historyPayload = messages.slice(-8).map(m => ({
+        role: m.sender === 'user' ? ('user' as const) : ('model' as const),
+        text: m.text
+      }));
+
       const response = await processAssistantMessage(query, {
         userName,
         tasks,
         projects,
         activeProjects,
         parkedProjects,
+        history: historyPayload,
         onAddTask: onAddTask || ((t) => ({ ...t, id: 'temp_' + Date.now(), created_at: new Date().toISOString() })),
         onToggleTask: onToggleTask || (() => {}),
         onSliceTask,
@@ -383,9 +446,8 @@ Como posso te ajudar agora?`,
       };
 
       setMessages(prev => [...prev, assistantReply]);
-      setIsProcessing(false);
 
-      // Feedback visual especial quando uma ação for concluída
+      // Feedback visual se executou ação
       if (response.actionExecuted?.type === 'task_completed' || response.actionExecuted?.type === 'task_created') {
         confetti({
           particleCount: 30,
@@ -394,7 +456,19 @@ Como posso te ajudar agora?`,
           colors: ['#315DFF', '#10B981', '#ffffff']
         });
       }
-    }, 450);
+    } catch (err: any) {
+      setMessages(prev => [
+        ...prev,
+        {
+          id: 'asst_err_' + Date.now(),
+          sender: 'assistant',
+          text: 'Ocorreu uma oscilação na resposta da IA generativa. Por favor, tente enviar novamente.',
+          timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+        }
+      ]);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleQuickPromptClick = (prompt: string) => {
@@ -505,26 +579,124 @@ Como posso te ajudar agora?`,
                   <h3 className="text-sm font-bold text-white tracking-tight">
                     Assistente IA & Copiloto
                   </h3>
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>ONLINE</span>
-                  </span>
+                  {keySaved ? (
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span>IA GENERATIVA</span>
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setShowKeyModal(true)}
+                      className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 transition cursor-pointer flex items-center gap-1"
+                    >
+                      <Key className="w-2.5 h-2.5" />
+                      <span>CONFIGURAR IA</span>
+                    </button>
+                  )}
                 </div>
                 <p className="text-[11px] text-slate-300 mt-0.5">
-                  Conversas, ações no sistema e foco blindado
+                  {keySaved ? 'Google Gemini Generativo conectado' : 'Conversação executiva & blindagem de foco'}
                 </p>
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-              title="Fechar"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setShowKeyModal(!showKeyModal)}
+                className={`p-1.5 rounded-xl transition-colors cursor-pointer border ${
+                  keySaved
+                    ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20'
+                    : 'text-amber-300 bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20'
+                }`}
+                title={keySaved ? 'Chave de IA configurada (Clique para alterar)' : 'Configurar chave de IA generativa'}
+              >
+                <Key className="w-4 h-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                title="Fechar"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
+
+          {/* Drawer / Painel de Configuração da Chave de IA Generativa */}
+          {showKeyModal && (
+            <div className="p-4 bg-[#141C2E] border-b border-white/15 animate-in slide-in-from-top-2 duration-150 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-white">
+                  <KeyRound className="w-4 h-4 text-[#315DFF]" />
+                  <span>Configurar Inteligência Artificial Generativa</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowKeyModal(false)}
+                  className="text-slate-400 hover:text-white text-xs cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <p className="text-[11px] text-slate-300 leading-relaxed">
+                Para conversar com IA Generativa real (sem respostas pré-definidas), insira sua chave gratuita do Google Gemini (ou OpenAI).
+              </p>
+
+              <form onSubmit={handleTestAndSaveKey} className="space-y-2.5">
+                <div className="relative">
+                  <input
+                    type="password"
+                    value={apiKeyInput}
+                    onChange={(e) => setApiKeyInput(e.target.value)}
+                    placeholder="Cole sua chave: AIzaSy... ou sk-..."
+                    className="w-full px-3 py-2 rounded-xl bg-[#0B101D] border border-white/20 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-[#315DFF]"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between text-[11px]">
+                  <a
+                    href="https://aistudio.google.com/app/apikey"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-blue-400 hover:text-blue-300 flex items-center gap-1 underline decoration-blue-500/40"
+                  >
+                    <span>Obter chave gratuita no Google AI Studio</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
+
+                  <button
+                    type="submit"
+                    disabled={isTestingKey}
+                    className="px-3 py-1.5 rounded-lg bg-[#315DFF] hover:bg-[#254BE0] disabled:opacity-50 text-white font-semibold text-xs transition cursor-pointer flex items-center gap-1.5"
+                  >
+                    {isTestingKey ? (
+                      <span>Validando...</span>
+                    ) : (
+                      <>
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Salvar Chave</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {keyFeedback && (
+                  <div className={`p-2 rounded-lg text-[11px] font-medium ${
+                    keyFeedback.type === 'success' 
+                      ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' 
+                      : 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
+                  }`}>
+                    {keyFeedback.message}
+                  </div>
+                )}
+              </form>
+            </div>
+          )}
 
           {/* Banner de Status do Foco e Ideias Trancadas */}
           <div className="px-4 py-2 bg-[#17264E]/70 border-b border-white/10 flex items-center justify-between text-[11px] text-white">

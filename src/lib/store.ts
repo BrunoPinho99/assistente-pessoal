@@ -149,6 +149,25 @@ export function usePersonalOS() {
     return raw === 'true';
   });
 
+  // Sincronização inicial com o MongoDB Atlas
+  useEffect(() => {
+    let isMounted = true;
+    fetch('/api/projects')
+      .then(res => {
+        if (!res.ok) throw new Error('Falha HTTP');
+        return res.json();
+      })
+      .then(data => {
+        if (isMounted && data.success && Array.isArray(data.projects) && data.projects.length > 0) {
+          setProjects(data.projects);
+        }
+      })
+      .catch(err => {
+        console.warn('Usando armazenamento local para projetos:', err.message);
+      });
+    return () => { isMounted = false; };
+  }, []);
+
   // Save to LocalStorage automatically
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
@@ -264,7 +283,7 @@ export function usePersonalOS() {
   };
 
   // ----------------------------------------------------------------------------
-  // Projects Actions
+  // Projects Actions (com sincronização em tempo real com MongoDB Atlas)
   // ----------------------------------------------------------------------------
   const addProject = (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at'>) => {
     const newProj: Project = {
@@ -274,6 +293,14 @@ export function usePersonalOS() {
       updated_at: new Date().toISOString()
     };
     setProjects(prev => [newProj, ...prev]);
+
+    // Persistência assíncrona no MongoDB Atlas
+    fetch('/api/projects', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newProj)
+    }).catch(err => console.warn('Erro ao salvar projeto no MongoDB Atlas:', err));
+
     return newProj;
   };
 
@@ -281,24 +308,46 @@ export function usePersonalOS() {
     setProjects(prev => prev.map(p => 
       p.id === id ? { ...p, ...updates, updated_at: new Date().toISOString() } : p
     ));
+
+    // Atualização assíncrona no MongoDB Atlas
+    fetch(`/api/projects?id=${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates)
+    }).catch(err => console.warn('Erro ao atualizar projeto no MongoDB Atlas:', err));
   };
 
   const deleteProject = (id: string) => {
     setProjects(prev => prev.filter(p => p.id !== id));
     // Set project_id to null in tasks associated
     setTasks(prev => prev.map(t => t.project_id === id ? { ...t, project_id: null } : t));
+
+    // Exclusão assíncrona no MongoDB Atlas
+    fetch(`/api/projects?id=${encodeURIComponent(id)}`, {
+      method: 'DELETE'
+    }).catch(err => console.warn('Erro ao excluir projeto no MongoDB Atlas:', err));
   };
 
   const toggleProjectStage = (projectId: string, stageId: string) => {
+    let updatedStages: any[] = [];
     setProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         const stages = p.stages.map(st => 
           st.id === stageId ? { ...st, completed: !st.completed } : st
         );
+        updatedStages = stages;
         return { ...p, stages, updated_at: new Date().toISOString() };
       }
       return p;
     }));
+
+    if (updatedStages.length > 0) {
+      fetch(`/api/projects?id=${encodeURIComponent(projectId)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stages: updatedStages })
+      }).catch(err => console.warn('Erro ao atualizar etapa no MongoDB:', err));
+    }
   };
 
   // ----------------------------------------------------------------------------
@@ -345,6 +394,19 @@ export function usePersonalOS() {
       }
       return p;
     }));
+
+    // Sincroniza ambos no MongoDB Atlas
+    fetch(`/api/projects?id=${encodeURIComponent(projectToLockId)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ locked: true })
+    }).catch(() => {});
+
+    fetch(`/api/projects?id=${encodeURIComponent(projectToUnlockId)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ locked: false })
+    }).catch(() => {});
   };
 
   // Estacionamento de Dopamina: Salvar ideia de negócio IMEDIATAMENTE com locked: true / category: parking

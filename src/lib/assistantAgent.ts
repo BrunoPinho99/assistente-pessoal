@@ -15,12 +15,14 @@ export interface AssistantResponse {
   suggestedPrompts?: string[];
 }
 
-interface AssistantContext {
+export interface AssistantContext {
   userName: string;
   tasks: Task[];
   projects: Project[];
   activeProjects: Project[];
   parkedProjects: Project[];
+  history?: Array<{ role: 'user' | 'assistant' | 'model'; text: string }>;
+  apiKey?: string;
   onAddTask: (task: Omit<Task, 'id' | 'created_at'>) => Task;
   onToggleTask: (taskId: string) => void;
   onSliceTask?: (taskId: string, microTasks: any[], mode: 'replace' | 'subtasks') => void;
@@ -415,15 +417,29 @@ Deseja que eu inicie o timer agora na prioridade principal?`,
   }
 
   // ============================================================================
-  // 8. CONVERSA GERAL & RACIOCÍNIO COGNITIVO COM IA
-  // Conecta ao endpoint /api/chat ou utiliza o motor cognitivo local
+  // 8. CONVERSA GERAL COM IA GENERATIVA REAL
+  // Envia histórico completo e contexto ao endpoint /api/chat
   // ============================================================================
   try {
+    const savedGeminiKey = typeof window !== 'undefined' 
+      ? localStorage.getItem('personal_os_gemini_key') || localStorage.getItem('personal_os_ai_key') || '' 
+      : '';
+    const savedOpenAiKey = typeof window !== 'undefined' 
+      ? localStorage.getItem('personal_os_openai_key') || '' 
+      : '';
+
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (savedGeminiKey) headers['x-gemini-key'] = savedGeminiKey;
+    if (savedOpenAiKey) headers['x-openai-key'] = savedOpenAiKey;
+
     const chatRes = await fetch('/api/chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({
         message: query,
+        history: context.history || [],
+        geminiApiKey: savedGeminiKey,
+        openAiApiKey: savedOpenAiKey,
         context: {
           userName,
           activeProjects: activeProjects.map(p => p.title),
@@ -447,7 +463,7 @@ Deseja que eu inicie o timer agora na prioridade principal?`,
       }
     }
   } catch (apiErr) {
-    // Continua para o motor cognitivo local
+    // Continua para o motor cognitivo de fallback
   }
 
   // Motor Cognitivo Especializado (semântico, empático e situacional)

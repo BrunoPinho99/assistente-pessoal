@@ -12,9 +12,13 @@ import {
   Unlock,
   ShieldCheck,
   FolderLock,
-  Sparkles
+  Sparkles,
+  Pencil,
+  PlusCircle,
+  Save,
+  Check
 } from 'lucide-react';
-import { Project, Task, ContextFilter, ContextArea } from '../../types';
+import { Project, Task, ContextFilter, ContextArea, ProjectStage, ProjectCategory } from '../../types';
 
 interface ProjectsViewProps {
   projects: Project[];
@@ -36,13 +40,16 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
   isDarkMode = false,
   onToggleStage,
   onAddProject,
+  onUpdateProject,
   onDeleteProject,
   onToggleLock,
   onOpenDopamineChat
 }) => {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [contextFilter, setContextFilter] = useState<ContextFilter>('todos');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   
   // Form de criação
   const [title, setTitle] = useState('');
@@ -52,6 +59,72 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
   const [category, setCategory] = useState<'profissional' | 'pessoal' | 'academico'>('profissional');
   const [nextStep, setNextStep] = useState('');
   const [createAsLocked, setCreateAsLocked] = useState(true);
+
+  // Form de Edição (Update)
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editArea, setEditArea] = useState<ContextArea>('Littera');
+  const [editCategory, setEditCategory] = useState<ProjectCategory>('profissional');
+  const [editMainGoal, setEditMainGoal] = useState('');
+  const [editNextStep, setEditNextStep] = useState('');
+  const [editStages, setEditStages] = useState<ProjectStage[]>([]);
+  const [newStageInput, setNewStageInput] = useState('');
+
+  const openEditModal = (proj: Project) => {
+    setEditingProjectId(proj.id);
+    setEditTitle(proj.title);
+    setEditDescription(proj.description || '');
+    setEditArea(proj.area);
+    setEditCategory(proj.category);
+    setEditMainGoal(proj.main_goal);
+    setEditNextStep(proj.next_step);
+    setEditStages(Array.isArray(proj.stages) ? [...proj.stages] : []);
+    setNewStageInput('');
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProjectId || !editTitle.trim()) return;
+
+    const updates: Partial<Project> = {
+      title: editTitle.trim(),
+      description: editDescription.trim(),
+      area: editArea,
+      category: editCategory,
+      main_goal: editMainGoal.trim() || 'Entregar objetivos estratégicos',
+      next_step: editNextStep.trim() || 'Definir primeiro passo',
+      stages: editStages
+    };
+
+    if (onUpdateProject) {
+      onUpdateProject(editingProjectId, updates);
+    }
+
+    // Atualiza o projeto selecionado se o modal de detalhes estiver aberto
+    if (selectedProject && selectedProject.id === editingProjectId) {
+      setSelectedProject(prev => prev ? { ...prev, ...updates } : null);
+    }
+
+    setShowEditModal(false);
+    setEditingProjectId(null);
+  };
+
+  const handleAddEditStage = () => {
+    if (!newStageInput.trim()) return;
+    const newStage: ProjectStage = {
+      id: 'st_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+      title: newStageInput.trim(),
+      completed: false
+    };
+    setEditStages(prev => [...prev, newStage]);
+    setNewStageInput('');
+  };
+
+  const handleRemoveEditStage = (stageId: string) => {
+    setEditStages(prev => prev.filter(s => s.id !== stageId));
+  };
 
   // Separação Estrita de Projetos Ativos vs Trancados
   const activeProjects = projects.filter(p => !p.locked);
@@ -471,23 +544,35 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                 </h3>
               </div>
 
-              {onToggleLock && (
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => {
-                    onToggleLock(selectedProject.id);
-                    setSelectedProject(null);
-                  }}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer border ${
-                    selectedProject.locked
-                      ? 'bg-[#315DFF] text-white border-[#315DFF]'
-                      : 'bg-rose-500/20 text-rose-300 border-rose-500/40 hover:bg-rose-500/30'
-                  }`}
+                  onClick={() => openEditModal(selectedProject)}
+                  className="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer border bg-[#101522] hover:bg-[#151D31] text-white border-white/20 shadow-xs"
+                  title="Editar detalhes do projeto"
                 >
-                  {selectedProject.locked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
-                  <span>{selectedProject.locked ? 'Destrancar Projeto' : 'Trancar no Estacionamento'}</span>
+                  <Pencil className="w-3.5 h-3.5" />
+                  <span>Editar</span>
                 </button>
-              )}
+
+                {onToggleLock && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onToggleLock(selectedProject.id);
+                      setSelectedProject(null);
+                    }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer border ${
+                      selectedProject.locked
+                        ? 'bg-[#315DFF] text-white border-[#315DFF]'
+                        : 'bg-rose-500/20 text-rose-300 border-rose-500/40 hover:bg-rose-500/30'
+                    }`}
+                  >
+                    {selectedProject.locked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
+                    <span>{selectedProject.locked ? 'Destrancar Projeto' : 'Trancar no Estacionamento'}</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Descrição e Próximo Passo */}
@@ -568,28 +653,279 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
 
             {/* Ações Inferiores */}
             <div className="pt-2 border-t border-[#E5EAF2] dark:border-[#263248] flex justify-between items-center">
-              <button
-                type="button"
-                onClick={() => {
-                  onDeleteProject(selectedProject.id);
-                  setSelectedProject(null);
-                }}
-                className="text-xs text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Excluir projeto</span>
-              </button>
+              {confirmDeleteId === selectedProject.id ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-rose-500 font-semibold">Excluir do MongoDB?</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onDeleteProject(selectedProject.id);
+                      setSelectedProject(null);
+                      setConfirmDeleteId(null);
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition cursor-pointer"
+                  >
+                    Confirmar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDeleteId(null)}
+                    className="px-2 py-1 rounded-lg text-xs text-slate-400 hover:text-white transition cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setConfirmDeleteId(selectedProject.id)}
+                  className="text-xs text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Excluir projeto</span>
+                </button>
+              )}
 
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => openEditModal(selectedProject)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-semibold cursor-pointer border flex items-center gap-1.5 ${
+                    isDarkMode ? 'bg-[#222B3D] border-[#33415C] text-[#F1F5F9]' : 'bg-[#E9EFF8] border-[#E5EAF2] text-[#172033]'
+                  }`}
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  <span>Editar</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedProject(null);
+                    setConfirmDeleteId(null);
+                  }}
+                  className={`px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer border ${
+                    isDarkMode ? 'bg-[#315DFF] text-white border-[#315DFF]' : 'bg-[#245BFF] text-white border-[#245BFF]'
+                  }`}
+                >
+                  Fechar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Edição de Projeto (Update CRUD) */}
+      {showEditModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150"
+          onClick={() => setShowEditModal(false)}
+        >
+          <div 
+            className={`w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border p-6 sm:p-7 shadow-[0_20px_48px_rgba(23,32,51,0.16)] space-y-4 text-left ${
+              isDarkMode ? 'bg-[#1C2333] border-[#263248]' : 'bg-[#FFFFFF] border-[#E5EAF2]'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-[#E5EAF2] dark:border-[#263248] pb-3">
+              <div className="flex items-center gap-2">
+                <Pencil className="w-4 h-4 text-[#315DFF]" />
+                <h3 className={`text-lg font-bold ${isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'}`}>
+                  Editar Projeto
+                </h3>
+              </div>
               <button
                 type="button"
-                onClick={() => setSelectedProject(null)}
-                className={`px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer border ${
-                  isDarkMode ? 'bg-[#222B3D] border-[#33415C] text-[#F1F5F9]' : 'bg-[#E9EFF8] border-[#E5EAF2] text-[#172033]'
-                }`}
+                onClick={() => setShowEditModal(false)}
+                className="p-1 rounded-lg text-[#9AA4B2] hover:text-[#172033] dark:hover:text-white transition cursor-pointer"
               >
-                Fechar
+                <X className="w-4 h-4" />
               </button>
             </div>
+
+            <form onSubmit={handleSaveEdit} className="space-y-4 text-xs">
+              <div>
+                <label className={`block font-semibold mb-1 ${isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'}`}>
+                  Título do Projeto
+                </label>
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className={`w-full px-3.5 py-2.5 rounded-xl border text-xs focus:outline-none focus:border-[#245BFF] ${
+                    isDarkMode ? 'bg-[#141A26] border-[#263248] text-[#F1F5F9]' : 'bg-[#F5F7FB] border-[#E5EAF2] text-[#172033]'
+                  }`}
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={`block font-semibold mb-1 ${isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'}`}>
+                    Área de Contexto
+                  </label>
+                  <select
+                    value={editArea}
+                    onChange={(e) => setEditArea(e.target.value as ContextArea)}
+                    className={`w-full px-3 py-2.5 rounded-xl border text-xs focus:outline-none focus:border-[#245BFF] ${
+                      isDarkMode ? 'bg-[#141A26] border-[#263248] text-[#F1F5F9]' : 'bg-[#F5F7FB] border-[#E5EAF2] text-[#172033]'
+                    }`}
+                  >
+                    <option value="Littera">Littera</option>
+                    <option value="Aura">Aura</option>
+                    <option value="IDP">IDP</option>
+                    <option value="Pessoal">Pessoal</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className={`block font-semibold mb-1 ${isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'}`}>
+                    Categoria
+                  </label>
+                  <select
+                    value={editCategory}
+                    onChange={(e) => setEditCategory(e.target.value as ProjectCategory)}
+                    className={`w-full px-3 py-2.5 rounded-xl border text-xs focus:outline-none focus:border-[#245BFF] ${
+                      isDarkMode ? 'bg-[#141A26] border-[#263248] text-[#F1F5F9]' : 'bg-[#F5F7FB] border-[#E5EAF2] text-[#172033]'
+                    }`}
+                  >
+                    <option value="profissional">Profissional</option>
+                    <option value="pessoal">Pessoal</option>
+                    <option value="academico">Acadêmico</option>
+                    <option value="business">Business</option>
+                    <option value="parking">Estacionamento</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className={`block font-semibold mb-1 ${isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'}`}>
+                  Objetivo Principal
+                </label>
+                <input
+                  type="text"
+                  value={editMainGoal}
+                  onChange={(e) => setEditMainGoal(e.target.value)}
+                  className={`w-full px-3.5 py-2.5 rounded-xl border text-xs focus:outline-none focus:border-[#245BFF] ${
+                    isDarkMode ? 'bg-[#141A26] border-[#263248] text-[#F1F5F9]' : 'bg-[#F5F7FB] border-[#E5EAF2] text-[#172033]'
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className={`block font-semibold mb-1 ${isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'}`}>
+                  Próximo Passo Imediato
+                </label>
+                <input
+                  type="text"
+                  value={editNextStep}
+                  onChange={(e) => setEditNextStep(e.target.value)}
+                  className={`w-full px-3.5 py-2.5 rounded-xl border text-xs focus:outline-none focus:border-[#245BFF] ${
+                    isDarkMode ? 'bg-[#141A26] border-[#263248] text-[#F1F5F9]' : 'bg-[#F5F7FB] border-[#E5EAF2] text-[#172033]'
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className={`block font-semibold mb-1 ${isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'}`}>
+                  Descrição do Projeto
+                </label>
+                <textarea
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  rows={2}
+                  className={`w-full px-3.5 py-2.5 rounded-xl border text-xs focus:outline-none focus:border-[#245BFF] resize-none ${
+                    isDarkMode ? 'bg-[#141A26] border-[#263248] text-[#F1F5F9]' : 'bg-[#F5F7FB] border-[#E5EAF2] text-[#172033]'
+                  }`}
+                />
+              </div>
+
+              {/* Gerenciador de Etapas */}
+              <div className="space-y-2 pt-2 border-t border-[#E5EAF2] dark:border-[#263248]">
+                <label className={`block font-semibold ${isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'}`}>
+                  Etapas do Projeto ({editStages.length})
+                </label>
+
+                <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                  {editStages.map((st, i) => (
+                    <div 
+                      key={st.id || i}
+                      className={`flex items-center justify-between gap-2 p-2 rounded-lg border text-xs ${
+                        isDarkMode ? 'bg-[#141A26] border-[#263248]' : 'bg-[#F5F7FB] border-[#E5EAF2]'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 flex-1">
+                        <input
+                          type="checkbox"
+                          checked={st.completed}
+                          onChange={() => {
+                            setEditStages(prev => prev.map((s, idx) => idx === i ? { ...s, completed: !s.completed } : s));
+                          }}
+                          className="rounded border-[#263248] text-[#315DFF] cursor-pointer"
+                        />
+                        <input
+                          type="text"
+                          value={st.title}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setEditStages(prev => prev.map((s, idx) => idx === i ? { ...s, title: val } : s));
+                          }}
+                          className={`flex-1 bg-transparent border-none outline-none text-xs ${st.completed ? 'line-through text-slate-500' : isDarkMode ? 'text-white' : 'text-slate-900'}`}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveEditStage(st.id)}
+                        className="p-1 text-slate-400 hover:text-rose-400 transition cursor-pointer"
+                        title="Remover etapa"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Adicionar nova etapa */}
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="text"
+                    value={newStageInput}
+                    onChange={(e) => setNewStageInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddEditStage(); } }}
+                    placeholder="Nova etapa do projeto..."
+                    className={`flex-1 px-3 py-2 rounded-xl border text-xs focus:outline-none focus:border-[#245BFF] ${
+                      isDarkMode ? 'bg-[#141A26] border-[#263248] text-[#F1F5F9]' : 'bg-[#F5F7FB] border-[#E5EAF2] text-[#172033]'
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddEditStage}
+                    className="px-3 py-2 rounded-xl bg-[#245BFF]/15 hover:bg-[#245BFF]/25 text-[#245BFF] dark:text-blue-300 font-semibold text-xs transition cursor-pointer"
+                  >
+                    Adicionar
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E5EAF2] dark:border-[#263248]">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className={`px-4 py-2.5 rounded-xl font-medium transition cursor-pointer ${
+                    isDarkMode ? 'hover:bg-[#222B3D] text-[#94A3B8]' : 'hover:bg-[#E9EFF8] text-[#687386]'
+                  }`}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl bg-[#245BFF] hover:bg-[#1A4EE5] text-white font-semibold flex items-center gap-1.5 shadow-sm transition cursor-pointer"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Salvar Alterações</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
