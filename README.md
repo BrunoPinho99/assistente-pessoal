@@ -78,3 +78,4 @@ npm run build
 
 ## 👤 Autor
 Desenvolvido por **Bruno Pinho** ([@BrunoPinho99](https://github.com/BrunoPinho99)).
+

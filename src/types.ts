@@ -72,18 +72,29 @@ export interface ProjectDocument {
   url: string;
 }
 
+export type ProjectCategory = 
+  | 'business' 
+  | 'academic' 
+  | 'parking' 
+  | 'profissional' 
+  | 'pessoal' 
+  | 'academico';
+
 export interface Project {
   id: string;
   user_id?: string;
-  title: string;
+  name?: string; // MongoDB Schema name
+  title: string; // Compatibilidade com frontend existente
   description?: string;
   area: ContextArea;
-  category: 'profissional' | 'pessoal' | 'academico';
+  category: ProjectCategory;
   main_goal: string;
   start_date?: string;
   deadline?: string | null;
   status: ProjectStatus;
   locked: boolean; // 🔒 True = trancado no estacionamento de dopamina, False = ativo (máx 2)
+  isLocked?: boolean; // MongoDB Schema field
+  unlockConditions?: string[]; // Critérios objetivos para o projeto poder ser destrancado no futuro
   stages: ProjectStage[];
   next_step: string;
   documents: ProjectDocument[];

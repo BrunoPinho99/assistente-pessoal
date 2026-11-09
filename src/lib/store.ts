@@ -347,19 +347,25 @@ export function usePersonalOS() {
     }));
   };
 
-  // Estacionamento de Dopamina: Salvar ideia de negócio IMEDIATAMENTE com locked: true
+  // Estacionamento de Dopamina: Salvar ideia de negócio IMEDIATAMENTE com locked: true / category: parking
   const parkDopamineIdea = (rawText: string, customArea?: ContextArea): Project => {
     const structured = structureDopamineIdea(rawText, customArea || 'Littera');
     const newProj: Project = {
       id: 'proj_' + Date.now(),
+      name: structured.title,
       title: structured.title,
       description: structured.scope,
       area: structured.area,
-      category: 'profissional',
+      category: 'parking',
       main_goal: structured.main_goal,
       next_step: structured.next_step,
       status: 'planejamento',
       locked: true, // 🔒 IMEDIATAMENTE trancado para blindar o foco atual
+      isLocked: true,
+      unlockConditions: [
+        'Concluir entrega prioritária do Littera em produção',
+        'Liberar 1 dos 2 slots de foco ativo (Regra da Substituição)'
+      ],
       stages: [
         { id: 'st_dp_1', title: 'Ideia capturada no Estacionamento de Dopamina', completed: true },
         { id: 'st_dp_2', title: 'Refinar escopo quando vaga de foco for liberada', completed: false }

@@ -3,15 +3,18 @@ import { Project, Task, StudySubject, Flashcard, Habit, Note, FocusSession } fro
 export const INITIAL_PROJECTS: Project[] = [
   {
     id: 'proj_littera',
+    name: 'Littera Platform',
     title: 'Littera Platform',
     area: 'Littera',
     description: 'Infraestrutura SaaS, engine de publicação e deploy de microsserviços.',
-    category: 'profissional',
+    category: 'business',
     main_goal: 'Finalizar deploy estável da v2.4 com isolamento de tenant.',
     start_date: '2026-10-01',
     deadline: '2026-11-20',
     status: 'ativo',
     locked: false, // ⚡ Ativo (1/2)
+    isLocked: false,
+    unlockConditions: [],
     stages: [
       { id: 'st_l1', title: 'Testes de regressão em Staging', completed: true },
       { id: 'st_l2', title: 'Script de migração de banco e secrets', completed: true },
@@ -25,15 +28,18 @@ export const INITIAL_PROJECTS: Project[] = [
   },
   {
     id: 'proj_aura',
+    name: 'Aura Studio & Design System',
     title: 'Aura Studio & Design System',
     area: 'Aura',
     description: 'Identidade visual, biblioteca de componentes espaciais e prototipagem interativa.',
-    category: 'profissional',
+    category: 'business',
     main_goal: 'Entregar o kit de componentes v1.0 no Figma e tokens em Tailwind.',
     start_date: '2026-10-15',
     deadline: '2026-11-30',
     status: 'ativo',
     locked: false, // ⚡ Ativo (2/2)
+    isLocked: false,
+    unlockConditions: [],
     stages: [
       { id: 'st_a1', title: 'Tokens semânticos e paleta de alto contraste', completed: true },
       { id: 'st_a2', title: 'Componentes de cards Bento com efeito glass', completed: true },
@@ -47,15 +53,21 @@ export const INITIAL_PROJECTS: Project[] = [
   },
   {
     id: 'proj_idp',
+    name: 'IDP — Governança e Regulação de IA',
     title: 'IDP — Governança e Regulação de IA',
     area: 'IDP',
     description: 'Pesquisa acadêmica, seminários de pós-graduação e publicação científica.',
-    category: 'academico',
+    category: 'academic',
     main_goal: 'Submissão do paper final e apresentação no simpósio.',
     start_date: '2026-09-01',
     deadline: '2026-12-05',
     status: 'ativo',
     locked: true, // 🔒 Trancado no Estacionamento de Dopamina (Limite de 2 ativos)
+    isLocked: true,
+    unlockConditions: [
+      'Publicar v1.8 do Littera em produção',
+      'Liberar 1 dos 2 slots de foco ativo (Regra da Substituição)'
+    ],
     stages: [
       { id: 'st_i1', title: 'Fichamento dos textos base e acórdãos', completed: true },
       { id: 'st_i2', title: 'Redação do capítulo metodológico', completed: true },

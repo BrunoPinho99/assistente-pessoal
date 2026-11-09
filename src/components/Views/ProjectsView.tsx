@@ -369,19 +369,39 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                     )}
                   </div>
 
-                  {/* Centro: Indicador de Cadeado */}
-                  <div className="relative z-20 flex items-center gap-2 text-rose-300 bg-black/50 backdrop-blur-md p-2 rounded-xl border border-white/10 w-fit">
-                    <Lock className="w-3.5 h-3.5 text-rose-400" />
-                    <span className="text-[10px] font-bold font-mono tracking-wider">
-                      ESTACIONAMENTO DE DOPAMINA
-                    </span>
+                  {/* Centro: Indicador de Cadeado e Categoria */}
+                  <div className="relative z-20 flex flex-col gap-1.5">
+                    <div className="flex items-center gap-2 text-rose-300 bg-black/60 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-white/10 w-fit">
+                      <Lock className="w-3.5 h-3.5 text-rose-400" />
+                      <span className="text-[10px] font-bold font-mono tracking-wider">
+                        ESTACIONAMENTO DE DOPAMINA
+                      </span>
+                    </div>
+
+                    {proj.unlockConditions && proj.unlockConditions.length > 0 && (
+                      <div className="bg-black/75 backdrop-blur-md p-2 rounded-xl border border-white/10 text-[10px] text-amber-200/90 space-y-1 max-w-[260px]">
+                        <span className="font-semibold text-[9px] uppercase tracking-wider text-amber-300/80 block">
+                          Destranca após:
+                        </span>
+                        <p className="line-clamp-2 leading-tight">
+                          • {proj.unlockConditions[0]}
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Base do Card */}
                   <div className="relative z-20 space-y-1 text-left">
-                    <h3 className="text-lg font-bold text-white tracking-tight truncate">
-                      {proj.title}
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-bold text-white tracking-tight truncate">
+                        {proj.name || proj.title}
+                      </h3>
+                      {proj.category && (
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-mono uppercase bg-white/10 text-white/80 border border-white/10">
+                          {proj.category}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-[11px] text-[#A6B2D1] line-clamp-2">
                       {proj.description || proj.main_goal}
                     </p>
@@ -476,6 +496,21 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                 <p className={`text-sm leading-relaxed ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
                   {selectedProject.description}
                 </p>
+              )}
+
+              {/* Condições de Desbloqueio (Se trancado) */}
+              {(selectedProject.locked || selectedProject.isLocked) && selectedProject.unlockConditions && selectedProject.unlockConditions.length > 0 && (
+                <div className="p-4 rounded-xl border text-xs space-y-2 bg-amber-500/10 border-amber-500/30">
+                  <span className="text-[10px] font-mono uppercase tracking-wider font-bold text-amber-300 flex items-center gap-1.5">
+                    <Lock className="w-3.5 h-3.5" />
+                    Condições para Destrancar (Foco Blindado)
+                  </span>
+                  <ul className="space-y-1 text-xs text-amber-100/90 list-disc list-inside">
+                    {selectedProject.unlockConditions.map((cond, i) => (
+                      <li key={i}>{cond}</li>
+                    ))}
+                  </ul>
+                </div>
               )}
 
               {/* Próximo Passo */}
