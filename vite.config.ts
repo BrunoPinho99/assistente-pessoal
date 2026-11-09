@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { processDopamineDump } from './server/services/dopamineService';
 import testDbHandler from './api/test-db';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 function dopamineDumpMiddlewarePlugin(): Plugin {
   return {
@@ -11,6 +14,7 @@ function dopamineDumpMiddlewarePlugin(): Plugin {
       server.middlewares.use(async (req, res, next) => {
         if (req.url === '/api/test-db' && req.method === 'GET') {
           try {
+            dotenv.config();
             await testDbHandler(req as any, res as any);
           } catch (e: any) {
             res.statusCode = 500;

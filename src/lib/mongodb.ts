@@ -1,4 +1,28 @@
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import path from 'path';
+import fs from 'fs';
+
+dotenv.config();
+
+function getMongoUri(): string | undefined {
+  if (process.env.MONGODB_URI) return process.env.MONGODB_URI;
+
+  try {
+    const envPath = path.resolve(process.cwd(), '.env');
+    if (fs.existsSync(envPath)) {
+      const content = fs.readFileSync(envPath, 'utf-8');
+      const match = content.match(/MONGODB_URI=["']?([^"'\n\r]+)["']?/);
+      if (match && match[1]) {
+        process.env.MONGODB_URI = match[1];
+        return match[1];
+      }
+    }
+  } catch (e) {
+    // fallback silencioso
+  }
+  return process.env.MONGODB_URI;
+}
 
 /**
  * Padrão de Cache Global de Conexão para Vercel Serverless & Node.js.
@@ -7,8 +31,6 @@ import mongoose from 'mongoose';
  * reaproveitar a instância do container Node.js. Sem o cache global, novas conexões
  * seriam abertas a cada request, esgotando o connection pool do MongoDB Atlas rapidamente (erros de Too Many Connections).
  */
-
-const MONGODB_URI = process.env.MONGODB_URI;
 
 interface MongooseCache {
   conn: typeof mongoose | null;
@@ -28,6 +50,8 @@ if (!global.mongooseCache) {
 }
 
 export async function connectToDatabase(): Promise<typeof mongoose> {
+  const MONGODB_URI = getMongoUri();
+
   if (!MONGODB_URI) {
     throw new Error(
       'A variável de ambiente MONGODB_URI não foi definida. ' +
