@@ -261,8 +261,13 @@ export function App() {
         parkedProjects={projects.filter(p => p.locked)}
         activeProjects={projects.filter(p => !p.locked)}
         onAddTask={addTask}
+        onUpdateTask={updateTask}
+        onDeleteTask={deleteTask}
         onToggleTask={handleToggleTaskWithConfetti}
         onSliceTask={applyTaskSlice}
+        onAddProject={addProject}
+        onUpdateProject={updateProject}
+        onDeleteProject={deleteProject}
         onParkIdea={parkDopamineIdea}
         onStartFocus={handleStartFocus}
         onNavigateTab={setActiveTab}
