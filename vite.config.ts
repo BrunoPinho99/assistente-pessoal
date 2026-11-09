@@ -2,12 +2,24 @@ import { defineConfig, Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { processDopamineDump } from './server/services/dopamineService';
+import testDbHandler from './api/test-db';
 
 function dopamineDumpMiddlewarePlugin(): Plugin {
   return {
     name: 'vite-plugin-dopamine-dump',
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
+        if (req.url === '/api/test-db' && req.method === 'GET') {
+          try {
+            await testDbHandler(req as any, res as any);
+          } catch (e: any) {
+            res.statusCode = 500;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ status: 'error', error: e.message }));
+          }
+          return;
+        }
+
         if (req.url === '/api/dopamine-dump' && req.method === 'POST') {
           let body = '';
           req.on('data', chunk => {

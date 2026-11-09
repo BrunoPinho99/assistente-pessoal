@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import { dopamineDumpRouter } from './routes/dopamineDumpRouter';
 import { connectToDatabase } from './db';
+import testDbHandler from '../api/test-db';
 
 dotenv.config();
 
@@ -23,6 +24,9 @@ app.use((req, res, next) => {
 
 // Rotas do TDAH Focus OS
 app.use('/api/dopamine-dump', dopamineDumpRouter);
+app.get('/api/test-db', async (req, res) => {
+  await testDbHandler(req as any, res as any);
+});
 
 // Rota de Healthcheck
 app.get('/api/health', (req, res) => {
