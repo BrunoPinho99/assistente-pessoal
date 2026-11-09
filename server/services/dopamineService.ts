@@ -61,10 +61,10 @@ export async function processDopamineDump(rawMessage: string): Promise<DopamineD
     if (connected) {
       const created = await ProjectModel.create({
         name: structured.name,
+        description: rawMessage, // Texto original da ideia
         category: forcedCategory,
-        isLocked: forcedLocked, // FORÇADO PELO BACKEND
+        isLocked: forcedLocked, // FORÇADO PELO BACKEND: isLocked: true
         unlockConditions: forcedUnlockConditions,
-        description: structured.hypothesis,
         mainGoal: structured.scope,
         nextStep: structured.next_step,
         area: 'Littera',
@@ -79,7 +79,7 @@ export async function processDopamineDump(rawMessage: string): Promise<DopamineD
   }
 
   // Passo 4: Retorno exato exigido pelo TDAH Focus OS
-  const replyMessage = 'Escopo estruturado e trancado no arquivo morto 🔒. Foco mantido no Littera.';
+  const replyMessage = '🔒 Ideia estruturada e trancada no arquivo morto. Foco mantido nos projetos ativos.';
 
   return {
     success: true,

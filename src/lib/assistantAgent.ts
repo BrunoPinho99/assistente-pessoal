@@ -270,7 +270,7 @@ export async function processAssistantMessage(
       .replace(/(estacionar ideia|estacione a ideia|estacionar|estacione|guardar ideia|tive uma ideia de|tive uma ideia:|nova ideia de negócio:|nova ideia de negócio|nova ideia de negocio|novo projeto:|ideia de app:|ideia de saas:)/i, '')
       .trim() || query;
 
-    let replyText = 'Escopo estruturado e trancado no arquivo morto 🔒. Foco mantido no Littera.';
+    let replyText = '🔒 Ideia estruturada e trancada no arquivo morto. Foco mantido nos projetos ativos.';
     let parked = onParkIdea(cleanIdea);
     let structuredDetails: any = null;
 

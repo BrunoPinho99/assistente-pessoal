@@ -204,17 +204,17 @@ export const PhysicalPadlockSeal: React.FC<PhysicalPadlockSealProps> = ({
 
       {/* Alívio Cognitivo TDAH & Proteção de Foco */}
       <div className="relative z-10 mt-3 pt-2.5 border-t border-white/10 space-y-1.5 text-[11px]">
-        <div className="flex items-start gap-1.5 text-slate-200">
-          <span className="text-rose-400 font-bold shrink-0">🔒</span>
-          <p className="leading-tight">
-            <strong>Ideia blindada no cofre:</strong> Está 100% registrada. Seu cérebro não precisa se preocupar em esquecer, e você não precisa começar a codar agora.
+        <div className="flex items-start gap-1.5 text-emerald-300">
+          <span className="text-emerald-400 font-bold shrink-0">🔒</span>
+          <p className="leading-tight font-semibold">
+            Ideia estruturada e trancada no arquivo morto. Foco mantido nos projetos ativos.
           </p>
         </div>
 
-        <div className="flex items-start gap-1.5 text-emerald-300/90 text-[10px]">
-          <span className="shrink-0 font-bold">🎯</span>
+        <div className="flex items-start gap-1.5 text-slate-300 text-[10px]">
+          <span className="shrink-0 font-bold text-rose-400">🛡️</span>
           <p className="leading-tight">
-            <strong>Foco mantido:</strong> Continue sua entrega prioritária no <strong>Littera</strong>.
+            <strong>Cofre Ativo:</strong> A ideia está salva no MongoDB com <code>isLocked: true</code>. Seu cérebro pode relaxar e manter a atenção plena em execução.
           </p>
         </div>
 

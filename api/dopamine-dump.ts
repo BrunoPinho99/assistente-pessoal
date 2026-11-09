@@ -171,10 +171,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await connectToDatabase();
       const created = await Project.create({
         name: projectName,
+        description: message, // Texto original da ideia
         category: 'parking',
-        isLocked: true, // FORÇADO PELO BACKEND
+        isLocked: true, // O isLocked: true é obrigatório
+        createdAt: new Date(),
         unlockConditions: forcedUnlockConditions,
-        description: structuredIdea.hypothesis,
         mainGoal: structuredIdea.scope,
         nextStep: structuredIdea.next_step,
         area: 'Littera',
@@ -188,14 +189,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     return sendJson(200, {
       success: true,
-      reply: 'Escopo estruturado e trancado no arquivo morto 🔒. Foco mantido no Littera.',
+      reply: '🔒 Ideia estruturada e trancada no arquivo morto. Foco mantido nos projetos ativos.',
       project: {
         id: savedId,
         name: projectName,
         category: 'parking',
         isLocked: true,
+        createdAt: Date.now(),
         unlockConditions: forcedUnlockConditions,
-        description: structuredIdea.hypothesis,
+        description: message,
         main_goal: structuredIdea.scope,
         next_step: structuredIdea.next_step,
         area: 'Littera',
