@@ -402,22 +402,6 @@ export const TasksView: React.FC<TasksViewProps> = ({
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {getEnergyBadge(t.energy_level)}
 
-                    {!isDone && onRequestSliceTask && (t.estimated_minutes > 45 || !t.is_micro_action) && (
-                      <button
-                        type="button"
-                        onClick={() => onRequestSliceTask(t)}
-                        className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 border ${
-                          isDarkMode
-                            ? 'bg-slate-800 border-slate-700 text-white hover:bg-slate-700'
-                            : 'bg-[#EEF4FF] border-[#315DFF]/30 text-[#315DFF] hover:bg-[#315DFF] hover:text-white'
-                        }`}
-                        title="Fatiar Tarefa com IA em micro-ações mecânicas"
-                      >
-                        <Sparkles className="w-3 h-3" />
-                        <span className="hidden md:inline">Fatiar com IA</span>
-                      </button>
-                    )}
-
                     {!isDone && (
                       <button
                         type="button"

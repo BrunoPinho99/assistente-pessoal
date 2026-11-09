@@ -458,28 +458,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <span>{activeAudioTone === 'brown' ? 'Som ativo' : 'Som foco'}</span>
               </button>
             </div>
-
-            {/* Validação de Micro-ação / Anti-Paralisia TDAH */}
-            {!heroValidation.isValid && (
-              <div className="mt-2.5 p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-between gap-2.5 text-xs">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                  <span className="text-[11px] text-amber-200 leading-tight">
-                    {heroValidation.reason}
-                  </span>
-                </div>
-                {onRequestSliceTask && (
-                  <button
-                    type="button"
-                    onClick={() => onRequestSliceTask(currentHeroTask)}
-                    className="px-2.5 py-1 rounded-lg bg-[#315DFF] hover:bg-[#254ED9] text-white text-[10px] font-bold flex items-center gap-1 shrink-0 cursor-pointer shadow-sm transition-all"
-                  >
-                    <Sparkles className="w-3 h-3" />
-                    <span>Fatiar com IA</span>
-                  </button>
-                )}
-              </div>
-            )}
           </div>
 
           {/* Lado Direito: Timer Pomodoro & Botão Iniciar Foco */}
@@ -497,24 +475,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             {/* Action Button */}
             <button
               type="button"
-              onClick={() => {
-                if (!isTimerRunning && !heroValidation.isValid && onRequestSliceTask) {
-                  onRequestSliceTask(currentHeroTask);
-                  return;
-                }
-                setIsTimerRunning(!isTimerRunning);
-              }}
+              onClick={() => setIsTimerRunning(!isTimerRunning)}
               className="w-full max-w-[180px] py-2.5 px-4 rounded-xl text-xs font-semibold btn-electric-clean flex items-center justify-center gap-2 cursor-pointer text-white"
             >
               {isTimerRunning ? (
                 <>
                   <Pause className="w-3.5 h-3.5 fill-current" />
                   <span>Pausar foco</span>
-                </>
-              ) : !heroValidation.isValid ? (
-                <>
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Fatiar com IA</span>
                 </>
               ) : (
                 <>
@@ -656,27 +623,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     </span>
                   </div>
 
-                  {/* Right side: Fatiar IA, Company Badge, Deadline & Chevron */}
+                  {/* Right side: Company Badge, Deadline & Chevron */}
                   <div className="flex items-center gap-2.5 shrink-0">
-                    {onRequestSliceTask && (task.estimated_minutes > 45 || !task.is_micro_action) && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onRequestSliceTask(task);
-                        }}
-                        className={`hidden sm:inline-flex px-2 py-0.5 rounded-md text-[10px] font-bold border transition-colors items-center gap-1 cursor-pointer ${
-                          isDark
-                            ? 'bg-slate-800 text-white border-slate-700 hover:bg-slate-700'
-                            : 'bg-[#EEF4FF] text-[#315DFF] border-[#315DFF]/20 hover:bg-[#315DFF] hover:text-white'
-                        }`}
-                        title="Fatiar esta tarefa em micro-ações mecânicas"
-                      >
-                        <Sparkles className="w-2.5 h-2.5" />
-                        <span>Fatiar IA</span>
-                      </button>
-                    )}
-
                     {getCompanyBadge(task)}
                     
                     {task.deadline && (

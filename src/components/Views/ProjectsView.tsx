@@ -3,6 +3,7 @@ import {
   FolderKanban, 
   Plus, 
   ArrowRight, 
+  ArrowLeft,
   Trash2,
   CheckCircle2,
   Circle,
@@ -12,11 +13,9 @@ import {
   Unlock,
   ShieldCheck,
   FolderLock,
-  Sparkles,
-  Pencil,
-  PlusCircle,
   Save,
-  Check
+  Check,
+  Play
 } from 'lucide-react';
 import { Project, Task, ContextFilter, ContextArea, ProjectStage, ProjectCategory } from '../../types';
 
@@ -42,6 +41,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
   onAddProject,
   onUpdateProject,
   onDeleteProject,
+  onStartFocus,
   onToggleLock,
   onOpenDopamineChat
 }) => {
@@ -207,6 +207,389 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
   };
 
   const contextOptions: ContextFilter[] = ['todos', 'Aura', 'Littera', 'IDP', 'Pessoal'];
+
+  // ==========================================================================
+  // VISÃO EM PÁGINA INTEIRA DO PROJETO (SEM POPUP)
+  // ==========================================================================
+  if (selectedProject && projectDraft) {
+    const projectTasks = tasks.filter(
+      t => t.project_id === projectDraft.id || (t.area === projectDraft.area && !t.project_id)
+    );
+
+    return (
+      <div className="flex flex-col gap-6 text-left pb-14 animate-in fade-in duration-150" data-purpose="project-full-page">
+        {/* Barra Superior de Navegação e Ações */}
+        <header className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#E5EAF2] dark:border-[#263248]">
+          <div className="flex items-center gap-2 text-xs">
+            <button
+              type="button"
+              onClick={handleCloseProjectEditor}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold border transition cursor-pointer ${
+                isDarkMode
+                  ? 'bg-[#1C2333] hover:bg-[#252F45] border-[#263248] text-white'
+                  : 'bg-white hover:bg-[#F5F7FB] border-[#E5EAF2] text-[#172033]'
+              }`}
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Voltar para Projetos</span>
+            </button>
+            <span className={isDarkMode ? 'text-[#64748B]' : 'text-[#D2DCE8]'}>/</span>
+            <span className={`font-semibold truncate max-w-[240px] ${isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'}`}>
+              {projectDraft.title}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            {saveFeedback && (
+              <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1">
+                <Check className="w-3.5 h-3.5" />
+                <span>Salvo!</span>
+              </span>
+            )}
+
+            {onToggleLock && (
+              <button
+                type="button"
+                onClick={() => {
+                  onToggleLock(projectDraft.id);
+                  setProjectDraft(prev => (prev ? { ...prev, locked: !prev.locked } : null));
+                }}
+                className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer border ${
+                  projectDraft.locked
+                    ? 'bg-[#315DFF] hover:bg-[#254BE0] text-white border-[#315DFF]'
+                    : isDarkMode
+                      ? 'bg-rose-500/15 text-rose-300 border-rose-500/30 hover:bg-rose-500/25'
+                      : 'bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100'
+                }`}
+              >
+                {projectDraft.locked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
+                <span>{projectDraft.locked ? 'Destrancar Projeto' : 'Trancar no Estacionamento'}</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={handleSaveProjectDraft}
+              disabled={isSaving}
+              className="px-4 py-2 rounded-xl bg-[#245BFF] hover:bg-[#1A4EE5] text-white font-semibold text-xs flex items-center gap-1.5 transition cursor-pointer shadow-sm"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>{isSaving ? 'Salvando...' : 'Salvar Alterações'}</span>
+            </button>
+          </div>
+        </header>
+
+        {/* Capa Hero do Projeto em Largura Total */}
+        <div className="relative h-44 sm:h-52 rounded-2xl overflow-hidden border border-white/15 shadow-md">
+          <img
+            src={getProjectCover(projectDraft.area, 0)}
+            alt={projectDraft.title}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#101522] via-black/45 to-black/30" />
+
+          <div className="absolute inset-0 p-6 sm:p-8 flex flex-col justify-between">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <select
+                  value={projectDraft.area}
+                  onChange={e => {
+                    const val = e.target.value as ContextArea;
+                    setProjectDraft(prev => (prev ? { ...prev, area: val } : null));
+                  }}
+                  className="px-3 py-1 rounded-lg text-xs font-bold bg-black/60 backdrop-blur-md border border-white/25 text-white cursor-pointer focus:outline-none focus:border-[#315DFF]"
+                >
+                  <option value="Littera" className="bg-[#101522] text-white">Littera</option>
+                  <option value="Aura" className="bg-[#101522] text-white">Aura</option>
+                  <option value="IDP" className="bg-[#101522] text-white">IDP</option>
+                  <option value="Pessoal" className="bg-[#101522] text-white">Pessoal</option>
+                </select>
+
+                <select
+                  value={projectDraft.category}
+                  onChange={e => {
+                    const val = e.target.value as ProjectCategory;
+                    setProjectDraft(prev => (prev ? { ...prev, category: val } : null));
+                  }}
+                  className="px-3 py-1 rounded-lg text-xs font-semibold bg-black/60 backdrop-blur-md border border-white/25 text-slate-200 cursor-pointer focus:outline-none focus:border-[#315DFF]"
+                >
+                  <option value="profissional" className="bg-[#101522] text-white">Profissional</option>
+                  <option value="pessoal" className="bg-[#101522] text-white">Pessoal</option>
+                  <option value="academico" className="bg-[#101522] text-white">Acadêmico</option>
+                  <option value="business" className="bg-[#101522] text-white">Business</option>
+                  <option value="parking" className="bg-[#101522] text-white">Estacionamento</option>
+                </select>
+
+                <span
+                  className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border backdrop-blur-md ${
+                    projectDraft.locked
+                      ? 'bg-rose-500/25 text-rose-200 border-rose-500/40'
+                      : 'bg-emerald-500/25 text-emerald-300 border-emerald-500/40'
+                  }`}
+                >
+                  {projectDraft.locked ? 'TRANCADO 🔒' : 'ATIVO'}
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <input
+                type="text"
+                value={projectDraft.title}
+                onChange={e => setProjectDraft(prev => (prev ? { ...prev, title: e.target.value } : null))}
+                placeholder="Nome do projeto..."
+                className="w-full text-2xl sm:text-3xl font-bold text-white bg-transparent border-b border-transparent hover:border-white/25 focus:border-[#315DFF] focus:outline-none transition-colors py-0.5"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Conteúdo Principal do Projeto em Página Inteira */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Coluna Esquerda: Descrição & Etapas */}
+          <div className="lg:col-span-7 space-y-6">
+            {/* Descrição */}
+            <div
+              className={`p-5 sm:p-6 rounded-2xl border space-y-2 ${
+                isDarkMode ? 'bg-[#161F33] border-[#263248]' : 'bg-white border-[#E5EAF2]'
+              }`}
+            >
+              <label
+                className={`text-xs font-bold uppercase tracking-wider block ${
+                  isDarkMode ? 'text-slate-400' : 'text-[#687386]'
+                }`}
+              >
+                Descrição & Escopo do Projeto
+              </label>
+              <textarea
+                value={projectDraft.description || ''}
+                onChange={e => setProjectDraft(prev => (prev ? { ...prev, description: e.target.value } : null))}
+                placeholder="Descreva o escopo, objetivos centrais e notas deste projeto..."
+                rows={4}
+                className={`w-full text-xs sm:text-sm bg-transparent border rounded-xl p-3 focus:outline-none focus:border-[#315DFF] resize-y leading-relaxed ${
+                  isDarkMode
+                    ? 'border-[#263248] text-slate-200 bg-[#101522]/60'
+                    : 'border-[#E5EAF2] text-[#172033] bg-[#F8FAFD]'
+                }`}
+              />
+            </div>
+
+            {/* Etapas do Projeto */}
+            <div
+              className={`p-5 sm:p-6 rounded-2xl border space-y-4 ${
+                isDarkMode ? 'bg-[#161F33] border-[#263248]' : 'bg-white border-[#E5EAF2]'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className={`text-sm font-bold flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-[#172033]'}`}>
+                  <span>Etapas do Projeto</span>
+                  <span className="px-2 py-0.5 rounded-full text-xs bg-[#315DFF]/20 text-[#315DFF] font-mono">
+                    {projectDraft.stages.filter(s => s.completed).length}/{projectDraft.stages.length}
+                  </span>
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                {projectDraft.stages.map(st => (
+                  <div
+                    key={st.id}
+                    className={`flex items-center justify-between gap-3 p-3 rounded-xl border text-xs transition group ${
+                      isDarkMode
+                        ? 'bg-[#101522] border-[#263248] hover:border-white/20'
+                        : 'bg-[#F8FAFD] border-[#E5EAF2] hover:border-[#CBD5E1]'
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleToggleDraftStage(st.id)}
+                      className="shrink-0 cursor-pointer text-slate-400 hover:text-[#315DFF] transition-colors"
+                    >
+                      {st.completed ? (
+                        <CheckCircle2 className="w-4 h-4 text-[#315DFF]" />
+                      ) : (
+                        <Circle className="w-4 h-4 text-slate-500" />
+                      )}
+                    </button>
+
+                    <input
+                      type="text"
+                      value={st.title}
+                      onChange={e => handleUpdateDraftStageTitle(st.id, e.target.value)}
+                      className={`flex-1 bg-transparent border-none outline-none text-xs sm:text-sm ${
+                        st.completed
+                          ? 'line-through text-slate-500'
+                          : isDarkMode
+                            ? 'text-slate-100'
+                            : 'text-[#172033]'
+                      }`}
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveDraftStage(st.id)}
+                      className="p-1 text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                      title="Remover etapa"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Adicionar nova etapa */}
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  type="text"
+                  value={newStageInput}
+                  onChange={e => setNewStageInput(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddDraftStage();
+                    }
+                  }}
+                  placeholder="Adicionar nova etapa..."
+                  className={`flex-1 px-3.5 py-2.5 rounded-xl border text-xs focus:outline-none focus:border-[#315DFF] ${
+                    isDarkMode
+                      ? 'bg-[#101522] border-[#263248] text-white placeholder-slate-500'
+                      : 'bg-[#F8FAFD] border-[#E5EAF2] text-[#172033] placeholder-[#9AA4B2]'
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={handleAddDraftStage}
+                  className="px-4 py-2.5 rounded-xl bg-[#315DFF] hover:bg-[#254BE0] text-white font-semibold text-xs transition cursor-pointer flex items-center gap-1"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Adicionar</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Coluna Direita: Próximo Passo, Objetivo, Tarefas Vinculadas e Exclusão */}
+          <div className="lg:col-span-5 space-y-6">
+            {/* Próximo Passo Imediato */}
+            <div className="p-5 rounded-2xl bg-[#141F36] border border-[#315DFF]/40 space-y-2.5">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-blue-400 uppercase tracking-wider">
+                <Target className="w-4 h-4" />
+                <span>Próximo Passo Imediato</span>
+              </div>
+              <input
+                type="text"
+                value={projectDraft.next_step}
+                onChange={e => setProjectDraft(prev => (prev ? { ...prev, next_step: e.target.value } : null))}
+                placeholder="Qual é a próxima ação física para avançar?"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#0C1322] border border-white/15 text-white text-xs sm:text-sm font-semibold focus:outline-none focus:border-[#315DFF]"
+              />
+            </div>
+
+            {/* Objetivo Estratégico */}
+            <div
+              className={`p-5 rounded-2xl border space-y-2.5 ${
+                isDarkMode ? 'bg-[#161F33] border-[#263248]' : 'bg-white border-[#E5EAF2]'
+              }`}
+            >
+              <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-500">
+                <ShieldCheck className="w-4 h-4" />
+                <span>Objetivo Principal</span>
+              </div>
+              <input
+                type="text"
+                value={projectDraft.main_goal}
+                onChange={e => setProjectDraft(prev => (prev ? { ...prev, main_goal: e.target.value } : null))}
+                placeholder="Meta central do projeto..."
+                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none focus:border-[#315DFF] ${
+                  isDarkMode
+                    ? 'bg-[#101522] border-[#263248] text-slate-100'
+                    : 'bg-[#F8FAFD] border-[#E5EAF2] text-[#172033]'
+                }`}
+              />
+            </div>
+
+            {/* Tarefas Vinculadas */}
+            <div
+              className={`p-5 rounded-2xl border space-y-3 ${
+                isDarkMode ? 'bg-[#161F33] border-[#263248]' : 'bg-white border-[#E5EAF2]'
+              }`}
+            >
+              <h3 className={`text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-[#687386]'}`}>
+                Tarefas deste Contexto ({projectTasks.filter(t => t.status !== 'concluido').length})
+              </h3>
+              {projectTasks.filter(t => t.status !== 'concluido').length === 0 ? (
+                <p className="text-xs text-slate-500">Nenhuma tarefa pendente vinculada.</p>
+              ) : (
+                <div className="space-y-2">
+                  {projectTasks
+                    .filter(t => t.status !== 'concluido')
+                    .slice(0, 6)
+                    .map(t => (
+                      <div
+                        key={t.id}
+                        className={`p-3 rounded-xl border flex items-center justify-between gap-2 text-xs ${
+                          isDarkMode ? 'bg-[#101522] border-[#263248] text-slate-200' : 'bg-[#F8FAFD] border-[#E5EAF2] text-[#172033]'
+                        }`}
+                      >
+                        <span className="truncate font-medium">{t.title}</span>
+                        <button
+                          type="button"
+                          onClick={() => onStartFocus(t)}
+                          className="px-2.5 py-1 rounded-lg bg-[#315DFF]/20 hover:bg-[#315DFF] text-[#315DFF] hover:text-white text-[11px] font-semibold transition cursor-pointer flex items-center gap-1 shrink-0"
+                        >
+                          <Play className="w-2.5 h-2.5 fill-current" />
+                          <span>Focar</span>
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+
+            {/* Zona de Exclusão */}
+            <div
+              className={`p-4 rounded-2xl border flex items-center justify-between ${
+                isDarkMode ? 'bg-[#161F33]/60 border-[#263248]' : 'bg-white border-[#E5EAF2]'
+              }`}
+            >
+              {confirmDeleteId === projectDraft.id ? (
+                <div className="flex items-center justify-between w-full gap-2">
+                  <span className="text-xs text-rose-400 font-semibold">Tem certeza que deseja excluir?</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onDeleteProject(projectDraft.id);
+                        handleCloseProjectEditor();
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition cursor-pointer"
+                    >
+                      Confirmar Exclusão
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDeleteId(null)}
+                      className="px-2.5 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white transition cursor-pointer"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setConfirmDeleteId(projectDraft.id)}
+                  className="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1.5 cursor-pointer transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Excluir este projeto</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8 text-left select-none pb-12" data-purpose="projects-view">
@@ -505,319 +888,6 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
           )}
         </div>
       </section>
-
-      {/* ========================================================================
-          PAINEL & EDITOR UNIFICADO DE PROJETO (ESTILO NOTION / LINEAR)
-          ======================================================================== */}
-      {selectedProject && projectDraft && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-md animate-in fade-in duration-150 overflow-y-auto"
-          onClick={handleCloseProjectEditor}
-        >
-          <div 
-            className="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl overflow-hidden border border-white/20 bg-[#101522] shadow-[0_25px_80px_rgba(0,0,0,0.85)] text-left animate-in zoom-in-95 duration-150 relative"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* 1. Capa Superior com Gradiente e Controles */}
-            <div className="relative h-28 sm:h-32 shrink-0 overflow-hidden">
-              <img 
-                src={getProjectCover(projectDraft.area, 0)} 
-                alt={projectDraft.title}
-                className="w-full h-full object-cover filter brightness-90"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#101522] via-black/40 to-black/60" />
-
-              {/* Botão Fechar no Topo Direito */}
-              <button
-                type="button"
-                onClick={handleCloseProjectEditor}
-                className="absolute top-3.5 right-3.5 p-2 rounded-xl bg-black/60 hover:bg-black/90 backdrop-blur-md border border-white/25 text-white/90 hover:text-white transition cursor-pointer z-30"
-                title="Fechar"
-              >
-                <X className="w-4 h-4" />
-              </button>
-
-              {/* Badges e Ações Rápidas no Banner */}
-              <div className="absolute bottom-3 left-5 right-5 flex items-center justify-between z-20">
-                <div className="flex items-center gap-2">
-                  {/* Seletor de Área */}
-                  <select
-                    value={projectDraft.area}
-                    onChange={(e) => {
-                      const val = e.target.value as ContextArea;
-                      setProjectDraft(prev => prev ? { ...prev, area: val } : null);
-                    }}
-                    className="px-2.5 py-1 rounded-lg text-xs font-bold bg-black/70 backdrop-blur-md border border-white/25 text-white cursor-pointer focus:outline-none focus:border-[#315DFF]"
-                  >
-                    <option value="Littera" className="bg-[#101522] text-white">Littera</option>
-                    <option value="Aura" className="bg-[#101522] text-white">Aura</option>
-                    <option value="IDP" className="bg-[#101522] text-white">IDP</option>
-                    <option value="Pessoal" className="bg-[#101522] text-white">Pessoal</option>
-                  </select>
-
-                  {/* Seletor de Categoria */}
-                  <select
-                    value={projectDraft.category}
-                    onChange={(e) => {
-                      const val = e.target.value as ProjectCategory;
-                      setProjectDraft(prev => prev ? { ...prev, category: val } : null);
-                    }}
-                    className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-black/70 backdrop-blur-md border border-white/25 text-slate-200 cursor-pointer focus:outline-none focus:border-[#315DFF]"
-                  >
-                    <option value="profissional" className="bg-[#101522] text-white">Profissional</option>
-                    <option value="pessoal" className="bg-[#101522] text-white">Pessoal</option>
-                    <option value="academico" className="bg-[#101522] text-white">Acadêmico</option>
-                    <option value="business" className="bg-[#101522] text-white">Business</option>
-                    <option value="parking" className="bg-[#101522] text-white">Estacionamento</option>
-                  </select>
-                </div>
-
-                {/* Toggle Cadeado / Ativo */}
-                {onToggleLock && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onToggleLock(projectDraft.id);
-                      setProjectDraft(prev => prev ? { ...prev, locked: !prev.locked } : null);
-                    }}
-                    className={`px-3 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer border shadow-sm ${
-                      projectDraft.locked
-                        ? 'bg-[#315DFF] hover:bg-[#254BE0] text-white border-[#315DFF]'
-                        : 'bg-rose-500/25 text-rose-200 border-rose-500/40 hover:bg-rose-500/35'
-                    }`}
-                  >
-                    {projectDraft.locked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
-                    <span>{projectDraft.locked ? 'Destrancar' : 'Trancar no Estacionamento'}</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* 2. Corpo Scrollável do Editor (Sem corte de tela) */}
-            <div className="flex-1 overflow-y-auto p-5 sm:p-7 space-y-5 text-left custom-scrollbar">
-              {/* Título Editável */}
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold block">
-                  Título do Projeto
-                </label>
-                <input
-                  type="text"
-                  value={projectDraft.title}
-                  onChange={(e) => setProjectDraft(prev => prev ? { ...prev, title: e.target.value } : null)}
-                  placeholder="Nome do projeto..."
-                  className="w-full text-xl sm:text-2xl font-bold text-white bg-transparent border-b border-white/10 hover:border-white/30 focus:border-[#315DFF] focus:outline-none transition-colors py-1"
-                />
-              </div>
-
-              {/* Descrição Editável */}
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold block">
-                  Descrição & Contexto
-                </label>
-                <textarea
-                  value={projectDraft.description || ''}
-                  onChange={(e) => setProjectDraft(prev => prev ? { ...prev, description: e.target.value } : null)}
-                  placeholder="Descreva o escopo, objetivos centrais e notas deste projeto..."
-                  rows={2}
-                  className="w-full text-xs text-slate-300 bg-transparent border-b border-white/10 hover:border-white/30 focus:border-[#315DFF] focus:outline-none resize-none transition-colors py-1 leading-relaxed"
-                />
-              </div>
-
-              {/* Card do Próximo Passo Imediato */}
-              <div className="p-4 rounded-2xl bg-[#141F36] border border-[#315DFF]/40 space-y-2">
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-blue-400 uppercase tracking-wider">
-                  <Target className="w-3.5 h-3.5" />
-                  <span>Próximo Passo Imediato</span>
-                </div>
-                <input
-                  type="text"
-                  value={projectDraft.next_step}
-                  onChange={(e) => setProjectDraft(prev => prev ? { ...prev, next_step: e.target.value } : null)}
-                  placeholder="Qual é a próxima ação física necessária para avançar?"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#0C1322] border border-white/15 text-white text-xs font-semibold focus:outline-none focus:border-[#315DFF]"
-                />
-              </div>
-
-              {/* Card do Objetivo Estratégico */}
-              <div className="p-4 rounded-2xl bg-[#131929] border border-white/10 space-y-2">
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-300 uppercase tracking-wider">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Objetivo Estratégico do Projeto</span>
-                </div>
-                <input
-                  type="text"
-                  value={projectDraft.main_goal}
-                  onChange={(e) => setProjectDraft(prev => prev ? { ...prev, main_goal: e.target.value } : null)}
-                  placeholder="Meta central (ex: Validar com 5 clientes reais)"
-                  className="w-full px-3.5 py-2 rounded-xl bg-[#0C1322] border border-white/10 text-slate-200 text-xs focus:outline-none focus:border-[#315DFF]"
-                />
-              </div>
-
-              {/* Condições de Desbloqueio (Se trancado) */}
-              {projectDraft.locked && (
-                <div className="p-4 rounded-2xl border text-xs space-y-2 bg-amber-500/10 border-amber-500/30 text-amber-200">
-                  <span className="text-[10px] font-mono uppercase tracking-wider font-bold text-amber-300 flex items-center gap-1.5">
-                    <Lock className="w-3.5 h-3.5" />
-                    <span>Condições para Destrancar (Foco Blindado)</span>
-                  </span>
-                  <ul className="space-y-1 text-xs text-amber-100/90 list-disc list-inside">
-                    {projectDraft.unlockConditions && projectDraft.unlockConditions.length > 0 ? (
-                      projectDraft.unlockConditions.map((cond, i) => (
-                        <li key={i}>{cond}</li>
-                      ))
-                    ) : (
-                      <li>Concluir entregas prioritárias do Littera e liberar slot de foco ativo.</li>
-                    )}
-                  </ul>
-                </div>
-              )}
-
-              {/* Etapas do Projeto (Checklist & Editor Inline) */}
-              <div className="space-y-3 pt-1">
-                <div className="flex items-center justify-between text-xs font-medium text-slate-300">
-                  <span className="font-bold flex items-center gap-1.5">
-                    <span>Etapas do Projeto</span>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] bg-white/10 text-white font-mono">
-                      {projectDraft.stages.filter(s => s.completed).length}/{projectDraft.stages.length}
-                    </span>
-                  </span>
-                  <span className="text-[11px] text-slate-400">
-                    Clique no texto para editar o nome da etapa
-                  </span>
-                </div>
-
-                <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                  {projectDraft.stages.map((st) => (
-                    <div 
-                      key={st.id}
-                      className="flex items-center justify-between gap-2.5 p-2.5 rounded-xl border border-white/10 bg-[#141C2E] text-xs transition hover:border-white/20 group"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => handleToggleDraftStage(st.id)}
-                        className="shrink-0 cursor-pointer text-slate-400 hover:text-[#315DFF] transition-colors"
-                      >
-                        {st.completed ? (
-                          <CheckCircle2 className="w-4 h-4 text-[#315DFF]" />
-                        ) : (
-                          <Circle className="w-4 h-4 text-slate-500 hover:text-white" />
-                        )}
-                      </button>
-
-                      <input
-                        type="text"
-                        value={st.title}
-                        onChange={(e) => handleUpdateDraftStageTitle(st.id, e.target.value)}
-                        className={`flex-1 bg-transparent border-none outline-none text-xs ${
-                          st.completed ? 'line-through text-slate-500' : 'text-slate-100'
-                        }`}
-                      />
-
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveDraftStage(st.id)}
-                        className="p-1 text-slate-500 hover:text-rose-400 opacity-60 group-hover:opacity-100 transition-opacity cursor-pointer"
-                        title="Remover etapa"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Adicionar nova etapa */}
-                <div className="flex items-center gap-2 pt-1">
-                  <input
-                    type="text"
-                    value={newStageInput}
-                    onChange={(e) => setNewStageInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleAddDraftStage();
-                      }
-                    }}
-                    placeholder="Adicionar nova etapa (Pressione Enter)..."
-                    className="flex-1 px-3.5 py-2 rounded-xl bg-[#0D1527] border border-white/15 text-white text-xs focus:outline-none focus:border-[#315DFF]"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleAddDraftStage}
-                    className="px-3.5 py-2 rounded-xl bg-[#315DFF] hover:bg-[#254BE0] text-white font-semibold text-xs transition cursor-pointer flex items-center gap-1 shadow-sm"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Adicionar</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* 3. Rodapé com Ações e Feedback de Salvamento */}
-            <div className="p-4 sm:px-7 bg-[#151D31] border-t border-white/10 flex items-center justify-between shrink-0">
-              <div>
-                {confirmDeleteId === projectDraft.id ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-rose-400 font-semibold">Excluir do MongoDB?</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onDeleteProject(projectDraft.id);
-                        handleCloseProjectEditor();
-                      }}
-                      className="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition cursor-pointer"
-                    >
-                      Confirmar
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setConfirmDeleteId(null)}
-                      className="px-2 py-1 rounded-lg text-xs text-slate-400 hover:text-white transition cursor-pointer"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setConfirmDeleteId(projectDraft.id)}
-                    className="text-xs text-rose-400 hover:text-rose-300 hover:underline flex items-center gap-1 cursor-pointer transition-colors"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Excluir projeto</span>
-                  </button>
-                )}
-              </div>
-
-              <div className="flex items-center gap-3">
-                {saveFeedback && (
-                  <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1 animate-in fade-in">
-                    <Check className="w-3.5 h-3.5" />
-                    <span>Salvo no MongoDB!</span>
-                  </span>
-                )}
-
-                <button
-                  type="button"
-                  onClick={handleSaveProjectDraft}
-                  disabled={isSaving}
-                  className="px-4 py-2 rounded-xl bg-[#315DFF] hover:bg-[#254BE0] text-white font-semibold text-xs flex items-center gap-1.5 transition cursor-pointer shadow-md"
-                >
-                  <Save className="w-3.5 h-3.5" />
-                  <span>{isSaving ? 'Salvando...' : 'Salvar Alterações'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleCloseProjectEditor}
-                  className="px-4 py-2 rounded-xl bg-[#222B3D] hover:bg-[#2C384E] text-slate-200 font-semibold text-xs border border-white/10 transition cursor-pointer"
-                >
-                  Fechar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Modal de Criação de Projeto */}
       {showAddModal && (
