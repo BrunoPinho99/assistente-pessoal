@@ -3,92 +3,233 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: 'Geist', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'Geist Mono', 'Space Grotesk', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-display: 'GT Walsheim Framer Medium', 'GT Walsheim Medium', 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Inter Variable', 'Inter', 'Geist', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  /* REFINED PERSONAL OS DESIGN SYSTEM TOKENS */
-  --color-sidebar-bg: #101522;
-  --color-focus-bg: #111B36;
-  --color-deep-blue: #172D69;
-  --color-electric-blue: #315DFF;
-  --color-workspace-bg: #F3F5FC;
-  --color-surface: #FFFFFF;
-  --color-primary-text: #171D38;
-  --color-secondary-text: #747E98;
-  --color-border-subtle: #E3E8F3;
+  /* FRAMER DARK-CANVAS DESIGN SYSTEM TOKENS */
+  --color-framer-primary: #ffffff;
+  --color-framer-on-primary: #000000;
+  --color-framer-accent-blue: #0099ff;
+  --color-framer-ink: #ffffff;
+  --color-framer-ink-muted: #999999;
+  --color-framer-canvas: #090909;
+  --color-framer-surface-1: #141414;
+  --color-framer-surface-2: #1c1c1c;
+  --color-framer-hairline: #262626;
+  --color-framer-hairline-soft: #1a1a1a;
+  --color-framer-gradient-magenta: #d44df0;
+  --color-framer-gradient-violet: #6a4cf5;
+  --color-framer-gradient-orange: #ff7a3d;
+  --color-framer-gradient-coral: #ff5577;
+  --color-framer-success: #22c55e;
 }
 
 html, body {
   height: 100%;
   font-family: var(--font-sans);
+  font-feature-settings: "cv01" 1, "cv05" 1, "cv09" 1, "cv11" 1, "ss03" 1, "ss07" 1, "dlig" 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #F3F5FC;
-  color: #171D38;
+  background-color: #090909;
+  color: #ffffff;
+  letter-spacing: -0.01em;
 }
 
-/* Subtle, refined custom scrollbar */
+/* Custom Dark Canvas Scrollbar */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #090909;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: #262626;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  background: #3d3d3d;
 }
 
 /* ==============================================================================
-   REFINED COMPONENT SURFACES
+   FRAMER TYPOGRAPHY SCALE (GT Walsheim / Geist Display + Inter Variable)
    ============================================================================== */
 
-/* Card de Foco: Clean Dark with single subtle internal radial glow */
-.card-focus-refined {
-  background: 
-    radial-gradient(circle at 85% 35%, rgba(49, 93, 255, 0.22) 0%, transparent 55%),
-    linear-gradient(145deg, #111B36 0%, #172D69 100%);
+.framer-display-xl {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+}
+
+.framer-display-lg {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.0;
+  letter-spacing: -0.045em;
+}
+
+.framer-display-md {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -1.0px;
+}
+
+.framer-headline {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.8px;
+}
+
+/* ==============================================================================
+   FRAMER SURFACES & ELEVATION
+   ============================================================================== */
+
+/* Surface 1: Charcoal Card (#141414) */
+.framer-card {
+  background-color: #141414;
+  border: 1px solid #262626;
+  border-radius: 20px;
+  box-shadow: inset 0 0.5px 0 0 rgba(255, 255, 255, 0.08), 0 10px 30px 0 rgba(0, 0, 0, 0.25);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.framer-card:hover {
+  border-color: #333333;
+}
+
+/* Surface 2: Featured Lifted Card (#1c1c1c) */
+.framer-card-featured {
+  background-color: #1c1c1c;
+  border: 1px solid #2e2e2e;
+  border-radius: 20px;
+  box-shadow: inset 0 0.5px 0 0 rgba(255, 255, 255, 0.12), 0 14px 36px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* Signature Gradient Spotlight Card — Violet / Magenta Atmosphere (30px radius) */
+.card-focus-refined,
+.framer-spotlight-violet {
+  background:
+    radial-gradient(120% 120% at 88% 15%, rgba(212, 77, 240, 0.48) 0%, rgba(106, 76, 245, 0.38) 42%, rgba(20, 20, 20, 0.94) 88%),
+    linear-gradient(135deg, #1a1230 0%, #141414 65%, #090909 100%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 30px;
+  box-shadow:
+    inset 0 0.5px 0 0 rgba(255, 255, 255, 0.22),
+    0 20px 50px -10px rgba(106, 76, 245, 0.22),
+    0 10px 30px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* Signature Gradient Spotlight Card — Magenta Wash */
+.framer-spotlight-magenta {
+  background:
+    radial-gradient(110% 110% at 85% 20%, rgba(212, 77, 240, 0.52) 0%, rgba(255, 85, 119, 0.32) 45%, rgba(20, 20, 20, 0.95) 90%),
+    linear-gradient(135deg, #28112b 0%, #141414 70%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 30px;
+  box-shadow: inset 0 0.5px 0 0 rgba(255, 255, 255, 0.2), 0 14px 40px -8px rgba(212, 77, 240, 0.22);
+}
+
+/* Signature Gradient Spotlight Card — Sunset Orange / Coral Wash */
+.framer-spotlight-orange {
+  background:
+    radial-gradient(110% 110% at 85% 20%, rgba(255, 122, 61, 0.5) 0%, rgba(255, 85, 119, 0.32) 45%, rgba(20, 20, 20, 0.95) 90%),
+    linear-gradient(135deg, #2b1610 0%, #141414 70%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 30px;
+  box-shadow: inset 0 0.5px 0 0 rgba(255, 255, 255, 0.2), 0 14px 40px -8px rgba(255, 122, 61, 0.2);
+}
+
+/* ==============================================================================
+   FRAMER BUTTONS & INPUTS
+   ============================================================================== */
+
+/* button-primary: White Pill on Dark Canvas */
+.btn-electric-clean,
+.framer-btn-primary {
+  background-color: #ffffff;
+  color: #000000;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.14px;
+  border-radius: 100px;
+  padding: 10px 16px;
+  transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-electric-clean:hover,
+.framer-btn-primary:hover {
+  background-color: #f0f0f0;
+}
+
+.btn-electric-clean:active,
+.framer-btn-primary:active {
+  transform: scale(0.97);
+}
+
+/* button-secondary: Charcoal Pill (#141414) */
+.framer-btn-secondary {
+  background-color: #141414;
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.14px;
+  border: 1px solid #262626;
+  border-radius: 100px;
+  padding: 10px 16px;
+  transition: all 0.15s ease;
+}
+
+.framer-btn-secondary:hover {
+  background-color: #1c1c1c;
+  border-color: #333333;
+}
+
+/* button-translucent: Surface-2 Pill (#1c1c1c) */
+.framer-btn-translucent {
+  background-color: #1c1c1c;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.14px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 22px;
-  box-shadow: 0 4px 20px -2px rgba(17, 27, 54, 0.12);
-}
-
-/* Clean White Surface */
-.card-surface-clean {
-  background-color: #FFFFFF;
-  border: 1px solid #E3E8F3;
-  border-radius: 18px;
-  box-shadow: 0 1px 3px 0 rgba(23, 29, 56, 0.03);
+  border-radius: 100px;
+  padding: 8px 14px;
   transition: all 0.15s ease;
 }
 
-.card-surface-clean:hover {
-  border-color: #CBD5E1;
-  box-shadow: 0 4px 14px -2px rgba(23, 29, 56, 0.05);
+.framer-btn-translucent:hover {
+  background-color: #262626;
 }
 
-/* Primary Electric Blue Button with Subtle Shadow */
-.btn-electric-clean {
-  background-color: #315DFF;
-  color: #FFFFFF;
-  font-weight: 600;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px 0 rgba(49, 93, 255, 0.25);
-  transition: all 0.15s ease;
+/* text-input + level-3 blue focus ring */
+.framer-input {
+  background-color: #141414;
+  color: #ffffff;
+  border: 1px solid #262626;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  letter-spacing: -0.14px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.btn-electric-clean:hover {
-  background-color: #264ED8;
-  box-shadow: 0 4px 12px 0 rgba(49, 93, 255, 0.35);
+.framer-input::placeholder {
+  color: #999999;
 }
 
-.btn-electric-clean:active {
-  transform: scale(0.98);
+.framer-input:focus {
+  outline: none;
+  border-color: #0099ff;
+  box-shadow: 0 0 0 2px rgba(0, 153, 255, 0.18);
 }

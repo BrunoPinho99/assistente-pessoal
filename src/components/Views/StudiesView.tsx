@@ -27,7 +27,6 @@ interface StudiesViewProps {
 export const StudiesView: React.FC<StudiesViewProps> = ({
   subjects,
   flashcards,
-  isDarkMode = false,
   onAddSubject,
   onUpdateSubject,
   onDeleteSubject,
@@ -107,29 +106,23 @@ export const StudiesView: React.FC<StudiesViewProps> = ({
     <div className="flex flex-col gap-6 text-left select-none" data-purpose="studies-view">
       
       {/* Top Header Row */}
-      <header className="flex items-center justify-between text-xs pb-3 border-b border-[#E5EAF2] dark:border-[#263248]">
-        <div className={`flex items-center gap-1.5 font-medium ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
-          <span className="hover:text-[#245BFF] transition-colors cursor-pointer">Meu espaço</span>
-          <span className={isDarkMode ? 'text-[#64748B]' : 'text-[#D2DCE8]'}>/</span>
-          <span className={`font-semibold ${isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'}`}>Estudos & Cursos</span>
+      <header className="flex items-center justify-between text-[13px] pb-3 border-b border-[#262626]">
+        <div className="flex items-center gap-1.5 font-medium text-[#999999]">
+          <span className="hover:text-[#0099ff] transition-colors cursor-pointer">Meu espaço</span>
+          <span className="text-[#262626]">/</span>
+          <span className="font-medium text-[#ffffff]">Estudos & Cursos</span>
         </div>
 
         {/* View & Add Controls */}
         <div className="flex items-center gap-3">
-          <div className={`p-1 rounded-xl flex items-center gap-1 border ${
-            isDarkMode ? 'bg-[#1C2333] border-[#263248]' : 'bg-[#E9EFF8] border-[#E5EAF2]'
-          }`}>
+          <div className="p-1 rounded-full flex items-center gap-1 border bg-[#141414] border-[#262626]">
             <button
               type="button"
               onClick={() => setActiveTab('disciplinas')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium tracking-[-0.13px] transition-all duration-150 cursor-pointer ${
                 activeTab === 'disciplinas'
-                  ? isDarkMode
-                    ? 'bg-[#222B3D] text-[#7A9CFF] font-semibold border border-[#33415C] shadow-xs'
-                    : 'bg-[#FFFFFF] text-[#245BFF] font-semibold shadow-xs border border-[#E5EAF2]'
-                  : isDarkMode
-                    ? 'text-[#94A3B8] hover:text-[#F1F5F9]'
-                    : 'text-[#687386] hover:text-[#172033]'
+                  ? 'bg-[#1c1c1c] text-[#ffffff]'
+                  : 'text-[#999999] hover:text-[#ffffff]'
               }`}
             >
               Disciplinas & Cursos
@@ -137,14 +130,10 @@ export const StudiesView: React.FC<StudiesViewProps> = ({
             <button
               type="button"
               onClick={() => setActiveTab('flashcards')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium tracking-[-0.13px] transition-all duration-150 cursor-pointer ${
                 activeTab === 'flashcards'
-                  ? isDarkMode
-                    ? 'bg-[#222B3D] text-[#7A9CFF] font-semibold border border-[#33415C] shadow-xs'
-                    : 'bg-[#FFFFFF] text-[#245BFF] font-semibold shadow-xs border border-[#E5EAF2]'
-                  : isDarkMode
-                    ? 'text-[#94A3B8] hover:text-[#F1F5F9]'
-                    : 'text-[#687386] hover:text-[#172033]'
+                  ? 'bg-[#1c1c1c] text-[#ffffff]'
+                  : 'text-[#999999] hover:text-[#ffffff]'
               }`}
             >
               Flashcards ({flashcards.length})
@@ -154,9 +143,9 @@ export const StudiesView: React.FC<StudiesViewProps> = ({
           <button
             type="button"
             onClick={() => activeTab === 'disciplinas' ? setShowSubjectModal(true) : setShowCardModal(true)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#245BFF] hover:bg-[#1A4EE5] active:scale-[0.98] text-white font-semibold text-xs tracking-wide shadow-[0_2px_8px_-1px_rgba(58,98,255,0.35)] transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-[15px] py-[10px] rounded-full bg-[#ffffff] hover:bg-[#f0f0f0] active:scale-[0.98] text-[#000000] font-medium text-[14px] tracking-[-0.14px] transition-all cursor-pointer"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-3.5 h-3.5 text-[#000000]" />
             <span>{activeTab === 'disciplinas' ? 'Nova Disciplina' : 'Novo Card'}</span>
           </button>
         </div>
@@ -164,12 +153,10 @@ export const StudiesView: React.FC<StudiesViewProps> = ({
 
       {/* Hero Header */}
       <div>
-        <h1 className={`text-2xl sm:text-3xl font-bold tracking-tight ${
-          isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'
-        }`}>
+        <h1 className="text-[32px] sm:text-[40px] font-medium tracking-[-1.8px] text-[#ffffff] leading-[1.05]">
           Central de Estudos & Pesquisa
         </h1>
-        <p className={`text-sm mt-1 font-normal ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
+        <p className="text-[15px] mt-1 font-normal text-[#999999] tracking-[-0.15px]">
           Organização acadêmica, módulos de conteúdo e revisão ativa com repetição espaçada.
         </p>
       </div>
@@ -185,53 +172,33 @@ export const StudiesView: React.FC<StudiesViewProps> = ({
             return (
               <div
                 key={s.id}
-                className={`p-5 rounded-2xl border transition-all duration-200 flex flex-col justify-between space-y-4 ${
-                  isDarkMode 
-                    ? 'bg-[#1C2333] border-[#263248] hover:border-[#33415C] shadow-xs' 
-                    : 'bg-[#FFFFFF] border-[#E5EAF2] hover:border-[#D2DCE8] shadow-[0_2px_8px_rgba(23,32,51,0.04)] hover:shadow-[0_8px_24px_rgba(23,32,51,0.06)]'
-                }`}
+                className="p-5 rounded-[20px] border border-[#262626] bg-[#141414] hover:border-[#333333] transition-all duration-200 flex flex-col justify-between space-y-4"
               >
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <span className={`text-[10px] font-bold uppercase tracking-wider block mb-0.5 ${
-                        isDarkMode ? 'text-[#7A9CFF]' : 'text-[#245BFF]'
-                      }`}>
+                      <span className="text-[10px] font-mono uppercase tracking-[0.08em] block mb-0.5 text-[#0099ff]">
                         {s.type} {s.institution ? `· ${s.institution}` : ''}
                       </span>
-                      <h3 className={`text-sm font-bold leading-snug ${
-                        isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'
-                      }`}>
+                      <h3 className="text-[16px] font-medium tracking-[-0.2px] text-[#ffffff] leading-snug">
                         {s.title}
                       </h3>
                     </div>
-                    <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-md border capitalize ${
-                      isDarkMode 
-                        ? 'bg-[#222B3D] text-[#7A9CFF] border-[#33415C]' 
-                        : 'bg-[#EEF3FF] text-[#245BFF] border-[#D4E2FF]'
-                    }`}>
+                    <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full border capitalize bg-[#1c1c1c] text-[#ffffff] border-[#262626]">
                       {s.status.replace('_', ' ')}
                     </span>
                   </div>
 
                   {/* Horas Estudadas */}
-                  <div className={`flex items-center justify-between text-xs p-2.5 rounded-xl border ${
-                    isDarkMode 
-                      ? 'bg-[#222B3D]/60 border-[#263248] text-[#94A3B8]' 
-                      : 'bg-[#F8FAFD] border-[#E5EAF2] text-[#687386]'
-                  }`}>
-                    <span className="flex items-center gap-1.5 font-medium">
-                      <Clock className="w-3.5 h-3.5 text-[#245BFF]" />
+                  <div className="flex items-center justify-between text-[13px] p-3 rounded-[12px] border bg-[#1c1c1c] border-[#262626] text-[#999999]">
+                    <span className="flex items-center gap-1.5 font-medium text-[#ffffff]">
+                      <Clock className="w-3.5 h-3.5 text-[#0099ff]" />
                       {s.hours_studied}h estudadas {s.target_hours ? `/ meta: ${s.target_hours}h` : ''}
                     </span>
                     <button
                       type="button"
                       onClick={() => onLogStudyHours(s.id, 0.5)}
-                      className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition cursor-pointer border ${
-                        isDarkMode 
-                          ? 'bg-[#245BFF]/20 text-[#7A9CFF] border-[#245BFF]/30 hover:bg-[#245BFF]/30' 
-                          : 'bg-[#EEF3FF] text-[#245BFF] border-[#D4E2FF] hover:bg-[#D4E2FF]'
-                      }`}
+                      className="px-2.5 py-1 rounded-full text-[11px] font-medium transition cursor-pointer border bg-[#141414] text-[#ffffff] border-[#262626] hover:bg-[#262626]"
                     >
                       +30 min
                     </button>
@@ -239,27 +206,21 @@ export const StudiesView: React.FC<StudiesViewProps> = ({
 
                   {/* Módulos do Conteúdo */}
                   <div className="space-y-1.5 pt-1">
-                    <div className={`flex justify-between text-[11px] font-medium ${
-                      isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'
-                    }`}>
+                    <div className="flex justify-between text-[12px] font-medium text-[#999999]">
                       <span>Módulos ({completedMods}/{totalMods})</span>
-                      <span className="font-mono text-[#245BFF] font-semibold">{progress}%</span>
+                      <span className="font-mono text-[#ffffff] font-medium">{progress}%</span>
                     </div>
-                    <div className={`w-full h-1.5 rounded-full overflow-hidden ${
-                      isDarkMode ? 'bg-[#263248]' : 'bg-[#E9EFF8]'
-                    }`}>
+                    <div className="w-full h-1.5 rounded-full overflow-hidden bg-[#262626]">
                       <div 
-                        className="bg-[#245BFF] h-full rounded-full transition-all duration-300" 
+                        className="bg-[#ffffff] h-full rounded-full transition-all duration-300" 
                         style={{ width: `${progress}%` }} 
                       />
                     </div>
-                    <div className="space-y-1 pt-2">
+                    <div className="space-y-1.5 pt-2">
                       {s.modules.map(mod => (
                         <label 
                           key={mod.id} 
-                          className={`flex items-center gap-2 text-xs transition cursor-pointer ${
-                            isDarkMode ? 'text-[#94A3B8] hover:text-[#F1F5F9]' : 'text-[#687386] hover:text-[#172033]'
-                          }`}
+                          className="flex items-center gap-2 text-[13px] transition cursor-pointer text-[#999999] hover:text-[#ffffff]"
                         >
                           <input
                             type="checkbox"
@@ -268,9 +229,9 @@ export const StudiesView: React.FC<StudiesViewProps> = ({
                               const updatedMods = s.modules.map(m => m.id === mod.id ? { ...m, completed: !m.completed } : m);
                               onUpdateSubject(s.id, { modules: updatedMods });
                             }}
-                            className="rounded text-[#245BFF] focus:ring-0"
+                            className="w-4 h-4 rounded accent-[#0099ff] cursor-pointer"
                           />
-                          <span className={`truncate font-medium ${mod.completed ? 'line-through text-[#9AA4B2] dark:text-[#64748B]' : ''}`}>
+                          <span className={`truncate font-normal ${mod.completed ? 'line-through text-[#666666]' : 'text-[#ffffff]'}`}>
                             {mod.title}
                           </span>
                         </label>
@@ -279,20 +240,18 @@ export const StudiesView: React.FC<StudiesViewProps> = ({
                   </div>
                 </div>
 
-                <div className={`pt-3 border-t flex items-center justify-between text-xs ${
-                  isDarkMode ? 'border-[#263248]' : 'border-[#E5EAF2]'
-                }`}>
+                <div className="pt-3 border-t border-[#262626] flex items-center justify-between text-[13px]">
                   <button
                     type="button"
                     onClick={() => { setSelectedSubjectId(s.id); setActiveTab('flashcards'); }}
-                    className="text-[#245BFF] dark:text-[#7A9CFF] hover:underline text-[11px] font-semibold cursor-pointer"
+                    className="text-[#0099ff] hover:underline text-[12px] font-medium cursor-pointer"
                   >
                     Ver Flashcards ({flashcards.filter(f => f.subject_id === s.id).length})
                   </button>
                   <button
                     type="button"
                     onClick={() => onDeleteSubject(s.id)}
-                    className="p-1.5 rounded-lg text-[#94A3B8] hover:text-rose-500 transition cursor-pointer"
+                    className="p-1.5 rounded-full text-[#999999] hover:text-rose-400 hover:bg-[#1c1c1c] transition cursor-pointer"
                     title="Excluir"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -308,16 +267,12 @@ export const StudiesView: React.FC<StudiesViewProps> = ({
       {activeTab === 'flashcards' && (
         <div className="max-w-xl mx-auto space-y-4 w-full">
           {/* Seletor de Disciplina */}
-          <div className="flex items-center justify-between text-xs">
-            <span className={`font-semibold ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>Filtrar por Disciplina:</span>
+          <div className="flex items-center justify-between text-[13px]">
+            <span className="font-medium text-[#999999]">Filtrar por Disciplina:</span>
             <select
               value={selectedSubjectId}
               onChange={(e) => { setSelectedSubjectId(e.target.value); setActiveCardIndex(0); setIsFlipped(false); }}
-              className={`px-3 py-1.5 rounded-xl border text-xs font-medium cursor-pointer ${
-                isDarkMode 
-                  ? 'bg-[#1C2333] border-[#263248] text-[#F1F5F9]' 
-                  : 'bg-[#FFFFFF] border-[#E5EAF2] text-[#172033] shadow-xs'
-              }`}
+              className="px-3.5 py-1.5 rounded-full border text-[13px] font-medium cursor-pointer bg-[#141414] border-[#262626] text-[#ffffff] focus:outline-none focus:border-[#0099ff]"
             >
               <option value="">Todas as Disciplinas</option>
               {subjects.map(s => (
@@ -327,55 +282,43 @@ export const StudiesView: React.FC<StudiesViewProps> = ({
           </div>
 
           {currentCards.length === 0 ? (
-            <div className={`text-center py-16 px-4 border border-dashed rounded-2xl ${
-              isDarkMode ? 'border-[#263248] bg-[#1C2333]/50' : 'border-[#E5EAF2] bg-[#FFFFFF]'
-            }`}>
-              <Brain className={`w-10 h-10 mx-auto mb-2 ${isDarkMode ? 'text-[#64748B]' : 'text-[#9AA4B2]'}`} />
-              <p className={`text-xs font-semibold ${isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'}`}>
+            <div className="text-center py-16 px-4 border border-dashed rounded-[20px] border-[#262626] bg-[#141414]">
+              <Brain className="w-10 h-10 mx-auto mb-2 text-[#999999]" />
+              <p className="text-[14px] font-medium text-[#ffffff]">
                 Nenhum flashcard para esta matéria.
               </p>
               <button
                 type="button"
                 onClick={() => setShowCardModal(true)}
-                className="mt-3 px-4 py-2 rounded-xl bg-[#245BFF] hover:bg-[#1A4EE5] text-white text-xs font-semibold shadow-xs transition"
+                className="mt-3 px-5 py-2 rounded-full bg-[#ffffff] hover:bg-[#f0f0f0] text-[#000000] text-[14px] font-medium transition cursor-pointer"
               >
                 + Criar Primeiro Card
               </button>
             </div>
           ) : activeCard ? (
             <div className="space-y-4">
-              <div className={`flex items-center justify-between text-xs ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
+              <div className="flex items-center justify-between text-[13px] text-[#999999]">
                 <span className="font-medium">Card {activeCardIndex + 1} de {currentCards.length}</span>
-                <span className={`font-mono ${isDarkMode ? 'text-white font-semibold' : 'text-[#245BFF]'}`}>Intervalo: {activeCard.interval_days} dias</span>
+                <span className="font-mono text-[#ffffff] font-medium">Intervalo: {activeCard.interval_days} dias</span>
               </div>
 
               {/* O Cartão Interativo com Virada */}
               <div
                 onClick={() => setIsFlipped(!isFlipped)}
-                className={`min-h-[220px] p-7 rounded-2xl border flex flex-col justify-between cursor-pointer transition-all duration-200 text-center select-none ${
-                  isDarkMode 
-                    ? 'bg-[#1C2333] border-[#263248] hover:border-[#245BFF] shadow-md' 
-                    : 'bg-[#FFFFFF] border-[#E5EAF2] hover:border-[#245BFF] shadow-[0_4px_20px_rgba(23,32,51,0.06)]'
-                }`}
+                className="min-h-[220px] p-8 rounded-[20px] border border-[#262626] bg-[#141414] hover:border-[#0099ff] cursor-pointer transition-all duration-200 flex flex-col justify-between text-center select-none"
               >
-                <span className={`text-[10px] font-mono font-bold uppercase tracking-wider ${
-                  isDarkMode ? 'text-white' : 'text-[#245BFF]'
-                }`}>
+                <span className="text-[11px] font-mono uppercase tracking-[0.08em] text-[#0099ff]">
                   {isFlipped ? 'Resposta (Verso)' : 'Pergunta (Frente) — Clique para virar'}
                 </span>
 
                 <div className="my-auto py-5">
-                  <p className={`text-base sm:text-lg font-semibold leading-relaxed ${
-                    isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'
-                  }`}>
+                  <p className="text-[18px] sm:text-[20px] font-medium leading-relaxed text-[#ffffff] tracking-[-0.2px]">
                     {isFlipped ? activeCard.back : activeCard.front}
                   </p>
                 </div>
 
-                <div className={`text-[11px] font-medium flex items-center justify-center gap-1.5 ${
-                  isDarkMode ? 'text-[#64748B]' : 'text-[#9AA4B2]'
-                }`}>
-                  <RotateCw className={`w-3.5 h-3.5 ${isDarkMode ? 'text-white' : 'text-[#245BFF]'}`} />
+                <div className="text-[12px] font-medium flex items-center justify-center gap-1.5 text-[#999999]">
+                  <RotateCw className="w-3.5 h-3.5 text-[#0099ff]" />
                   <span>{isFlipped ? 'Clique para ver a pergunta' : 'Clique para revelar a resposta'}</span>
                 </div>
               </div>
@@ -386,21 +329,21 @@ export const StudiesView: React.FC<StudiesViewProps> = ({
                   <button
                     type="button"
                     onClick={() => handleAnswerCard('dificil')}
-                    className="p-3 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-xs font-semibold hover:bg-rose-100 transition cursor-pointer"
+                    className="p-3 rounded-full border border-[#ff5577]/40 bg-[#ff5577]/15 text-[#ff5577] text-[13px] font-medium hover:bg-[#ff5577]/25 transition cursor-pointer"
                   >
                     Difícil (+1 dia)
                   </button>
                   <button
                     type="button"
                     onClick={() => handleAnswerCard('bom')}
-                    className="p-3 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-[#EEF3FF] dark:bg-[#245BFF]/30 text-[#245BFF] dark:text-white text-xs font-semibold hover:bg-[#D4E2FF] transition cursor-pointer"
+                    className="p-3 rounded-full border border-[#0099ff]/40 bg-[#0099ff]/15 text-[#0099ff] text-[13px] font-medium hover:bg-[#0099ff]/25 transition cursor-pointer"
                   >
                     Bom (+2 dias)
                   </button>
                   <button
                     type="button"
                     onClick={() => handleAnswerCard('facil')}
-                    className="p-3 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-semibold hover:bg-emerald-100 transition cursor-pointer"
+                    className="p-3 rounded-full border border-[#22c55e]/40 bg-[#22c55e]/15 text-[#22c55e] text-[13px] font-medium hover:bg-[#22c55e]/25 transition cursor-pointer"
                   >
                     Fácil (+4 dias)
                   </button>
@@ -416,27 +359,25 @@ export const StudiesView: React.FC<StudiesViewProps> = ({
         <div 
           role="dialog" 
           aria-modal="true" 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150"
         >
-          <div className={`w-full max-w-md rounded-2xl border p-6 shadow-[0_20px_48px_rgba(23,32,51,0.16)] text-left space-y-4 ${
-            isDarkMode ? 'bg-[#1C2333] border-[#263248]' : 'bg-[#FFFFFF] border-[#E5EAF2]'
-          }`}>
-            <div className="flex items-center justify-between border-b border-[#E5EAF2] dark:border-[#263248] pb-3">
-              <h3 className={`text-sm font-bold ${isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'}`}>
+          <div className="w-full max-w-md rounded-[20px] border border-[#262626] bg-[#141414] p-6 text-left space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#262626] pb-3">
+              <h3 className="text-[16px] font-medium tracking-[-0.2px] text-[#ffffff]">
                 Nova Disciplina ou Curso
               </h3>
               <button
                 type="button"
                 onClick={() => setShowSubjectModal(false)}
-                className={`p-1 rounded-lg ${isDarkMode ? 'text-[#94A3B8] hover:text-[#F1F5F9]' : 'text-[#687386] hover:text-[#172033]'}`}
+                className="p-1.5 rounded-full text-[#999999] hover:text-[#ffffff] hover:bg-[#1c1c1c] transition"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateSubject} className="space-y-3.5">
+            <form onSubmit={handleCreateSubject} className="space-y-4">
               <div>
-                <label className={`text-xs font-semibold mb-1 block ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
+                <label className="text-[13px] font-medium mb-1.5 block text-[#ffffff]">
                   Título
                 </label>
                 <input
@@ -446,26 +387,18 @@ export const StudiesView: React.FC<StudiesViewProps> = ({
                   placeholder="Ex: Estatística Aplicada"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  className={`w-full px-3 py-2 rounded-xl border text-xs sm:text-sm focus:outline-none focus:border-[#245BFF] focus:ring-2 focus:ring-[#245BFF]/20 ${
-                    isDarkMode 
-                      ? 'bg-[#182030] border-[#263248] text-[#F1F5F9] placeholder-[#64748B]' 
-                      : 'bg-[#FFFFFF] border-[#E5EAF2] text-[#172033] placeholder-[#9AA4B2]'
-                  }`}
+                  className="w-full px-3.5 py-2.5 rounded-[10px] border text-[14px] bg-[#090909] border-[#262626] text-[#ffffff] placeholder-[#999999] focus:outline-none focus:border-[#0099ff]"
                 />
               </div>
 
               <div>
-                <label className={`text-xs font-semibold mb-1 block ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
+                <label className="text-[13px] font-medium mb-1.5 block text-[#ffffff]">
                   Tipo
                 </label>
                 <select
                   value={newType}
                   onChange={(e) => setNewType(e.target.value)}
-                  className={`w-full px-3 py-2 rounded-xl border text-xs ${
-                    isDarkMode 
-                      ? 'bg-[#182030] border-[#263248] text-[#F1F5F9]' 
-                      : 'bg-[#FFFFFF] border-[#E5EAF2] text-[#172033]'
-                  }`}
+                  className="w-full px-3.5 py-2.5 rounded-[10px] border text-[14px] bg-[#090909] border-[#262626] text-[#ffffff] focus:outline-none focus:border-[#0099ff]"
                 >
                   <option value="disciplina">Disciplina Faculdade/Escola</option>
                   <option value="curso">Curso Online</option>
@@ -475,7 +408,7 @@ export const StudiesView: React.FC<StudiesViewProps> = ({
               </div>
 
               <div>
-                <label className={`text-xs font-semibold mb-1 block ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
+                <label className="text-[13px] font-medium mb-1.5 block text-[#ffffff]">
                   Meta de Horas de Estudo
                 </label>
                 <input
@@ -484,27 +417,21 @@ export const StudiesView: React.FC<StudiesViewProps> = ({
                   step="5"
                   value={newTargetHours}
                   onChange={(e) => setNewTargetHours(parseInt(e.target.value) || 20)}
-                  className={`w-full px-3 py-2 rounded-xl border text-xs ${
-                    isDarkMode 
-                      ? 'bg-[#182030] border-[#263248] text-[#F1F5F9]' 
-                      : 'bg-[#FFFFFF] border-[#E5EAF2] text-[#172033]'
-                  }`}
+                  className="w-full px-3.5 py-2.5 rounded-[10px] border text-[14px] bg-[#090909] border-[#262626] text-[#ffffff] focus:outline-none focus:border-[#0099ff]"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-[#E5EAF2] dark:border-[#263248]">
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-[#262626]">
                 <button
                   type="button"
                   onClick={() => setShowSubjectModal(false)}
-                  className={`px-4 py-2 rounded-xl text-xs font-medium ${
-                    isDarkMode ? 'text-[#94A3B8] hover:bg-[#222B3D]' : 'text-[#687386] hover:bg-[#F5F7FB]'
-                  }`}
+                  className="px-4 py-2 rounded-full font-medium cursor-pointer border bg-[#1c1c1c] border-[#262626] text-[#ffffff] hover:bg-[#262626] text-[13px]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-[#245BFF] hover:bg-[#1A4EE5] text-white shadow-xs"
+                  className="px-5 py-2 rounded-full bg-[#ffffff] hover:bg-[#f0f0f0] text-[#000000] font-medium cursor-pointer text-[14px]"
                 >
                   Salvar
                 </button>
@@ -519,27 +446,25 @@ export const StudiesView: React.FC<StudiesViewProps> = ({
         <div 
           role="dialog" 
           aria-modal="true" 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150"
         >
-          <div className={`w-full max-w-md rounded-2xl border p-6 shadow-[0_20px_48px_rgba(23,32,51,0.16)] text-left space-y-4 ${
-            isDarkMode ? 'bg-[#1C2333] border-[#263248]' : 'bg-[#FFFFFF] border-[#E5EAF2]'
-          }`}>
-            <div className="flex items-center justify-between border-b border-[#E5EAF2] dark:border-[#263248] pb-3">
-              <h3 className={`text-sm font-bold ${isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'}`}>
+          <div className="w-full max-w-md rounded-[20px] border border-[#262626] bg-[#141414] p-6 text-left space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#262626] pb-3">
+              <h3 className="text-[16px] font-medium tracking-[-0.2px] text-[#ffffff]">
                 Novo Flashcard
               </h3>
               <button
                 type="button"
                 onClick={() => setShowCardModal(false)}
-                className={`p-1 rounded-lg ${isDarkMode ? 'text-[#94A3B8] hover:text-[#F1F5F9]' : 'text-[#687386] hover:text-[#172033]'}`}
+                className="p-1.5 rounded-full text-[#999999] hover:text-[#ffffff] hover:bg-[#1c1c1c] transition"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateCard} className="space-y-3.5">
+            <form onSubmit={handleCreateCard} className="space-y-4">
               <div>
-                <label className={`text-xs font-semibold mb-1 block ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
+                <label className="text-[13px] font-medium mb-1.5 block text-[#ffffff]">
                   Frente (Pergunta ou Conceito)
                 </label>
                 <textarea
@@ -549,16 +474,12 @@ export const StudiesView: React.FC<StudiesViewProps> = ({
                   placeholder="Ex: O que é memoization?"
                   value={cardFront}
                   onChange={(e) => setCardFront(e.target.value)}
-                  className={`w-full px-3 py-2 rounded-xl border text-xs resize-none focus:outline-none focus:border-[#245BFF] ${
-                    isDarkMode 
-                      ? 'bg-[#182030] border-[#263248] text-[#F1F5F9] placeholder-[#64748B]' 
-                      : 'bg-[#FFFFFF] border-[#E5EAF2] text-[#172033] placeholder-[#9AA4B2]'
-                  }`}
+                  className="w-full px-3.5 py-2.5 rounded-[10px] border text-[14px] resize-none bg-[#090909] border-[#262626] text-[#ffffff] placeholder-[#999999] focus:outline-none focus:border-[#0099ff]"
                 />
               </div>
 
               <div>
-                <label className={`text-xs font-semibold mb-1 block ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
+                <label className="text-[13px] font-medium mb-1.5 block text-[#ffffff]">
                   Verso (Resposta Clara e Sucinta)
                 </label>
                 <textarea
@@ -567,27 +488,21 @@ export const StudiesView: React.FC<StudiesViewProps> = ({
                   placeholder="Ex: Técnica de otimização que armazena os resultados de chamadas de funções caras..."
                   value={cardBack}
                   onChange={(e) => setCardBack(e.target.value)}
-                  className={`w-full px-3 py-2 rounded-xl border text-xs resize-none focus:outline-none focus:border-[#245BFF] ${
-                    isDarkMode 
-                      ? 'bg-[#182030] border-[#263248] text-[#F1F5F9] placeholder-[#64748B]' 
-                      : 'bg-[#FFFFFF] border-[#E5EAF2] text-[#172033] placeholder-[#9AA4B2]'
-                  }`}
+                  className="w-full px-3.5 py-2.5 rounded-[10px] border text-[14px] resize-none bg-[#090909] border-[#262626] text-[#ffffff] placeholder-[#999999] focus:outline-none focus:border-[#0099ff]"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-[#E5EAF2] dark:border-[#263248]">
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-[#262626]">
                 <button
                   type="button"
                   onClick={() => setShowCardModal(false)}
-                  className={`px-4 py-2 rounded-xl text-xs font-medium ${
-                    isDarkMode ? 'text-[#94A3B8] hover:bg-[#222B3D]' : 'text-[#687386] hover:bg-[#F5F7FB]'
-                  }`}
+                  className="px-4 py-2 rounded-full font-medium cursor-pointer border bg-[#1c1c1c] border-[#262626] text-[#ffffff] hover:bg-[#262626] text-[13px]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-[#245BFF] hover:bg-[#1A4EE5] text-white shadow-xs"
+                  className="px-5 py-2 rounded-full bg-[#ffffff] hover:bg-[#f0f0f0] text-[#000000] font-medium cursor-pointer text-[14px]"
                 >
                   Adicionar Card
                 </button>

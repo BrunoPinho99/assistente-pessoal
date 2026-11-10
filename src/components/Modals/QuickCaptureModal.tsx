@@ -11,7 +11,6 @@ interface QuickCaptureModalProps {
 export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
   isOpen,
   onClose,
-  isDarkMode = false,
   onCapture
 }) => {
   const [text, setText] = useState('');
@@ -41,54 +40,42 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
     <div 
       role="dialog" 
       aria-modal="true" 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-150"
     >
-      <div className={`w-full max-w-lg rounded-2xl border p-6 shadow-[0_20px_48px_rgba(23,32,51,0.16)] text-left space-y-4 ${
-        isDarkMode ? 'bg-[#1C2333] border-[#263248] text-[#F1F5F9]' : 'bg-[#FFFFFF] border-[#E5EAF2] text-[#172033]'
-      }`}>
-        <div className="flex items-center justify-between border-b border-[#E5EAF2] dark:border-[#263248] pb-3.5">
+      <div className="w-full max-w-lg rounded-[20px] border border-[#262626] bg-[#141414] p-6 shadow-2xl text-left space-y-4 text-white font-sans">
+        <div className="flex items-center justify-between border-b border-[#262626] pb-3.5">
           <div className="flex items-center gap-2.5">
-            <span className={`w-7 h-7 rounded-lg flex items-center justify-center border ${
-              isDarkMode 
-                ? 'bg-[#245BFF]/20 border-[#245BFF]/30 text-[#7A9CFF]' 
-                : 'bg-[#EEF3FF] border-[#D4E2FF] text-[#245BFF]'
-            }`}>
-              <Zap className="w-4 h-4" />
+            <span className="w-7 h-7 rounded-full flex items-center justify-center border border-[#262626] bg-[#1c1c1c] text-white">
+              <Zap className="w-3.5 h-3.5 text-white" />
             </span>
             <div>
-              <h3 className={`text-sm font-bold tracking-tight ${isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'}`}>
-                Captura Rápida (Zero Atrito)
+              <h3 className="text-sm font-medium tracking-tight text-white">
+                Captura Rápida
               </h3>
-              <p className={`text-[11px] ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
-                Despeje pensamentos soltos da mente instantaneamente.
+              <p className="text-[11px] text-[#999999]">
+                Despeje pensamentos soltos da mente instantaneamente sem atrito.
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className={`p-1 rounded-lg transition-colors cursor-pointer ${
-              isDarkMode ? 'text-[#94A3B8] hover:text-[#F1F5F9]' : 'text-[#687386] hover:text-[#172033]'
-            }`}
+            className="p-1 rounded-full text-[#999999] hover:text-white hover:bg-[#1c1c1c] transition-colors cursor-pointer"
             aria-label="Fechar"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Tipo de Destino (Segmented Soft Tech) */}
-        <div className={`p-1 rounded-xl flex items-center gap-1 border ${
-          isDarkMode ? 'bg-[#182030] border-[#263248]' : 'bg-[#E9EFF8] border-[#E5EAF2]'
-        }`}>
+        {/* Tipo de Destino (Pill Tabs) */}
+        <div className="p-1 rounded-full flex items-center gap-1 border border-[#262626] bg-[#1c1c1c]">
           <button
             type="button"
             onClick={() => setType('inbox')}
-            className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`flex-1 py-1.5 px-2 rounded-full text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
               type === 'inbox' 
-                ? isDarkMode 
-                  ? 'bg-[#315DFF] text-white font-semibold shadow-xs' 
-                  : 'bg-[#FFFFFF] text-[#245BFF] font-semibold shadow-xs border border-[#E5EAF2]'
-                : isDarkMode ? 'text-[#94A3B8] hover:text-[#F1F5F9]' : 'text-[#687386] hover:text-[#172033]'
+                ? 'bg-white text-black font-semibold shadow-xs' 
+                : 'text-[#999999] hover:text-white'
             }`}
           >
             <Inbox className="w-3.5 h-3.5" />
@@ -98,81 +85,69 @@ export const QuickCaptureModal: React.FC<QuickCaptureModalProps> = ({
           <button
             type="button"
             onClick={() => setType('task')}
-            className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`flex-1 py-1.5 px-2 rounded-full text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
               type === 'task' 
-                ? isDarkMode 
-                  ? 'bg-[#315DFF] text-white font-semibold shadow-xs' 
-                  : 'bg-[#FFFFFF] text-[#245BFF] font-semibold shadow-xs border border-[#E5EAF2]'
-                : isDarkMode ? 'text-[#94A3B8] hover:text-[#F1F5F9]' : 'text-[#687386] hover:text-[#172033]'
+                ? 'bg-white text-black font-semibold shadow-xs' 
+                : 'text-[#999999] hover:text-white'
             }`}
           >
-            <Zap className="w-3.5 h-3.5" />
-            <span>Ação Imediata</span>
+            <Check className="w-3.5 h-3.5" />
+            <span>Tarefa</span>
           </button>
 
           <button
             type="button"
             onClick={() => setType('note')}
-            className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`flex-1 py-1.5 px-2 rounded-full text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
               type === 'note' 
-                ? isDarkMode 
-                  ? 'bg-[#315DFF] text-white font-semibold shadow-xs' 
-                  : 'bg-[#FFFFFF] text-[#245BFF] font-semibold shadow-xs border border-[#E5EAF2]'
-                : isDarkMode ? 'text-[#94A3B8] hover:text-[#F1F5F9]' : 'text-[#687386] hover:text-[#172033]'
+                ? 'bg-white text-black font-semibold shadow-xs' 
+                : 'text-[#999999] hover:text-white'
             }`}
           >
             <FileText className="w-3.5 h-3.5" />
-            <span>Anotação</span>
+            <span>Nota</span>
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3.5">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <textarea
             autoFocus
             rows={3}
+            placeholder={
+              type === 'task' 
+                ? "Qual ação precisa ser feita? (Ex: Enviar proposta do Littera)" 
+                : type === 'note'
+                ? "Qual ideia ou insight você teve agora?"
+                : "Pensamento solto para organizar depois..."
+            }
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                e.preventDefault();
                 handleSubmit(e);
               }
             }}
-            placeholder={
-              type === 'inbox' 
-                ? 'Ex: Rever os slides de apresentação do IDP...' 
-                : type === 'task' 
-                  ? 'Ex: Rodar migrations do cluster e subir PR...' 
-                  : 'Ex: Ideia de novo módulo para o Littera...'
-            }
-            className={`w-full p-3.5 rounded-xl border text-xs sm:text-sm focus:outline-none focus:border-[#245BFF] focus:ring-2 focus:ring-[#245BFF]/20 resize-none transition-all ${
-              isDarkMode 
-                ? 'bg-[#182030] border-[#263248] text-[#F1F5F9] placeholder-[#64748B]' 
-                : 'bg-[#FFFFFF] border-[#E5EAF2] text-[#172033] placeholder-[#9AA4B2]'
-            }`}
+            className="w-full px-3.5 py-2.5 rounded-xl border border-[#262626] bg-[#1c1c1c] text-white placeholder-[#999999] text-xs focus:outline-none focus:border-[#0099ff] focus:ring-1 focus:ring-[#0099ff] resize-none transition-all"
           />
 
-          <div className="flex items-center justify-between text-xs pt-1">
-            <span className={`text-[11px] font-mono ${isDarkMode ? 'text-[#64748B]' : 'text-[#9AA4B2]'}`}>
-              Pressione <kbd className="px-1.5 py-0.5 rounded border border-[#E5EAF2] dark:border-[#263248] bg-[#F5F7FB] dark:bg-[#182030] text-[10px]">Cmd + Enter</kbd> para salvar
+          <div className="flex items-center justify-between pt-1">
+            <span className="text-[10px] text-[#999999]">
+              Pressione <kbd className="font-mono bg-[#1c1c1c] px-1.5 py-0.5 rounded border border-[#262626] text-white">⌘ + Enter</kbd> para salvar
             </span>
-
-            <div className="flex items-center gap-2">
+            <div className="flex gap-2">
               <button
                 type="button"
                 onClick={onClose}
-                className={`px-3 py-1.5 rounded-xl text-xs font-medium ${
-                  isDarkMode ? 'text-[#94A3B8] hover:bg-[#222B3D]' : 'text-[#687386] hover:bg-[#F5F7FB]'
-                }`}
+                className="px-4 py-2 rounded-full text-xs font-medium text-[#999999] hover:text-white bg-[#1c1c1c] border border-[#262626] transition cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 rounded-xl text-xs font-semibold bg-[#245BFF] hover:bg-[#1A4EE5] active:scale-[0.98] text-white shadow-[0_2px_8px_-1px_rgba(58,98,255,0.35)] transition cursor-pointer flex items-center gap-1.5"
+                disabled={!text.trim()}
+                className="px-5 py-2 rounded-full text-xs font-semibold bg-white hover:bg-neutral-200 active:scale-[0.98] text-black shadow-sm disabled:opacity-40 transition cursor-pointer"
               >
-                <Check className="w-3.5 h-3.5" />
-                <span>Salvar</span>
+                Capturar
               </button>
             </div>
           </div>

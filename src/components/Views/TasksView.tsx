@@ -13,8 +13,7 @@ import {
   Clock, 
   Sparkles, 
   Flame, 
-  Activity,
-  ArrowRight
+  Activity
 } from 'lucide-react';
 import { Task, Project, EnergyLevel, Priority, TaskStatus, ContextFilter, ContextArea } from '../../types';
 import { PriorityBadge } from '../../lib/priorityUtils';
@@ -34,18 +33,17 @@ interface TasksViewProps {
 export const TasksView: React.FC<TasksViewProps> = ({
   tasks,
   projects,
-  isDarkMode = false,
+  isDarkMode = true,
   onToggleTask,
   onOpenTaskModal,
   onDeleteTask,
-  onStartFocus,
-  onRequestSliceTask
+  onStartFocus
 }) => {
   const [viewMode, setViewMode] = useState<'lista' | 'kanban' | 'calendario'>('lista');
   const [contextFilter, setContextFilter] = useState<ContextFilter>('todos');
-  const [filterEnergy, setFilterEnergy] = useState<EnergyLevel | 'all'>('all');
+  const [filterEnergy] = useState<EnergyLevel | 'all'>('all');
   const [filterPriority, setFilterPriority] = useState<Priority | 'all'>('all');
-  const [filterProject, setFilterProject] = useState<string | 'all'>('all');
+  const [filterProject] = useState<string | 'all'>('all');
 
   const filteredTasks = tasks.filter(t => {
     if (contextFilter !== 'todos' && t.area !== contextFilter) return false;
@@ -59,33 +57,21 @@ export const TasksView: React.FC<TasksViewProps> = ({
     switch (lvl) {
       case 'low':
         return (
-          <span className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md border ${
-            isDarkMode 
-              ? 'bg-emerald-950/40 text-emerald-400 border-emerald-800/40' 
-              : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-          }`}>
+          <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-[6px] border bg-[#22c55e]/15 text-[#22c55e] border-[#22c55e]/30 tracking-[-0.12px]">
             <Sparkles className="w-2.5 h-2.5" />
             <span>Baixa</span>
           </span>
         );
       case 'medium':
         return (
-          <span className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md border ${
-            isDarkMode 
-              ? 'bg-sky-950/40 text-sky-400 border-sky-800/40' 
-              : 'bg-sky-50 text-sky-700 border-sky-200'
-          }`}>
+          <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-[6px] border bg-[#0099ff]/15 text-[#0099ff] border-[#0099ff]/30 tracking-[-0.12px]">
             <Activity className="w-2.5 h-2.5" />
             <span>Média</span>
           </span>
         );
       case 'high':
         return (
-          <span className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md border ${
-            isDarkMode 
-              ? 'bg-amber-950/40 text-amber-400 border-amber-800/40' 
-              : 'bg-amber-50 text-amber-800 border-amber-200'
-          }`}>
+          <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-[6px] border bg-[#ff7a3d]/15 text-[#ff7a3d] border-[#ff7a3d]/30 tracking-[-0.12px]">
             <Flame className="w-2.5 h-2.5 fill-current" />
             <span>Alta</span>
           </span>
@@ -96,22 +82,14 @@ export const TasksView: React.FC<TasksViewProps> = ({
   const getAreaBadge = (area: ContextArea) => {
     switch (area) {
       case 'Littera':
-        return isDarkMode 
-          ? 'bg-blue-950/70 text-white border-blue-600/40' 
-          : 'bg-[#EEF4FF] text-[#245BFF] border-[#D4E2FF]';
+        return 'bg-[#0099ff]/15 text-[#0099ff] border-[#0099ff]/30';
       case 'Aura':
-        return isDarkMode 
-          ? 'bg-purple-950/70 text-white border-purple-500/40' 
-          : 'bg-[#F0EEFF] text-[#6E56CF] border-[#D2DCE8]';
+        return 'bg-[#6a4cf5]/20 text-[#d44df0] border-[#6a4cf5]/40';
       case 'IDP':
-        return isDarkMode 
-          ? 'bg-emerald-950/70 text-white border-emerald-500/40' 
-          : 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        return 'bg-[#22c55e]/15 text-[#22c55e] border-[#22c55e]/30';
       case 'Pessoal':
       default:
-        return isDarkMode 
-          ? 'bg-[#20293B] text-slate-200 border-[#2E3C56]' 
-          : 'bg-[#F5F7FB] text-[#687386] border-[#E5EAF2]';
+        return 'bg-[#1c1c1c] text-[#999999] border-[#262626]';
     }
   };
 
@@ -128,29 +106,23 @@ export const TasksView: React.FC<TasksViewProps> = ({
     <div className="flex flex-col gap-6 text-left select-none" data-purpose="tasks-view">
       
       {/* Top Header Row */}
-      <header className="flex items-center justify-between text-xs pb-3 border-b border-[#E5EAF2] dark:border-[#263248]">
-        <div className={`flex items-center gap-1.5 font-medium ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
-          <span className="hover:text-[#245BFF] transition-colors cursor-pointer">Meu espaço</span>
-          <span className={isDarkMode ? 'text-[#64748B]' : 'text-[#D2DCE8]'}>/</span>
-          <span className={`font-semibold ${isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'}`}>Tarefas</span>
+      <header className="flex items-center justify-between text-[13px] pb-3 border-b border-[#262626]">
+        <div className="flex items-center gap-1.5 font-medium text-[#999999]">
+          <span className="hover:text-[#0099ff] transition-colors cursor-pointer">Meu espaço</span>
+          <span className="text-[#262626]">/</span>
+          <span className="font-medium text-[#ffffff]">Tarefas</span>
         </div>
 
         <div className="flex items-center gap-3">
-          {/* View Switcher: Segmented Soft Tech Control */}
-          <div className={`p-1 rounded-xl flex items-center gap-1 border ${
-            isDarkMode ? 'bg-[#1C2333] border-[#263248]' : 'bg-[#E9EFF8] border-[#E5EAF2]'
-          }`}>
+          {/* View Switcher: Framer Pill Control (Selected = #1c1c1c surface lift) */}
+          <div className="p-1 rounded-full flex items-center gap-1 border bg-[#141414] border-[#262626]">
             <button
               type="button"
               onClick={() => setViewMode('lista')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium tracking-[-0.13px] flex items-center gap-1.5 transition-all cursor-pointer ${
                 viewMode === 'lista'
-                  ? isDarkMode
-                    ? 'bg-[#315DFF] text-white font-semibold shadow-xs'
-                    : 'bg-[#FFFFFF] text-[#245BFF] font-semibold shadow-xs border border-[#E5EAF2]'
-                  : isDarkMode
-                    ? 'text-[#94A3B8] hover:text-[#F1F5F9]'
-                    : 'text-[#687386] hover:text-[#172033]'
+                  ? 'bg-[#1c1c1c] text-[#ffffff]'
+                  : 'text-[#999999] hover:text-[#ffffff]'
               }`}
             >
               <LayoutList className="w-3.5 h-3.5" />
@@ -160,14 +132,10 @@ export const TasksView: React.FC<TasksViewProps> = ({
             <button
               type="button"
               onClick={() => setViewMode('kanban')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium tracking-[-0.13px] flex items-center gap-1.5 transition-all cursor-pointer ${
                 viewMode === 'kanban'
-                  ? isDarkMode
-                    ? 'bg-[#315DFF] text-white font-semibold shadow-xs'
-                    : 'bg-[#FFFFFF] text-[#245BFF] font-semibold shadow-xs border border-[#E5EAF2]'
-                  : isDarkMode
-                    ? 'text-[#94A3B8] hover:text-[#F1F5F9]'
-                    : 'text-[#687386] hover:text-[#172033]'
+                  ? 'bg-[#1c1c1c] text-[#ffffff]'
+                  : 'text-[#999999] hover:text-[#ffffff]'
               }`}
             >
               <Kanban className="w-3.5 h-3.5" />
@@ -177,14 +145,10 @@ export const TasksView: React.FC<TasksViewProps> = ({
             <button
               type="button"
               onClick={() => setViewMode('calendario')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium tracking-[-0.13px] flex items-center gap-1.5 transition-all cursor-pointer ${
                 viewMode === 'calendario'
-                  ? isDarkMode
-                    ? 'bg-[#315DFF] text-white font-semibold shadow-xs'
-                    : 'bg-[#FFFFFF] text-[#245BFF] font-semibold shadow-xs border border-[#E5EAF2]'
-                  : isDarkMode
-                    ? 'text-[#94A3B8] hover:text-[#F1F5F9]'
-                    : 'text-[#687386] hover:text-[#172033]'
+                  ? 'bg-[#1c1c1c] text-[#ffffff]'
+                  : 'text-[#999999] hover:text-[#ffffff]'
               }`}
             >
               <CalendarIcon className="w-3.5 h-3.5" />
@@ -192,12 +156,13 @@ export const TasksView: React.FC<TasksViewProps> = ({
             </button>
           </div>
 
+          {/* Framer Primary CTA: White Pill */}
           <button
             type="button"
             onClick={() => onOpenTaskModal(null)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#245BFF] hover:bg-[#1A4EE5] active:scale-[0.98] text-white font-semibold text-xs tracking-wide shadow-[0_2px_8px_-1px_rgba(58,98,255,0.35)] transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-[15px] py-[10px] rounded-full bg-[#ffffff] hover:bg-[#f0f0f0] active:scale-[0.98] text-[#000000] font-medium text-[14px] tracking-[-0.14px] transition-all cursor-pointer"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-3.5 h-3.5 text-[#000000]" />
             <span>Nova tarefa</span>
           </button>
         </div>
@@ -206,20 +171,16 @@ export const TasksView: React.FC<TasksViewProps> = ({
       {/* Hero Header & Filter Tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className={`text-2xl sm:text-3xl font-bold tracking-tight ${
-            isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'
-          }`}>
+          <h1 className="text-[32px] sm:text-[40px] font-medium tracking-[-1.8px] text-[#ffffff] leading-[1.05]">
             Central de Tarefas
           </h1>
-          <p className={`text-sm mt-1 font-normal ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
+          <p className="text-[15px] mt-1 font-normal text-[#999999] tracking-[-0.15px]">
             Organização sem sobrecarga. Uma entrega de cada vez.
           </p>
         </div>
 
-        {/* Filtros de Contexto */}
-        <div className={`p-1 rounded-xl flex items-center gap-1 border overflow-x-auto ${
-          isDarkMode ? 'bg-[#1C2333] border-[#263248]' : 'bg-[#E9EFF8] border-[#E5EAF2]'
-        }`}>
+        {/* Filtros de Contexto (Framer Pill Tabs) */}
+        <div className="p-1 rounded-full flex items-center gap-1 border overflow-x-auto bg-[#141414] border-[#262626]">
           {contextOptions.map(ctx => {
             const isActive = contextFilter === ctx;
             const count = ctx === 'todos' ? tasks.length : tasks.filter(t => t.area === ctx).length;
@@ -229,14 +190,10 @@ export const TasksView: React.FC<TasksViewProps> = ({
                 key={ctx}
                 type="button"
                 onClick={() => setContextFilter(ctx)}
-                className={`px-3 py-1.5 rounded-lg text-xs transition-all duration-150 cursor-pointer capitalize ${
+                className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium tracking-[-0.13px] transition-all duration-150 cursor-pointer capitalize tabular-nums ${
                   isActive
-                    ? isDarkMode
-                      ? 'bg-[#315DFF] text-white font-semibold shadow-xs'
-                      : 'bg-[#FFFFFF] text-[#245BFF] font-semibold shadow-xs border border-[#E5EAF2]'
-                    : isDarkMode
-                      ? 'text-[#94A3B8] hover:text-[#F1F5F9]'
-                      : 'text-[#687386] hover:text-[#172033]'
+                    ? 'bg-[#1c1c1c] text-[#ffffff]'
+                    : 'text-[#999999] hover:text-[#ffffff]'
                 }`}
               >
                 {ctx} ({count})
@@ -247,23 +204,17 @@ export const TasksView: React.FC<TasksViewProps> = ({
       </div>
 
       {/* Filtro por Temperatura de Prioridade */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-        <span className={`font-mono text-[11px] uppercase tracking-wider shrink-0 font-semibold ${
-          isDarkMode ? 'text-[#64748B]' : 'text-[#9AA4B2]'
-        }`}>
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 text-[13px]">
+        <span className="font-mono text-[11px] uppercase tracking-[0.06em] shrink-0 font-medium text-[#999999]">
           Prioridade:
         </span>
         <button
           type="button"
           onClick={() => setFilterPriority('all')}
-          className={`px-2.5 py-1 rounded-lg text-xs font-medium transition cursor-pointer border ${
+          className={`px-3 py-1 rounded-full text-[13px] font-medium tracking-[-0.13px] transition cursor-pointer border tabular-nums ${
             filterPriority === 'all'
-              ? isDarkMode
-                ? 'bg-[#222B3D] text-[#F1F5F9] border-[#33415C] font-semibold'
-                : 'bg-[#FFFFFF] text-[#172033] border-[#E5EAF2] font-semibold shadow-xs'
-              : isDarkMode
-                ? 'bg-transparent border-transparent text-[#94A3B8] hover:text-[#F1F5F9]'
-                : 'bg-transparent border-transparent text-[#687386] hover:text-[#172033]'
+              ? 'bg-[#1c1c1c] text-[#ffffff] border-[#262626]'
+              : 'bg-transparent border-transparent text-[#999999] hover:text-[#ffffff]'
           }`}
         >
           Todas ({tasks.length})
@@ -271,62 +222,60 @@ export const TasksView: React.FC<TasksViewProps> = ({
         <button
           type="button"
           onClick={() => setFilterPriority('urgente')}
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition cursor-pointer border ${
+          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[13px] font-medium tracking-[-0.13px] transition cursor-pointer border tabular-nums ${
             filterPriority === 'urgente'
-              ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 font-semibold'
-              : isDarkMode ? 'text-rose-400 hover:bg-rose-500/10 border-transparent' : 'text-rose-700 hover:bg-rose-50 border-transparent'
+              ? 'bg-[#ff5577]/15 text-[#ff5577] border-[#ff5577]/40'
+              : 'text-[#ff5577]/80 hover:bg-[#ff5577]/10 border-transparent'
           }`}
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+          <span className="w-1.5 h-1.5 rounded-full bg-[#ff5577]"></span>
           <span>Urgente ({tasks.filter(t => t.priority === 'urgente').length})</span>
         </button>
         <button
           type="button"
           onClick={() => setFilterPriority('alta')}
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition cursor-pointer border ${
+          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[13px] font-medium tracking-[-0.13px] transition cursor-pointer border tabular-nums ${
             filterPriority === 'alta'
-              ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 font-semibold'
-              : isDarkMode ? 'text-amber-400 hover:bg-amber-500/10 border-transparent' : 'text-amber-800 hover:bg-amber-50 border-transparent'
+              ? 'bg-[#ff7a3d]/15 text-[#ff7a3d] border-[#ff7a3d]/40'
+              : 'text-[#ff7a3d]/80 hover:bg-[#ff7a3d]/10 border-transparent'
           }`}
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+          <span className="w-1.5 h-1.5 rounded-full bg-[#ff7a3d]"></span>
           <span>Alta ({tasks.filter(t => t.priority === 'alta').length})</span>
         </button>
         <button
           type="button"
           onClick={() => setFilterPriority('media')}
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition cursor-pointer border ${
+          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[13px] font-medium tracking-[-0.13px] transition cursor-pointer border tabular-nums ${
             filterPriority === 'media'
-              ? 'bg-sky-500/20 text-sky-300 border-sky-500/50 font-semibold'
-              : isDarkMode ? 'text-sky-400 hover:bg-sky-500/10 border-transparent' : 'text-sky-800 hover:bg-sky-50 border-transparent'
+              ? 'bg-[#0099ff]/15 text-[#0099ff] border-[#0099ff]/40'
+              : 'text-[#0099ff]/80 hover:bg-[#0099ff]/10 border-transparent'
           }`}
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+          <span className="w-1.5 h-1.5 rounded-full bg-[#0099ff]"></span>
           <span>Média ({tasks.filter(t => t.priority === 'media').length})</span>
         </button>
         <button
           type="button"
           onClick={() => setFilterPriority('baixa')}
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition cursor-pointer border ${
+          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[13px] font-medium tracking-[-0.13px] transition cursor-pointer border tabular-nums ${
             filterPriority === 'baixa'
-              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 font-semibold'
-              : isDarkMode ? 'text-emerald-400 hover:bg-emerald-500/10 border-transparent' : 'text-emerald-800 hover:bg-emerald-50 border-transparent'
+              ? 'bg-[#22c55e]/15 text-[#22c55e] border-[#22c55e]/40'
+              : 'text-[#22c55e]/80 hover:bg-[#22c55e]/10 border-transparent'
           }`}
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e]"></span>
           <span>Baixa ({tasks.filter(t => t.priority === 'baixa').length})</span>
         </button>
       </div>
 
-      {/* 1. VISUALIZAÇÃO: LISTA (Soft Tech Rows) */}
+      {/* 1. VISUALIZAÇÃO: LISTA (Framer Charcoal Rows) */}
       {viewMode === 'lista' && (
         <div className="space-y-2.5">
           {filteredTasks.length === 0 ? (
-            <div className={`text-center py-12 px-4 border border-dashed rounded-2xl ${
-              isDarkMode ? 'border-[#263248] bg-[#1C2333]/50' : 'border-[#E5EAF2] bg-[#FFFFFF]'
-            }`}>
-              <CheckSquare className={`w-8 h-8 mx-auto mb-2 ${isDarkMode ? 'text-[#64748B]' : 'text-[#9AA4B2]'}`} />
-              <p className={`text-xs ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
+            <div className="text-center py-12 px-4 border border-dashed rounded-[20px] border-[#262626] bg-[#141414]">
+              <CheckSquare className="w-8 h-8 mx-auto mb-2 text-[#999999]" />
+              <p className="text-[14px] text-[#999999]">
                 Nenhuma tarefa correspondente aos filtros atuais.
               </p>
             </div>
@@ -338,14 +287,10 @@ export const TasksView: React.FC<TasksViewProps> = ({
               return (
                 <div
                   key={t.id}
-                  className={`p-3.5 sm:p-4 rounded-xl border transition-all duration-150 flex items-center justify-between gap-3 group ${
+                  className={`p-4 rounded-[15px] border transition-all duration-150 flex items-center justify-between gap-3 group ${
                     isDone
-                      ? isDarkMode 
-                        ? 'bg-[#182030]/60 border-[#263248] opacity-50' 
-                        : 'bg-[#F5F7FB] border-[#E5EAF2] opacity-50'
-                      : isDarkMode
-                        ? 'bg-[#1C2333] border-[#263248] hover:border-[#33415C] hover:bg-[#20293B] shadow-xs'
-                        : 'bg-[#FFFFFF] border-[#E5EAF2] hover:border-[#D2DCE8] hover:bg-[#FFFFFF] shadow-[0_1px_3px_rgba(23,32,51,0.04)] hover:shadow-[0_4px_16px_rgba(23,32,51,0.06)]'
+                      ? 'bg-[#141414]/60 border-[#262626] opacity-50'
+                      : 'bg-[#141414] border-[#262626] hover:bg-[#1c1c1c]'
                   }`}
                 >
                   <div className="flex items-center gap-3.5 flex-1 min-w-0">
@@ -355,44 +300,42 @@ export const TasksView: React.FC<TasksViewProps> = ({
                       className="cursor-pointer p-0.5 transition-colors shrink-0"
                     >
                       {isDone ? (
-                        <CheckCircle2 className="w-5 h-5 text-[#245BFF]" />
+                        <CheckCircle2 className="w-5 h-5 text-[#ffffff]" />
                       ) : (
-                        <Circle className={`w-5 h-5 ${isDarkMode ? 'text-[#33415C] hover:text-[#245BFF]' : 'text-[#D2DCE8] hover:text-[#245BFF]'}`} />
+                        <Circle className="w-5 h-5 text-[#999999] hover:text-[#ffffff]" />
                       )}
                     </button>
 
                     <div className="min-w-0 flex-1 text-left">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`text-sm font-semibold truncate ${
+                        <span className={`text-[15px] font-medium tracking-[-0.15px] truncate ${
                           isDone 
-                            ? 'line-through text-[#9AA4B2] dark:text-[#64748B]' 
-                            : isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'
+                            ? 'line-through text-[#999999]' 
+                            : 'text-[#ffffff]'
                         }`}>
                           {t.title}
                         </span>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${getAreaBadge(t.area)}`}>
+                        <span className={`px-2 py-0.5 rounded-[6px] text-[11px] font-medium border ${getAreaBadge(t.area)}`}>
                           {t.area}
                         </span>
                         <PriorityBadge priority={t.priority} isDarkMode={isDarkMode} size="xs" />
                       </div>
 
-                      <div className={`flex items-center gap-2 text-xs mt-1 font-medium flex-wrap ${
-                        isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'
-                      }`}>
+                      <div className="flex items-center gap-2 text-[13px] mt-1 font-normal flex-wrap text-[#999999]">
                         {project && (
-                          <span className={`font-semibold ${isDarkMode ? 'text-white' : 'text-[#245BFF]'}`}>
+                          <span className="font-medium text-[#ffffff]">
                             {project.title}
                           </span>
                         )}
                         {project && <span>·</span>}
-                        <span className="flex items-center gap-1">
+                        <span className="flex items-center gap-1 tabular-nums">
                           <Clock className="w-3 h-3" />
                           {t.estimated_minutes}m
                         </span>
                         {t.deadline && (
                           <>
                             <span>·</span>
-                            <span>Prazo: {t.deadline}</span>
+                            <span className="tabular-nums">Prazo: {t.deadline}</span>
                           </>
                         )}
                       </div>
@@ -406,13 +349,9 @@ export const TasksView: React.FC<TasksViewProps> = ({
                       <button
                         type="button"
                         onClick={() => onStartFocus(t)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 border ${
-                          isDarkMode
-                            ? 'bg-[#315DFF] border-[#315DFF] text-white hover:bg-[#245BFF]'
-                            : 'bg-[#EEF3FF] border-[#D4E2FF] text-[#245BFF] hover:bg-[#245BFF] hover:text-white'
-                        }`}
+                        className="px-3.5 py-1.5 rounded-full text-[13px] font-medium tracking-[-0.13px] transition cursor-pointer flex items-center gap-1.5 bg-[#ffffff] text-[#000000] hover:bg-[#f0f0f0] active:scale-[0.98]"
                       >
-                        <Play className="w-3 h-3 fill-current" />
+                        <Play className="w-3 h-3 fill-current text-[#000000]" />
                         <span className="hidden sm:inline">Focar</span>
                       </button>
                     )}
@@ -420,9 +359,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
                     <button
                       type="button"
                       onClick={() => onOpenTaskModal(t)}
-                      className={`p-1.5 rounded-lg transition cursor-pointer opacity-0 group-hover:opacity-100 ${
-                        isDarkMode ? 'text-[#94A3B8] hover:text-[#F1F5F9]' : 'text-[#687386] hover:text-[#172033]'
-                      }`}
+                      className="p-1.5 rounded-full transition cursor-pointer opacity-0 group-hover:opacity-100 text-[#999999] hover:text-[#ffffff] hover:bg-[#262626]"
                       title="Editar"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
@@ -431,7 +368,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
                     <button
                       type="button"
                       onClick={() => onDeleteTask(t.id)}
-                      className="p-1.5 rounded-lg text-[#94A3B8] hover:text-rose-500 transition cursor-pointer opacity-0 group-hover:opacity-100"
+                      className="p-1.5 rounded-full text-[#999999] hover:text-[#ff5577] transition cursor-pointer opacity-0 group-hover:opacity-100"
                       title="Excluir"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -444,7 +381,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
         </div>
       )}
 
-      {/* 2. VISUALIZAÇÃO: KANBAN (Soft Tech Bento Board) */}
+      {/* 2. VISUALIZAÇÃO: KANBAN (Framer Dark Artboard Columns) */}
       {viewMode === 'kanban' && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start overflow-x-auto pb-4">
           {kanbanColumns.map(col => {
@@ -453,21 +390,13 @@ export const TasksView: React.FC<TasksViewProps> = ({
             return (
               <div 
                 key={col.id} 
-                className={`rounded-2xl p-4 space-y-3 min-w-[240px] border ${
-                  isDarkMode 
-                    ? 'bg-[#182030] border-[#263248]' 
-                    : 'bg-[#F0F4FA] border-[#E5EAF2]'
-                }`}
+                className="rounded-[20px] p-4 space-y-3 min-w-[240px] border bg-[#141414] border-[#262626]"
               >
-                <div className="flex items-center justify-between pb-2.5 border-b border-[#E5EAF2] dark:border-[#263248]">
-                  <h4 className={`text-xs font-bold uppercase tracking-wider ${
-                    isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'
-                  }`}>
+                <div className="flex items-center justify-between pb-2.5 border-b border-[#262626]">
+                  <h4 className="text-[13px] font-medium tracking-[-0.13px] text-[#ffffff]">
                     {col.label}
                   </h4>
-                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md font-bold ${
-                    isDarkMode ? 'bg-[#222B3D] text-[#7A9CFF]' : 'bg-[#FFFFFF] text-[#245BFF] shadow-xs'
-                  }`}>
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded-full font-medium bg-[#1c1c1c] text-[#999999] border border-[#262626] tabular-nums">
                     {colTasks.length}
                   </span>
                 </div>
@@ -477,27 +406,19 @@ export const TasksView: React.FC<TasksViewProps> = ({
                     <div
                       key={t.id}
                       onClick={() => onOpenTaskModal(t)}
-                      className={`p-3.5 rounded-xl border transition-all duration-150 cursor-pointer text-left space-y-2.5 ${
-                        isDarkMode
-                          ? 'bg-[#1C2333] border-[#263248] hover:border-[#245BFF] hover:bg-[#20293B]'
-                          : 'bg-[#FFFFFF] border-[#E5EAF2] hover:border-[#245BFF] shadow-[0_1px_3px_rgba(23,32,51,0.04)] hover:shadow-[0_4px_16px_rgba(58,98,255,0.08)]'
-                      }`}
+                      className="p-3.5 rounded-[15px] border transition-all duration-150 cursor-pointer text-left space-y-2.5 bg-[#1c1c1c] border-[#262626] hover:border-[#0099ff]/60"
                     >
                       <div className="flex items-center justify-between gap-1.5">
-                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border ${getAreaBadge(t.area)}`}>
+                        <span className={`px-2 py-0.5 rounded-[6px] text-[10px] font-medium border ${getAreaBadge(t.area)}`}>
                           {t.area}
                         </span>
                         <PriorityBadge priority={t.priority} isDarkMode={isDarkMode} size="xs" />
                       </div>
-                      <span className={`text-xs font-semibold block line-clamp-2 ${
-                        isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'
-                      }`}>
+                      <span className="text-[14px] font-medium tracking-[-0.14px] block line-clamp-2 text-[#ffffff]">
                         {t.title}
                       </span>
-                      <div className={`flex items-center justify-between text-[11px] font-medium pt-2 border-t ${
-                        isDarkMode ? 'border-[#263248] text-[#94A3B8]' : 'border-[#E5EAF2] text-[#687386]'
-                      }`}>
-                        <span>{t.estimated_minutes}m</span>
+                      <div className="flex items-center justify-between text-[12px] font-normal pt-2 border-t border-[#262626] text-[#999999]">
+                        <span className="tabular-nums">{t.estimated_minutes}m</span>
                         {getEnergyBadge(t.energy_level)}
                       </div>
                     </div>
@@ -511,34 +432,30 @@ export const TasksView: React.FC<TasksViewProps> = ({
 
       {/* 3. VISUALIZAÇÃO: CALENDÁRIO / PRAZOS */}
       {viewMode === 'calendario' && (
-        <div className={`p-6 rounded-2xl border space-y-4 ${
-          isDarkMode ? 'bg-[#1C2333] border-[#263248]' : 'bg-[#FFFFFF] border-[#E5EAF2] shadow-[0_2px_8px_rgba(23,32,51,0.04)]'
-        }`}>
-          <h3 className={`text-base font-bold ${isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'}`}>
+        <div className="p-6 rounded-[20px] border space-y-4 bg-[#141414] border-[#262626]">
+          <h3 className="text-[18px] font-semibold tracking-[-0.4px] text-[#ffffff]">
             Prazos & Entregas Programadas
           </h3>
           <div className="space-y-2.5">
             {filteredTasks.filter(t => t.deadline).length === 0 ? (
-              <p className={`text-xs ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
+              <p className="text-[14px] text-[#999999]">
                 Nenhuma tarefa com prazo programado.
               </p>
             ) : (
               filteredTasks.filter(t => t.deadline).map(t => (
                 <div 
                   key={t.id} 
-                  className={`flex items-center justify-between p-3.5 rounded-xl border text-xs transition-colors ${
-                    isDarkMode ? 'border-[#263248] bg-[#222B3D]/50 hover:bg-[#222B3D]' : 'border-[#E5EAF2] bg-[#F8FAFD] hover:bg-[#F0F4FA]'
-                  }`}
+                  className="flex items-center justify-between p-4 rounded-[15px] border text-[14px] transition-colors border-[#262626] bg-[#1c1c1c] hover:border-[#0099ff]/50"
                 >
                   <div className="flex items-center gap-2.5">
-                    <CalendarIcon className="w-4 h-4 text-[#245BFF]" />
-                    <span className={`font-semibold ${isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'}`}>{t.title}</span>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${getAreaBadge(t.area)}`}>
+                    <CalendarIcon className="w-4 h-4 text-[#0099ff]" />
+                    <span className="font-medium text-[#ffffff]">{t.title}</span>
+                    <span className={`px-2 py-0.5 rounded-[6px] text-[11px] font-medium border ${getAreaBadge(t.area)}`}>
                       {t.area}
                     </span>
                     <PriorityBadge priority={t.priority} isDarkMode={isDarkMode} size="xs" />
                   </div>
-                  <span className={`font-mono font-medium ${isDarkMode ? 'text-[#7A9CFF]' : 'text-[#245BFF]'}`}>
+                  <span className="font-mono text-[13px] font-medium text-[#0099ff] tabular-nums">
                     {t.deadline}
                   </span>
                 </div>

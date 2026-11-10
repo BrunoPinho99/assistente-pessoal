@@ -246,32 +246,32 @@ export const DopamineParkingChat: React.FC<DopamineParkingChatProps> = ({
 
   return (
     <>
-      {/* Botão Flutuante quando fechado */}
+      {/* Botão Flutuante quando fechado (Framer White Pill) */}
       {!isOpen && (
         <button
           type="button"
           onClick={onOpen}
-          className="fixed bottom-6 right-6 z-40 px-4 py-3 rounded-2xl bg-[#315DFF] hover:bg-[#254ED9] text-white shadow-[0_8px_28px_rgba(49,93,255,0.4)] flex items-center gap-2.5 transition-all duration-200 hover:scale-[1.03] active:scale-[0.98] cursor-pointer"
+          className="fixed bottom-6 right-6 z-40 px-4 py-2.5 rounded-full bg-white hover:bg-neutral-200 text-black shadow-2xl flex items-center gap-2 transition-all duration-150 hover:scale-[1.02] active:scale-[0.98] cursor-pointer tracking-tight"
           title="Abrir Chat IA"
         >
-          <Sparkles className="w-4 h-4" />
+          <Sparkles className="w-3.5 h-3.5 text-black" />
           <span className="text-xs font-semibold">Chat IA</span>
         </button>
       )}
 
-      {/* Janela de Chat Limpa */}
+      {/* Janela de Chat Framer Dark-Canvas */}
       {isOpen && (
         <div
-          className="fixed bottom-6 right-6 z-50 w-full max-w-[400px] h-[540px] max-h-[82vh] rounded-2xl bg-[#101522] border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.65)] flex flex-col overflow-hidden text-left font-sans animate-in slide-in-from-bottom-3 duration-150"
+          className="fixed bottom-6 right-6 z-50 w-full max-w-[400px] h-[540px] max-h-[82vh] rounded-[20px] bg-[#141414] border border-[#262626] shadow-2xl flex flex-col overflow-hidden text-left font-sans animate-in slide-in-from-bottom-2 duration-150"
           data-purpose="ai-assistant-chat"
         >
           {/* Header Minimalista */}
-          <div className="px-4 py-3 bg-[#151D31] border-b border-white/10 flex items-center justify-between shrink-0">
+          <div className="px-4 py-3 bg-[#141414] border-b border-[#262626] flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-[#315DFF] flex items-center justify-center text-white">
-                <Bot className="w-4 h-4" />
+              <div className="w-6 h-6 rounded-lg bg-[#1c1c1c] border border-[#262626] flex items-center justify-center text-white">
+                <Bot className="w-3.5 h-3.5 text-white" />
               </div>
-              <span className="text-xs sm:text-sm font-semibold text-white">Chat IA</span>
+              <span className="text-xs sm:text-sm font-medium tracking-tight text-white">Chat IA</span>
             </div>
 
             <div className="flex items-center gap-1">
@@ -279,7 +279,7 @@ export const DopamineParkingChat: React.FC<DopamineParkingChatProps> = ({
                 <button
                   type="button"
                   onClick={() => setMessages([initialMessage])}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                  className="p-1.5 rounded-lg text-[#999999] hover:text-white hover:bg-[#1c1c1c] transition-colors cursor-pointer"
                   title="Limpar conversa"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -289,7 +289,7 @@ export const DopamineParkingChat: React.FC<DopamineParkingChatProps> = ({
               <button
                 type="button"
                 onClick={() => setShowKeyModal(!showKeyModal)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-[#999999] hover:text-white hover:bg-[#1c1c1c] transition-colors cursor-pointer"
                 title="Chave de API"
               >
                 <Key className="w-3.5 h-3.5" />
@@ -298,26 +298,26 @@ export const DopamineParkingChat: React.FC<DopamineParkingChatProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-[#999999] hover:text-white hover:bg-[#1c1c1c] transition-colors cursor-pointer"
                 title="Fechar"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
 
           {/* Configuração Opcional de Chave */}
           {showKeyModal && (
-            <div className="p-3.5 bg-[#141C2E] border-b border-white/15 space-y-2.5">
+            <div className="p-3.5 bg-[#1c1c1c] border-b border-[#262626] space-y-2.5">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-white flex items-center gap-1.5">
-                  <KeyRound className="w-3.5 h-3.5 text-[#315DFF]" />
+                <span className="text-xs font-medium text-white flex items-center gap-1.5 tracking-tight">
+                  <KeyRound className="w-3.5 h-3.5 text-white" />
                   Chave da API Gemini
                 </span>
                 <button
                   type="button"
                   onClick={() => setShowKeyModal(false)}
-                  className="text-slate-400 hover:text-white text-xs cursor-pointer"
+                  className="text-[#999999] hover:text-white text-xs cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -329,14 +329,14 @@ export const DopamineParkingChat: React.FC<DopamineParkingChatProps> = ({
                   value={apiKeyInput}
                   onChange={e => setApiKeyInput(e.target.value)}
                   placeholder="Cole sua chave caso queira trocar..."
-                  className="w-full px-3 py-1.5 rounded-lg bg-[#0B101D] border border-white/20 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-[#315DFF]"
+                  className="w-full px-3 py-1.5 rounded-lg bg-[#141414] border border-[#262626] text-white text-xs placeholder:text-[#999999] focus:outline-none focus:border-[#0099ff]"
                 />
                 <div className="flex items-center justify-between text-[11px]">
                   <a
                     href="https://aistudio.google.com/app/apikey"
                     target="_blank"
                     rel="noreferrer"
-                    className="text-blue-400 hover:text-blue-300 flex items-center gap-1 underline"
+                    className="text-[#0099ff] hover:underline flex items-center gap-1"
                   >
                     <span>Google AI Studio</span>
                     <ExternalLink className="w-2.5 h-2.5" />
@@ -344,9 +344,9 @@ export const DopamineParkingChat: React.FC<DopamineParkingChatProps> = ({
                   <button
                     type="submit"
                     disabled={isTestingKey}
-                    className="px-3 py-1 rounded-lg bg-[#315DFF] hover:bg-[#254BE0] text-white font-semibold text-xs cursor-pointer flex items-center gap-1"
+                    className="px-3 py-1 rounded-full bg-white hover:bg-neutral-200 text-black font-semibold text-xs cursor-pointer flex items-center gap-1"
                   >
-                    <Check className="w-3 h-3" />
+                    <Check className="w-3 h-3 text-black" />
                     <span>{isTestingKey ? 'Testando...' : 'Salvar'}</span>
                   </button>
                 </div>
@@ -367,25 +367,25 @@ export const DopamineParkingChat: React.FC<DopamineParkingChatProps> = ({
               return (
                 <div key={msg.id} className={`flex ${isAsst ? 'justify-start' : 'justify-end'}`}>
                   <div
-                    className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 space-y-2 ${
+                    className={`max-w-[85%] rounded-[18px] px-3.5 py-2.5 space-y-2 ${
                       isAsst
-                        ? 'bg-[#161F33] border border-white/10 text-slate-100'
-                        : 'bg-[#315DFF] text-white font-medium'
+                        ? 'bg-[#1c1c1c] border border-[#262626] text-white'
+                        : 'bg-white text-black font-normal'
                     }`}
                   >
                     {isAsst ? (
                       renderFormattedText(msg.text)
                     ) : (
-                      <p className="text-xs sm:text-[13px] text-white leading-relaxed">{msg.text}</p>
+                      <p className="text-xs sm:text-[13px] text-black leading-relaxed">{msg.text}</p>
                     )}
 
                     {/* Confirmação compacta de alterações feitas no dashboard */}
                     {msg.actionsExecuted && msg.actionsExecuted.length > 0 && (
-                      <div className="pt-1.5 border-t border-white/10 flex flex-wrap gap-1.5">
+                      <div className="pt-1.5 border-t border-[#262626] flex flex-wrap gap-1.5">
                         {msg.actionsExecuted.map((act, idx) => (
                           <span
                             key={idx}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-medium"
+                            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-medium"
                           >
                             <Check className="w-3 h-3 shrink-0" />
                             <span>{act.title}</span>
@@ -400,8 +400,8 @@ export const DopamineParkingChat: React.FC<DopamineParkingChatProps> = ({
 
             {isProcessing && (
               <div className="flex justify-start">
-                <div className="px-3.5 py-2.5 rounded-2xl bg-[#161F33] border border-white/10 text-slate-300 text-xs flex items-center gap-2">
-                  <Sparkles className="w-3.5 h-3.5 animate-spin text-[#315DFF]" />
+                <div className="px-3.5 py-2 rounded-full bg-[#1c1c1c] border border-[#262626] text-[#999999] text-xs flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 animate-spin text-[#0099ff]" />
                   <span>Pensando...</span>
                 </div>
               </div>
@@ -413,7 +413,7 @@ export const DopamineParkingChat: React.FC<DopamineParkingChatProps> = ({
           {/* Input Limpo */}
           <form
             onSubmit={e => handleSendMessage(e)}
-            className="p-3 bg-[#151D31] border-t border-white/10 flex items-center gap-2 shrink-0"
+            className="p-3 bg-[#141414] border-t border-[#262626] flex items-center gap-2 shrink-0"
           >
             <input
               type="text"
@@ -421,15 +421,15 @@ export const DopamineParkingChat: React.FC<DopamineParkingChatProps> = ({
               onChange={e => setInputMessage(e.target.value)}
               placeholder="Converse, peça ideias ou altere o dashboard..."
               disabled={isProcessing}
-              className="flex-1 px-3.5 py-2.5 rounded-xl text-xs sm:text-[13px] bg-[#101522] border border-white/15 text-white placeholder-slate-400 focus:outline-none focus:border-[#315DFF] transition-all"
+              className="flex-1 px-4 py-2.5 rounded-full text-xs sm:text-[13px] bg-[#1c1c1c] border border-[#262626] text-white placeholder-[#999999] focus:outline-none focus:border-[#0099ff] focus:ring-1 focus:ring-[#0099ff] transition-all"
             />
             <button
               type="submit"
               disabled={!inputMessage.trim() || isProcessing}
-              className="p-2.5 rounded-xl bg-[#315DFF] hover:bg-[#254ED9] disabled:opacity-40 disabled:cursor-not-allowed text-white transition-colors cursor-pointer shrink-0"
+              className="w-9 h-9 rounded-full bg-white hover:bg-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed text-black transition-colors cursor-pointer shrink-0 flex items-center justify-center shadow-xs"
               title="Enviar"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-4 h-4 text-black" />
             </button>
           </form>
         </div>

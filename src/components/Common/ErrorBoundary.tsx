@@ -44,22 +44,22 @@ export class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen w-full bg-[#101522] text-[#F3F5FC] flex items-center justify-center p-6 font-sans">
-          <div className="max-w-md w-full bg-[#151D31] border border-[rgba(120,140,190,0.16)] rounded-2xl p-6 sm:p-8 shadow-2xl flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-xl bg-[#315DFF]/20 border border-[#315DFF]/30 flex items-center justify-center text-[#315DFF] mb-4">
-              <AlertTriangle className="w-6 h-6 text-[#315DFF]" />
+        <div className="min-h-screen w-full bg-[#090909] text-white flex items-center justify-center p-6 font-sans">
+          <div className="max-w-md w-full bg-[#141414] border border-[#262626] rounded-[20px] p-6 sm:p-8 shadow-2xl flex flex-col items-center text-center">
+            <div className="w-12 h-12 rounded-full bg-[#1c1c1c] border border-[#262626] flex items-center justify-center text-white mb-4">
+              <AlertTriangle className="w-6 h-6 text-white" />
             </div>
             
-            <h2 className="text-xl font-bold tracking-tight text-white mb-2">
+            <h2 className="text-xl font-medium tracking-tight text-white mb-2">
               Recuperação do Personal OS
             </h2>
             
-            <p className="text-xs text-[#8E9BB5] leading-relaxed mb-6">
+            <p className="text-xs text-[#999999] leading-relaxed mb-6">
               Ocorreu uma inconsistência no carregamento da interface. Você pode tentar recarregar ou restaurar os dados padrão com segurança.
             </p>
 
             {this.state.error && (
-              <div className="w-full bg-[#101522] border border-white/5 rounded-lg p-3 text-left mb-6 overflow-hidden">
+              <div className="w-full bg-[#1c1c1c] border border-[#262626] rounded-xl p-3 text-left mb-6 overflow-hidden">
                 <p className="text-[11px] font-mono text-rose-400 break-all line-clamp-3">
                   {this.state.error.message || String(this.state.error)}
                 </p>
@@ -70,18 +70,18 @@ export class ErrorBoundary extends Component<Props, State> {
               <button
                 type="button"
                 onClick={this.handleReload}
-                className="w-full sm:flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-[#315DFF] hover:bg-[#254ED9] text-white flex items-center justify-center gap-2 cursor-pointer transition-all shadow-[0_2px_8px_rgba(49,93,255,0.3)]"
+                className="w-full sm:flex-1 py-2.5 px-4 rounded-full text-xs font-semibold bg-white hover:bg-neutral-200 text-black flex items-center justify-center gap-2 cursor-pointer transition-all shadow-sm"
               >
-                <RefreshCw className="w-3.5 h-3.5" />
+                <RefreshCw className="w-3.5 h-3.5 text-black" />
                 <span>Recarregar</span>
               </button>
               
               <button
                 type="button"
                 onClick={this.handleResetData}
-                className="w-full sm:flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 text-[#CBD5E1] border border-white/10 flex items-center justify-center gap-2 cursor-pointer transition-all"
+                className="w-full sm:flex-1 py-2.5 px-4 rounded-full text-xs font-medium bg-[#1c1c1c] hover:bg-[#262626] text-[#999999] hover:text-white border border-[#262626] flex items-center justify-center gap-2 cursor-pointer transition-all"
               >
-                <RotateCcw className="w-3.5 h-3.5 text-[#8E9BB5]" />
+                <RotateCcw className="w-3.5 h-3.5 text-[#999999]" />
                 <span>Restaurar padrão</span>
               </button>
             </div>

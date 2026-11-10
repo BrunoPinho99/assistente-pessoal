@@ -32,8 +32,6 @@ export function App() {
     // Preferences
     themeMode,
     setThemeMode,
-    isDarkMode,
-    setIsDarkMode,
     isCalmMode,
     setIsCalmMode,
     // Tasks
@@ -61,15 +59,13 @@ export function App() {
     // Habits
     toggleHabitDate,
     // Metrics & Tools
-    isOverloaded,
-    todayEstimatedMinutes,
     staleProjects,
     quickCapture
   } = usePersonalOS();
 
   // Navigation State
   const [activeTab, setActiveTab] = useState<NavigationTab>('hoje');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery] = useState('');
 
   // Modals State
   const [isQuickCaptureOpen, setIsQuickCaptureOpen] = useState(false);
@@ -81,7 +77,7 @@ export function App() {
   // Estacionamento de Dopamina (Chat de Captura)
   const [isDopamineChatOpen, setIsDopamineChatOpen] = useState(false);
 
-  // Trade-off Modal (A Regra da Substituição: Máx 2 Projetos)
+  // Trade-off Modal (A Regra da Substituição: Máx 3 Slots Protocolo 1-1-1)
   const [isTradeoffOpen, setIsTradeoffOpen] = useState(false);
   const [projectToUnlockCandidate, setProjectToUnlockCandidate] = useState<Project | null>(null);
 
@@ -121,7 +117,11 @@ export function App() {
       updateTask(taskToEdit.id, taskData);
     } else {
       addTask(taskData);
-      confetti({ particleCount: 30, spread: 40 });
+      confetti({
+        particleCount: 30,
+        spread: 40,
+        colors: ['#ffffff', '#0099ff', '#d44df0', '#6a4cf5']
+      });
     }
   };
 
@@ -133,7 +133,7 @@ export function App() {
         particleCount: 50,
         spread: 60,
         origin: { y: 0.75 },
-        colors: ['#2563eb', '#3b82f6', '#60a5fa', '#ffffff']
+        colors: ['#ffffff', '#0099ff', '#d44df0', '#6a4cf5']
       });
     }
   };
@@ -149,15 +149,13 @@ export function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleToggleTheme = () => {
-    const nextMode: ThemeMode = themeMode === 'hybrid' ? 'dark' : themeMode === 'dark' ? 'light' : 'hybrid';
+    const nextMode: ThemeMode = 'dark';
     setThemeMode(nextMode);
   };
 
   return (
-    <div className={`h-full w-full flex overflow-hidden antialiased font-sans selection:bg-[#315DFF] selection:text-white transition-colors duration-150 ${
-      themeMode === 'dark' ? 'bg-[#101522] text-[#F3F5FC] dark' : 'bg-[#F3F5FC] text-[#171D38]'
-    }`}>
-      {/* Sidebar (250-270px) */}
+    <div className="h-full w-full flex overflow-hidden antialiased font-sans bg-[#090909] text-[#ffffff] dark selection:bg-[#0099ff]/30 selection:text-white">
+      {/* Sidebar — Framer Dark Canvas (#090909) with #262626 hairline */}
       <Sidebar
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -171,11 +169,12 @@ export function App() {
         onCloseMobile={() => setIsMobileMenuOpen(false)}
       />
 
-      {/* MainContent */}
-      <main className={`flex-1 flex flex-col h-full overflow-y-auto overflow-x-hidden min-w-0 transition-colors duration-150 relative ${
-        themeMode === 'dark' ? 'bg-[#101522]' : 'bg-[#F3F5FC]'
-      }`} data-purpose="main-content-scroll">
-        <div className="max-w-[1400px] w-full mx-auto px-6 sm:px-9 lg:px-10 py-6 flex flex-col gap-6 min-w-0">
+      {/* Main Artboard Canvas (#090909) */}
+      <main
+        className="flex-1 flex flex-col h-full overflow-y-auto overflow-x-hidden min-w-0 relative bg-[#090909]"
+        data-purpose="main-content-scroll"
+      >
+        <div className="max-w-[1200px] w-full mx-auto px-5 sm:px-8 lg:px-10 py-7 flex flex-col gap-8 min-w-0">
           {/* 1. MÓDULO HOJE (Meu Dia) */}
           {activeTab === 'hoje' && (
             <DashboardView
@@ -185,8 +184,8 @@ export function App() {
               habits={habits}
               subjects={subjects}
               isCalmMode={isCalmMode}
-              themeMode={themeMode}
-              isDarkMode={isDarkMode}
+              themeMode="dark"
+              isDarkMode={true}
               onChangeThemeMode={setThemeMode}
               onToggleTheme={handleToggleTheme}
               onToggleTask={handleToggleTaskWithConfetti}
@@ -207,7 +206,7 @@ export function App() {
             <TasksView
               tasks={filteredTasks}
               projects={projects}
-              isDarkMode={isDarkMode}
+              isDarkMode={true}
               onToggleTask={handleToggleTaskWithConfetti}
               onOpenTaskModal={handleOpenTaskModal}
               onDeleteTask={deleteTask}
@@ -223,7 +222,7 @@ export function App() {
               projects={projects}
               tasks={tasks}
               staleProjects={staleProjects}
-              isDarkMode={isDarkMode}
+              isDarkMode={true}
               onToggleStage={toggleProjectStage}
               onAddProject={addProject}
               onUpdateProject={updateProject}
@@ -240,7 +239,7 @@ export function App() {
             <StudiesView
               subjects={subjects}
               flashcards={flashcards}
-              isDarkMode={isDarkMode}
+              isDarkMode={true}
               onAddSubject={addSubject}
               onUpdateSubject={updateSubject}
               onDeleteSubject={deleteSubject}
@@ -252,7 +251,7 @@ export function App() {
         </div>
       </main>
 
-      {/* 1. Assistente IA & Copiloto (Conversação, Ações no Sistema e Estacionamento) */}
+      {/* 1. Assistente IA & Copiloto */}
       <DopamineParkingChat
         isOpen={isDopamineChatOpen}
         onOpen={() => setIsDopamineChatOpen(true)}
@@ -274,10 +273,10 @@ export function App() {
         onStartFocus={handleStartFocus}
         onNavigateTab={setActiveTab}
         onNavigateToProjects={() => setActiveTab('projetos')}
-        isDarkMode={isDarkMode}
+        isDarkMode={true}
       />
 
-      {/* 2. Modal de Trade-off (A Regra da Substituição: Máximo 2 Projetos Ativos) */}
+      {/* 2. Modal de Trade-off */}
       <TradeoffModal
         isOpen={isTradeoffOpen}
         onClose={() => {
@@ -289,7 +288,7 @@ export function App() {
         onConfirmTradeoff={executeProjectTradeoff}
       />
 
-      {/* 3. Modal de Fatiar Tarefa com IA (Bloco 45m / Anti-Paralisia) */}
+      {/* 3. Modal de Fatiar Tarefa com IA */}
       <SliceTaskModal
         isOpen={isSliceModalOpen}
         onClose={() => {
@@ -303,14 +302,14 @@ export function App() {
       {/* Modais Globais de Apoio */}
       <QuickCaptureModal
         isOpen={isQuickCaptureOpen}
-        isDarkMode={isDarkMode}
+        isDarkMode={true}
         onClose={() => setIsQuickCaptureOpen(false)}
         onCapture={(text, type) => quickCapture(text, type)}
       />
 
       <LostHelpModal
         isOpen={isLostHelpOpen}
-        isDarkMode={isDarkMode}
+        isDarkMode={true}
         onClose={() => setIsLostHelpOpen(false)}
         tasks={tasks}
         projects={projects}
@@ -321,7 +320,7 @@ export function App() {
 
       <EmergencyTriageModal
         isOpen={isEmergencyTriageOpen}
-        isDarkMode={isDarkMode}
+        isDarkMode={true}
         onClose={() => setIsEmergencyTriageOpen(false)}
         tasks={tasks}
         onDeferTask={(id) => updateTask(id, { status: 'adiado' })}
@@ -331,7 +330,7 @@ export function App() {
 
       <TaskModal
         isOpen={isTaskModalOpen}
-        isDarkMode={isDarkMode}
+        isDarkMode={true}
         onClose={() => {
           setIsTaskModalOpen(false);
           setTaskToEdit(null);

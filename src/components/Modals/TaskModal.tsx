@@ -187,26 +187,22 @@ export const TaskModal: React.FC<TaskModalProps> = ({
     <div 
       role="dialog" 
       aria-modal="true" 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-150 overflow-y-auto"
     >
-      <div className={`w-full max-w-2xl rounded-2xl border p-6 sm:p-7 shadow-[0_20px_48px_rgba(23,32,51,0.16)] text-left space-y-5 my-8 max-h-[90vh] overflow-y-auto ${
-        isDarkMode ? 'bg-[#1C2333] border-[#263248] text-[#F1F5F9]' : 'bg-[#FFFFFF] border-[#E5EAF2] text-[#172033]'
-      }`}>
-        <div className="flex items-center justify-between border-b border-[#E5EAF2] dark:border-[#263248] pb-3.5">
+      <div className="w-full max-w-xl rounded-[20px] border border-[#262626] bg-[#141414] p-6 sm:p-7 shadow-2xl text-left space-y-5 my-8 max-h-[90vh] overflow-y-auto text-white">
+        <div className="flex items-center justify-between border-b border-[#262626] pb-3.5">
           <div>
-            <h3 className={`text-base font-bold tracking-tight ${isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'}`}>
+            <h3 className="text-base font-medium tracking-tight text-white">
               {taskToEdit ? 'Editar Ação' : 'Nova Tarefa Executável'}
             </h3>
-            <p className={`text-xs mt-0.5 ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
-              Defina o escopo com clareza e sem sobrecarga cognitiva.
+            <p className="text-xs text-[#999999] mt-0.5 tracking-tight">
+              Foco exclusivo na tarefa, sem sobrecarga ou poluição visual.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-              isDarkMode ? 'text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-[#222B3D]' : 'text-[#687386] hover:text-[#172033] hover:bg-[#F5F7FB]'
-            }`}
+            className="p-1.5 rounded-full text-[#999999] hover:text-white hover:bg-[#1c1c1c] transition-colors cursor-pointer"
             aria-label="Fechar"
           >
             <X className="w-4 h-4" />
@@ -216,7 +212,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Título & Descrição */}
           <div>
-            <label className={`text-xs font-semibold mb-1 block ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
+            <label className="text-xs font-normal text-[#999999] mb-1.5 block tracking-tight">
               Título da Tarefa *
             </label>
             <input
@@ -226,17 +222,13 @@ export const TaskModal: React.FC<TaskModalProps> = ({
               placeholder="Ex: Resolver 3 exercícios de ordenação de busca"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none focus:border-[#245BFF] focus:ring-2 focus:ring-[#245BFF]/20 transition-all ${
-                isDarkMode 
-                  ? 'bg-[#182030] border-[#263248] text-[#F1F5F9] placeholder-[#64748B]' 
-                  : 'bg-[#FFFFFF] border-[#E5EAF2] text-[#172033] placeholder-[#9AA4B2]'
-              }`}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#262626] bg-[#1c1c1c] text-white placeholder-[#999999] text-xs sm:text-sm focus:outline-none focus:border-[#0099ff] focus:ring-1 focus:ring-[#0099ff] transition-all"
             />
           </div>
 
           {/* Área de Contexto */}
           <div>
-            <label className={`text-xs font-semibold mb-1.5 block ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
+            <label className="text-xs font-normal text-[#999999] mb-1.5 block tracking-tight">
               Área de Contexto
             </label>
             <div className="flex items-center gap-1.5 flex-wrap">
@@ -245,12 +237,10 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                   key={ar}
                   type="button"
                   onClick={() => setArea(ar)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border ${
+                  className={`px-3 py-1.5 rounded-full text-xs transition-colors cursor-pointer tracking-tight ${
                     area === ar
-                      ? 'bg-[#245BFF] text-white border-[#245BFF] shadow-xs'
-                      : isDarkMode 
-                        ? 'bg-[#222B3D] border-[#263248] text-[#94A3B8] hover:text-[#F1F5F9]' 
-                        : 'bg-[#F5F7FB] border-[#E5EAF2] text-[#687386] hover:text-[#172033]'
+                      ? 'bg-white text-black font-semibold shadow-xs'
+                      : 'bg-[#1c1c1c] border border-[#262626] text-[#999999] hover:text-white'
                   }`}
                 >
                   {ar}
@@ -260,29 +250,25 @@ export const TaskModal: React.FC<TaskModalProps> = ({
           </div>
 
           <div>
-            <label className={`text-xs font-semibold mb-1 block ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
+            <label className="text-xs font-normal text-[#999999] mb-1 block tracking-tight">
               Descrição ou Primeiro Passo
             </label>
             <textarea
               rows={2}
-              placeholder="Detalhes adicionais para não precisar reabrir o contexto do zero..."
+              placeholder="Detalhes essenciais para iniciar sem paralisia..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className={`w-full px-3.5 py-2.5 rounded-xl border text-xs focus:outline-none focus:border-[#245BFF] focus:ring-2 focus:ring-[#245BFF]/20 resize-none transition-all ${
-                isDarkMode 
-                  ? 'bg-[#182030] border-[#263248] text-[#F1F5F9] placeholder-[#64748B]' 
-                  : 'bg-[#FFFFFF] border-[#E5EAF2] text-[#172033] placeholder-[#9AA4B2]'
-              }`}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#262626] bg-[#1c1c1c] text-white placeholder-[#999999] text-xs focus:outline-none focus:border-[#0099ff] focus:ring-1 focus:ring-[#0099ff] resize-none transition-all"
             />
           </div>
 
-          {/* Estimativa de Duração Rápida (1-clique sem fricção) */}
+          {/* Estimativa de Duração Rápida */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className={`text-xs font-semibold ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
+              <label className="text-xs font-normal text-[#999999] tracking-tight">
                 Estimativa de Duração
               </label>
-              <span className={`text-xs font-mono font-medium ${isDarkMode ? 'text-[#38BDF8]' : 'text-[#245BFF]'}`}>
+              <span className="text-xs font-mono font-medium text-white">
                 {estimatedMinutes} min
               </span>
             </div>
@@ -292,12 +278,10 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                   key={mins}
                   type="button"
                   onClick={() => setEstimatedMinutes(mins)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-full text-xs transition-colors cursor-pointer tracking-tight ${
                     estimatedMinutes === mins
-                      ? 'bg-[#245BFF] text-white border-[#245BFF] shadow-xs'
-                      : isDarkMode
-                        ? 'bg-[#182030] border-[#263248] text-[#94A3B8] hover:text-[#F1F5F9]'
-                        : 'bg-[#F5F7FB] border-[#E5EAF2] text-[#687386] hover:text-[#172033]'
+                      ? 'bg-white text-black font-semibold shadow-xs'
+                      : 'bg-[#1c1c1c] border border-[#262626] text-[#999999] hover:text-white'
                   }`}
                 >
                   {mins === 25 ? '🍅 25m (Pomodoro)' : `${mins} min`}
@@ -310,20 +294,16 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                   step="5"
                   value={estimatedMinutes}
                   onChange={(e) => setEstimatedMinutes(Math.max(5, parseInt(e.target.value) || 5))}
-                  className={`w-16 px-2 py-1 text-center rounded-lg border text-xs ${
-                    isDarkMode 
-                      ? 'bg-[#182030] border-[#263248] text-[#F1F5F9]' 
-                      : 'bg-[#FFFFFF] border-[#E5EAF2] text-[#172033]'
-                  }`}
+                  className="w-16 px-2 py-1 text-center rounded-lg border border-[#262626] bg-[#1c1c1c] text-white text-xs focus:outline-none focus:border-[#0099ff]"
                 />
-                <span className={`text-xs ${isDarkMode ? 'text-[#64748B]' : 'text-[#9AA4B2]'}`}>min</span>
+                <span className="text-xs text-[#999999]">min</span>
               </div>
             </div>
           </div>
 
-          {/* Subtarefas / Micro-passos (Foco anti-paralisia na tela principal) */}
-          <div className="pt-2 border-t border-[#E5EAF2] dark:border-[#263248] space-y-2">
-            <span className={`text-xs font-semibold block ${isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'}`}>
+          {/* Subtarefas / Micro-passos */}
+          <div className="pt-2 border-t border-[#262626] space-y-2">
+            <span className="text-xs font-normal text-[#999999] block tracking-tight">
               Micro-passos ({subtasks.filter(s => s.completed).length}/{subtasks.length})
             </span>
 
@@ -332,25 +312,23 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                 {subtasks.map(st => (
                   <div 
                     key={st.id} 
-                    className={`flex items-center justify-between gap-2 p-2 rounded-lg border text-xs ${
-                      isDarkMode ? 'bg-[#182030] border-[#263248]' : 'bg-[#F8FAFD] border-[#E5EAF2]'
-                    }`}
+                    className="flex items-center justify-between gap-2 p-2 rounded-xl border border-[#262626] bg-[#1c1c1c] text-xs"
                   >
                     <label className="flex items-center gap-2 cursor-pointer flex-1 min-w-0">
                       <input
                         type="checkbox"
                         checked={st.completed}
                         onChange={() => handleToggleSubtask(st.id)}
-                        className="rounded text-[#245BFF] focus:ring-0"
+                        className="rounded border-[#262626] text-white focus:ring-0"
                       />
-                      <span className={`truncate font-medium ${st.completed ? 'line-through text-[#9AA4B2] dark:text-[#64748B]' : isDarkMode ? 'text-[#F1F5F9]' : 'text-[#172033]'}`}>
+                      <span className={`truncate font-normal ${st.completed ? 'line-through text-[#666666]' : 'text-white'}`}>
                         {st.title}
                       </span>
                     </label>
                     <button
                       type="button"
                       onClick={() => handleDeleteSubtask(st.id)}
-                      className="text-[#94A3B8] hover:text-rose-500 p-0.5"
+                      className="text-[#999999] hover:text-rose-400 p-0.5 cursor-pointer"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -371,20 +349,12 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                     handleAddSubtask();
                   }
                 }}
-                className={`flex-1 px-3 py-1.5 rounded-xl border text-xs focus:outline-none focus:border-[#245BFF] ${
-                  isDarkMode 
-                    ? 'bg-[#182030] border-[#263248] text-[#F1F5F9] placeholder-[#64748B]' 
-                    : 'bg-[#FFFFFF] border-[#E5EAF2] text-[#172033] placeholder-[#9AA4B2]'
-                }`}
+                className="flex-1 px-3.5 py-2 rounded-xl border border-[#262626] bg-[#1c1c1c] text-white placeholder-[#999999] text-xs focus:outline-none focus:border-[#0099ff]"
               />
               <button
                 type="button"
                 onClick={handleAddSubtask}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer border ${
-                  isDarkMode 
-                    ? 'bg-[#222B3D] border-[#33415C] text-[#F1F5F9]' 
-                    : 'bg-[#E9EFF8] border-[#E5EAF2] text-[#172033]'
-                }`}
+                className="px-3.5 py-2 rounded-full text-xs font-medium bg-[#1c1c1c] hover:bg-[#262626] border border-[#262626] text-white cursor-pointer"
               >
                 + Adicionar
               </button>
@@ -392,20 +362,14 @@ export const TaskModal: React.FC<TaskModalProps> = ({
           </div>
 
           {/* Toggle de Opções Secundárias (Recolhido para evitar poluição visual de TDAH) */}
-          <div className="pt-2 border-t border-[#E5EAF2] dark:border-[#263248]">
+          <div className="pt-2 border-t border-[#262626]">
             <button
               type="button"
               onClick={() => setShowAdvanced(!showAdvanced)}
-              className={`w-full py-2 px-3 rounded-xl border text-xs font-medium flex items-center justify-between transition-all cursor-pointer ${
-                showAdvanced 
-                  ? isDarkMode ? 'bg-[#222B3D] border-[#245BFF]/50 text-[#F1F5F9]' : 'bg-[#EBF1FF] border-[#245BFF]/40 text-[#245BFF]'
-                  : isDarkMode 
-                    ? 'bg-[#182030] hover:bg-[#222B3D] border-[#263248] text-[#94A3B8]' 
-                    : 'bg-[#F8FAFD] hover:bg-[#F0F4FA] border-[#E5EAF2] text-[#687386]'
-              }`}
+              className="w-full py-2 px-3 rounded-xl border border-[#262626] bg-[#1c1c1c] hover:bg-[#262626] text-xs font-normal text-[#999999] hover:text-white flex items-center justify-between transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-2">
-                <SlidersHorizontal className="w-3.5 h-3.5 text-[#245BFF]" />
+                <SlidersHorizontal className="w-3.5 h-3.5 text-white" />
                 <span>{showAdvanced ? 'Ocultar opções secundárias' : 'Mais opções (Projeto, Prazo, Prioridade, Contexto)'}</span>
               </div>
               {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -414,21 +378,17 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 
           {/* Painel Recolhível de Detalhes Secundários */}
           {showAdvanced && (
-            <div className="space-y-4 pt-2 border-t border-[#E5EAF2] dark:border-[#263248] animate-in fade-in slide-in-from-top-2 duration-150">
+            <div className="space-y-4 pt-2 border-t border-[#262626] animate-in fade-in slide-in-from-top-1 duration-150">
               {/* Categoria, Projeto e Disciplina */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className={`text-xs font-medium mb-1 block ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
+                  <label className="text-xs font-normal text-[#999999] mb-1 block">
                     Categoria
                   </label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value as TaskCategory)}
-                    className={`w-full px-3 py-2 rounded-xl border text-xs cursor-pointer ${
-                      isDarkMode 
-                        ? 'bg-[#182030] border-[#263248] text-[#F1F5F9]' 
-                        : 'bg-[#FFFFFF] border-[#E5EAF2] text-[#172033]'
-                    }`}
+                    className="w-full px-3 py-2 rounded-xl border border-[#262626] bg-[#1c1c1c] text-white text-xs cursor-pointer focus:outline-none focus:border-[#0099ff]"
                   >
                     <option value="academico">Acadêmico</option>
                     <option value="profissional">Profissional</option>
@@ -439,17 +399,13 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                 </div>
 
                 <div>
-                  <label className={`text-xs font-medium mb-1 block ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
+                  <label className="text-xs font-normal text-[#999999] mb-1 block">
                     Projeto Relacionado
                   </label>
                   <select
                     value={projectId}
                     onChange={(e) => setProjectId(e.target.value)}
-                    className={`w-full px-3 py-2 rounded-xl border text-xs cursor-pointer ${
-                      isDarkMode 
-                        ? 'bg-[#182030] border-[#263248] text-[#F1F5F9]' 
-                        : 'bg-[#FFFFFF] border-[#E5EAF2] text-[#172033]'
-                    }`}
+                    className="w-full px-3 py-2 rounded-xl border border-[#262626] bg-[#1c1c1c] text-white text-xs cursor-pointer focus:outline-none focus:border-[#0099ff]"
                   >
                     <option value="">Sem projeto</option>
                     {projects.map(p => (
@@ -459,17 +415,13 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                 </div>
 
                 <div>
-                  <label className={`text-xs font-medium mb-1 block ${isDarkMode ? 'text-[#94A3B8]' : 'text-[#687386]'}`}>
+                  <label className="text-xs font-normal text-[#999999] mb-1 block">
                     Disciplina / Curso
                   </label>
                   <select
                     value={subjectId}
                     onChange={(e) => setSubjectId(e.target.value)}
-                    className={`w-full px-3 py-2 rounded-xl border text-xs cursor-pointer ${
-                      isDarkMode 
-                        ? 'bg-[#182030] border-[#263248] text-[#F1F5F9]' 
-                        : 'bg-[#FFFFFF] border-[#E5EAF2] text-[#172033]'
-                    }`}
+                    className="w-full px-3 py-2 rounded-xl border border-[#262626] bg-[#1c1c1c] text-white text-xs cursor-pointer focus:outline-none focus:border-[#0099ff]"
                   >
                     <option value="">Nenhum</option>
                     {subjects.map(s => (
@@ -655,22 +607,20 @@ export const TaskModal: React.FC<TaskModalProps> = ({
             </div>
           )}
 
-          {/* Footer Actions */}
-          <div className="flex justify-end gap-2 pt-3 border-t border-[#E5EAF2] dark:border-[#263248]">
+          {/* Footer Actions (Framer Pills) */}
+          <div className="flex justify-end gap-2 pt-3 border-t border-[#262626]">
             <button
               type="button"
               onClick={onClose}
-              className={`px-4 py-2 rounded-xl text-xs font-medium transition cursor-pointer ${
-                isDarkMode ? 'text-[#94A3B8] hover:bg-[#222B3D]' : 'text-[#687386] hover:bg-[#F5F7FB]'
-              }`}
+              className="px-4 py-2 rounded-full text-xs font-medium text-[#999999] hover:text-white bg-[#1c1c1c] border border-[#262626] transition cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl text-xs font-semibold bg-[#245BFF] hover:bg-[#1A4EE5] active:scale-[0.98] text-white shadow-[0_2px_8px_-1px_rgba(58,98,255,0.35)] transition cursor-pointer flex items-center gap-1.5"
+              className="px-5 py-2 rounded-full text-xs font-semibold bg-white hover:bg-neutral-200 active:scale-[0.98] text-black shadow-sm transition cursor-pointer flex items-center gap-1.5"
             >
-              <Check className="w-3.5 h-3.5" />
+              <Check className="w-3.5 h-3.5 text-black" />
               <span>{taskToEdit ? 'Salvar Alterações' : 'Criar Tarefa'}</span>
             </button>
           </div>

@@ -126,23 +126,12 @@ export function usePersonalOS() {
     return INITIAL_FOCUS_SESSIONS;
   });
 
-  // Preferences (Default: 'hybrid' as in the reference image)
-  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEYS.THEME);
-      if (raw === 'hybrid' || raw === 'light' || raw === 'dark') return raw;
-    } catch {}
-    return 'hybrid';
-  });
+  // Preferences (Framer Dark-Canvas: The brand IS dark)
+  const [themeMode, setThemeMode] = useState<ThemeMode>('dark');
 
-  const isDarkMode = themeMode === 'dark';
-  const setIsDarkMode = (val: boolean | ((prev: boolean) => boolean)) => {
-    if (typeof val === 'function') {
-      const next = val(isDarkMode);
-      setThemeMode(next ? 'dark' : 'hybrid');
-    } else {
-      setThemeMode(val ? 'dark' : 'hybrid');
-    }
+  const isDarkMode = true;
+  const setIsDarkMode = (_val: boolean | ((prev: boolean) => boolean)) => {
+    setThemeMode('dark');
   };
 
   const [isCalmMode, setIsCalmMode] = useState<boolean>(() => {
