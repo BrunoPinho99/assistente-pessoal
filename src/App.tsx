@@ -32,6 +32,7 @@ export function App() {
     // Preferences
     themeMode,
     setThemeMode,
+    isDarkMode,
     isCalmMode,
     setIsCalmMode,
     // Tasks
@@ -85,11 +86,13 @@ export function App() {
   const [isSliceModalOpen, setIsSliceModalOpen] = useState(false);
   const [taskToSlice, setTaskToSlice] = useState<Task | null>(null);
 
-  // Active Focus Task
-  const [, setActiveFocusTask] = useState<Task | null>(tasks[0] || null);
+  // Active Focus Task & Auto-Start Trigger
+  const [activeFocusTask, setActiveFocusTask] = useState<Task | null>(tasks[0] || null);
+  const [focusStartTrigger, setFocusStartTrigger] = useState<number>(0);
 
   const handleStartFocus = (task: Task) => {
     setActiveFocusTask(task);
+    setFocusStartTrigger(Date.now());
     setActiveTab('hoje');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -120,7 +123,7 @@ export function App() {
       confetti({
         particleCount: 30,
         spread: 40,
-        colors: ['#ffffff', '#0099ff', '#d44df0', '#6a4cf5']
+        colors: ['#0099ff', '#d44df0', '#6a4cf5', '#ff7a3d']
       });
     }
   };
@@ -133,7 +136,7 @@ export function App() {
         particleCount: 50,
         spread: 60,
         origin: { y: 0.75 },
-        colors: ['#ffffff', '#0099ff', '#d44df0', '#6a4cf5']
+        colors: ['#0099ff', '#d44df0', '#6a4cf5', '#ff7a3d']
       });
     }
   };
@@ -149,13 +152,19 @@ export function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleToggleTheme = () => {
-    const nextMode: ThemeMode = 'dark';
+    const nextMode: ThemeMode = themeMode === 'dark' ? 'light' : 'dark';
     setThemeMode(nextMode);
   };
 
   return (
-    <div className="h-full w-full flex overflow-hidden antialiased font-sans bg-[#090909] text-[#ffffff] dark selection:bg-[#0099ff]/30 selection:text-white">
-      {/* Sidebar — Framer Dark Canvas (#090909) with #262626 hairline */}
+    <div
+      className={`h-full w-full flex overflow-hidden antialiased font-sans transition-colors duration-200 selection:bg-[#0099ff]/25 ${
+        isDarkMode
+          ? 'bg-[#090909] text-[#ffffff] dark selection:text-white'
+          : 'bg-[#f7f7f8] text-[#090909] light selection:text-[#090909]'
+      }`}
+    >
+      {/* Sidebar — Framer Dual-Canvas (Dark #090909 / Light #ffffff) */}
       <Sidebar
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -169,9 +178,11 @@ export function App() {
         onCloseMobile={() => setIsMobileMenuOpen(false)}
       />
 
-      {/* Main Artboard Canvas (#090909) */}
+      {/* Main Artboard Canvas */}
       <main
-        className="flex-1 flex flex-col h-full overflow-y-auto overflow-x-hidden min-w-0 relative bg-[#090909]"
+        className={`flex-1 flex flex-col h-full overflow-y-auto overflow-x-hidden min-w-0 relative transition-colors duration-200 ${
+          isDarkMode ? 'bg-[#090909]' : 'bg-[#f7f7f8]'
+        }`}
         data-purpose="main-content-scroll"
       >
         <div className="max-w-[1200px] w-full mx-auto px-5 sm:px-8 lg:px-10 py-7 flex flex-col gap-8 min-w-0">
@@ -184,11 +195,14 @@ export function App() {
               habits={habits}
               subjects={subjects}
               isCalmMode={isCalmMode}
-              themeMode="dark"
-              isDarkMode={true}
+              themeMode={themeMode}
+              isDarkMode={isDarkMode}
+              externalFocusTask={activeFocusTask}
+              focusStartTrigger={focusStartTrigger}
               onChangeThemeMode={setThemeMode}
               onToggleTheme={handleToggleTheme}
               onToggleTask={handleToggleTaskWithConfetti}
+              onUpdateTask={updateTask}
               onStartFocus={handleStartFocus}
               onToggleHabit={toggleHabitDate}
               onOpenLostHelp={() => setIsLostHelpOpen(true)}
@@ -206,7 +220,7 @@ export function App() {
             <TasksView
               tasks={filteredTasks}
               projects={projects}
-              isDarkMode={true}
+              isDarkMode={isDarkMode}
               onToggleTask={handleToggleTaskWithConfetti}
               onOpenTaskModal={handleOpenTaskModal}
               onDeleteTask={deleteTask}
@@ -222,7 +236,7 @@ export function App() {
               projects={projects}
               tasks={tasks}
               staleProjects={staleProjects}
-              isDarkMode={true}
+              isDarkMode={isDarkMode}
               onToggleStage={toggleProjectStage}
               onAddProject={addProject}
               onUpdateProject={updateProject}
@@ -239,7 +253,7 @@ export function App() {
             <StudiesView
               subjects={subjects}
               flashcards={flashcards}
-              isDarkMode={true}
+              isDarkMode={isDarkMode}
               onAddSubject={addSubject}
               onUpdateSubject={updateSubject}
               onDeleteSubject={deleteSubject}
@@ -273,7 +287,7 @@ export function App() {
         onStartFocus={handleStartFocus}
         onNavigateTab={setActiveTab}
         onNavigateToProjects={() => setActiveTab('projetos')}
-        isDarkMode={true}
+        isDarkMode={isDarkMode}
       />
 
       {/* 2. Modal de Trade-off */}
@@ -302,14 +316,14 @@ export function App() {
       {/* Modais Globais de Apoio */}
       <QuickCaptureModal
         isOpen={isQuickCaptureOpen}
-        isDarkMode={true}
+        isDarkMode={isDarkMode}
         onClose={() => setIsQuickCaptureOpen(false)}
         onCapture={(text, type) => quickCapture(text, type)}
       />
 
       <LostHelpModal
         isOpen={isLostHelpOpen}
-        isDarkMode={true}
+        isDarkMode={isDarkMode}
         onClose={() => setIsLostHelpOpen(false)}
         tasks={tasks}
         projects={projects}
@@ -320,7 +334,7 @@ export function App() {
 
       <EmergencyTriageModal
         isOpen={isEmergencyTriageOpen}
-        isDarkMode={true}
+        isDarkMode={isDarkMode}
         onClose={() => setIsEmergencyTriageOpen(false)}
         tasks={tasks}
         onDeferTask={(id) => updateTask(id, { status: 'adiado' })}
@@ -330,7 +344,7 @@ export function App() {
 
       <TaskModal
         isOpen={isTaskModalOpen}
-        isDarkMode={true}
+        isDarkMode={isDarkMode}
         onClose={() => {
           setIsTaskModalOpen(false);
           setTaskToEdit(null);

@@ -131,3 +131,4 @@ spacing:
 # Framer Dark-Canvas Design System (`adhd-project-manager`)
 
 Applied across all views, navigation, modals, and interactive cards of Personal OS.
+

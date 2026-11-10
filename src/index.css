@@ -7,7 +7,7 @@
   --font-sans: 'Inter Variable', 'Inter', 'Geist', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  /* FRAMER DARK-CANVAS DESIGN SYSTEM TOKENS */
+  /* FRAMER DESIGN SYSTEM TOKENS */
   --color-framer-primary: #ffffff;
   --color-framer-on-primary: #000000;
   --color-framer-accent-blue: #0099ff;
@@ -25,34 +25,62 @@
   --color-framer-success: #22c55e;
 }
 
+:root,
+html.dark {
+  --framer-canvas: #090909;
+  --framer-surface-1: #141414;
+  --framer-surface-2: #1c1c1c;
+  --framer-ink: #ffffff;
+  --framer-ink-muted: #999999;
+  --framer-hairline: #262626;
+  --framer-hairline-soft: #1a1a1a;
+  --framer-btn-bg: #ffffff;
+  --framer-btn-fg: #000000;
+  --framer-btn-hover: #f0f0f0;
+}
+
+html.light {
+  --framer-canvas: #f7f7f8;
+  --framer-surface-1: #ffffff;
+  --framer-surface-2: #efefef;
+  --framer-ink: #090909;
+  --framer-ink-muted: #666666;
+  --framer-hairline: #e4e4e7;
+  --framer-hairline-soft: #f0f0f2;
+  --framer-btn-bg: #090909;
+  --framer-btn-fg: #ffffff;
+  --framer-btn-hover: #222222;
+}
+
 html, body {
   height: 100%;
   font-family: var(--font-sans);
   font-feature-settings: "cv01" 1, "cv05" 1, "cv09" 1, "cv11" 1, "ss03" 1, "ss07" 1, "dlig" 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #090909;
-  color: #ffffff;
+  background-color: var(--framer-canvas);
+  color: var(--framer-ink);
   letter-spacing: -0.01em;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Custom Dark Canvas Scrollbar */
+/* Custom Canvas Scrollbar */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #090909;
+  background: var(--framer-canvas);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #262626;
+  background: var(--framer-hairline);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3d3d3d;
+  background: var(--framer-ink-muted);
 }
 
 /* ==============================================================================
@@ -88,28 +116,28 @@ html, body {
 }
 
 /* ==============================================================================
-   FRAMER SURFACES & ELEVATION
+   FRAMER SURFACES & ELEVATION (DARK & LIGHT DUAL CANVAS)
    ============================================================================== */
 
-/* Surface 1: Charcoal Card (#141414) */
+/* Surface 1: Card (#141414 in Dark / #ffffff in Light) */
 .framer-card {
-  background-color: #141414;
-  border: 1px solid #262626;
+  background-color: var(--framer-surface-1);
+  border: 1px solid var(--framer-hairline);
   border-radius: 20px;
-  box-shadow: inset 0 0.5px 0 0 rgba(255, 255, 255, 0.08), 0 10px 30px 0 rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 0.5px 0 0 rgba(255, 255, 255, 0.08), 0 10px 30px 0 rgba(0, 0, 0, 0.06);
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.framer-card:hover {
-  border-color: #333333;
+html.light .framer-card {
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.04);
 }
 
-/* Surface 2: Featured Lifted Card (#1c1c1c) */
+/* Surface 2: Featured Lifted Card (#1c1c1c in Dark / #efefef in Light) */
 .framer-card-featured {
-  background-color: #1c1c1c;
-  border: 1px solid #2e2e2e;
+  background-color: var(--framer-surface-2);
+  border: 1px solid var(--framer-hairline);
   border-radius: 20px;
-  box-shadow: inset 0 0.5px 0 0 rgba(255, 255, 255, 0.12), 0 14px 36px 0 rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 0.5px 0 0 rgba(255, 255, 255, 0.12), 0 14px 36px 0 rgba(0, 0, 0, 0.12);
 }
 
 /* Signature Gradient Spotlight Card — Violet / Magenta Atmosphere (30px radius) */
@@ -124,6 +152,17 @@ html, body {
     inset 0 0.5px 0 0 rgba(255, 255, 255, 0.22),
     0 20px 50px -10px rgba(106, 76, 245, 0.22),
     0 10px 30px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* In Light Mode, Framer Gradient Spotlight Card becomes a vibrant Violet/Magenta showcase poster on the white artboard */
+html.light .card-focus-refined,
+html.light .framer-spotlight-violet {
+  background:
+    radial-gradient(120% 120% at 88% 15%, rgba(212, 77, 240, 0.85) 0%, rgba(106, 76, 245, 0.92) 48%, #4328b8 100%);
+  border: 1px solid rgba(106, 76, 245, 0.25);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.3),
+    0 20px 45px -12px rgba(106, 76, 245, 0.35);
 }
 
 /* Signature Gradient Spotlight Card — Magenta Wash */
@@ -147,14 +186,14 @@ html, body {
 }
 
 /* ==============================================================================
-   FRAMER BUTTONS & INPUTS
+   FRAMER BUTTONS & INPUTS (ADAPTIVE DARK/LIGHT)
    ============================================================================== */
 
-/* button-primary: White Pill on Dark Canvas */
+/* button-primary: White Pill on Dark / Black Pill on Light */
 .btn-electric-clean,
 .framer-btn-primary {
-  background-color: #ffffff;
-  color: #000000;
+  background-color: var(--framer-btn-bg);
+  color: var(--framer-btn-fg);
   font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 500;
@@ -167,7 +206,7 @@ html, body {
 
 .btn-electric-clean:hover,
 .framer-btn-primary:hover {
-  background-color: #f0f0f0;
+  background-color: var(--framer-btn-hover);
 }
 
 .btn-electric-clean:active,
@@ -175,48 +214,30 @@ html, body {
   transform: scale(0.97);
 }
 
-/* button-secondary: Charcoal Pill (#141414) */
+/* button-secondary: Surface-1 Pill */
 .framer-btn-secondary {
-  background-color: #141414;
-  color: #ffffff;
+  background-color: var(--framer-surface-1);
+  color: var(--framer-ink);
   font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 500;
   line-height: 1;
   letter-spacing: -0.14px;
-  border: 1px solid #262626;
+  border: 1px solid var(--framer-hairline);
   border-radius: 100px;
   padding: 10px 16px;
   transition: all 0.15s ease;
 }
 
 .framer-btn-secondary:hover {
-  background-color: #1c1c1c;
-  border-color: #333333;
-}
-
-/* button-translucent: Surface-2 Pill (#1c1c1c) */
-.framer-btn-translucent {
-  background-color: #1c1c1c;
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: -0.14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 100px;
-  padding: 8px 14px;
-  transition: all 0.15s ease;
-}
-
-.framer-btn-translucent:hover {
-  background-color: #262626;
+  background-color: var(--framer-surface-2);
 }
 
 /* text-input + level-3 blue focus ring */
 .framer-input {
-  background-color: #141414;
-  color: #ffffff;
-  border: 1px solid #262626;
+  background-color: var(--framer-surface-1);
+  color: var(--framer-ink);
+  border: 1px solid var(--framer-hairline);
   border-radius: 10px;
   padding: 10px 14px;
   font-size: 14px;
@@ -225,11 +246,11 @@ html, body {
 }
 
 .framer-input::placeholder {
-  color: #999999;
+  color: var(--framer-ink-muted);
 }
 
 .framer-input:focus {
   outline: none;
   border-color: #0099ff;
-  box-shadow: 0 0 0 2px rgba(0, 153, 255, 0.18);
+  box-shadow: 0 0 0 3px rgba(0, 153, 255, 0.15);
 }

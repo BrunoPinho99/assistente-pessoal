@@ -126,12 +126,16 @@ export function usePersonalOS() {
     return INITIAL_FOCUS_SESSIONS;
   });
 
-  // Preferences (Framer Dark-Canvas: The brand IS dark)
-  const [themeMode, setThemeMode] = useState<ThemeMode>('dark');
+  // Preferences (Framer Dual-Canvas: Dark & Light Mode)
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.THEME);
+    return (saved === 'light' || saved === 'dark') ? saved : 'dark';
+  });
 
-  const isDarkMode = true;
-  const setIsDarkMode = (_val: boolean | ((prev: boolean) => boolean)) => {
-    setThemeMode('dark');
+  const isDarkMode = themeMode === 'dark';
+  const setIsDarkMode = (val: boolean | ((prev: boolean) => boolean)) => {
+    const nextDark = typeof val === 'function' ? val(isDarkMode) : val;
+    setThemeMode(nextDark ? 'dark' : 'light');
   };
 
   const [isCalmMode, setIsCalmMode] = useState<boolean>(() => {
@@ -221,8 +225,10 @@ export function usePersonalOS() {
     localStorage.setItem(STORAGE_KEYS.THEME, themeMode);
     if (themeMode === 'dark') {
       document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
     } else {
       document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
     }
   }, [themeMode]);
 
@@ -284,25 +290,48 @@ export function usePersonalOS() {
   const toggleTaskStatus = (id: string) => {
     let nextStatus: TaskStatus = 'a_fazer';
     let completedAt: string | null = null;
+    let updatedSubtasks: Subtask[] | undefined = undefined;
 
-    setTasks(prev => prev.map(t => {
-      if (t.id === id) {
-        nextStatus = t.status === 'concluido' ? 'a_fazer' : 'concluido';
-        completedAt = nextStatus === 'concluido' ? new Date().toISOString() : null;
-        return {
-          ...t,
-          status: nextStatus,
-          completed_at: completedAt
-        };
-      }
-      return t;
-    }));
+    setTasks(prev => {
+      const updated = prev.map(t => {
+        if (t.id === id) {
+          nextStatus = t.status === 'concluido' ? 'a_fazer' : 'concluido';
+          completedAt = nextStatus === 'concluido' ? new Date().toISOString() : null;
+          updatedSubtasks = nextStatus === 'concluido' && Array.isArray(t.subtasks)
+            ? t.subtasks.map(st => ({ ...st, completed: true }))
+            : t.subtasks;
+          return {
+            ...t,
+            status: nextStatus,
+            completed_at: completedAt,
+            subtasks: updatedSubtasks || t.subtasks
+          };
+        }
+        return t;
+      });
+
+      // Mantém as pendentes na fila ativa (subindo a seguinte) e move as concluídas para a fila de concluídas
+      const pending = updated.filter(t => t.status !== 'concluido');
+      const completed = updated
+        .filter(t => t.status === 'concluido')
+        .sort((a, b) => {
+          const timeA = a.completed_at ? new Date(a.completed_at).getTime() : 0;
+          const timeB = b.completed_at ? new Date(b.completed_at).getTime() : 0;
+          return timeB - timeA;
+        });
+
+      return [...pending, ...completed];
+    });
 
     // Sincronização contínua no MongoDB Atlas
     fetch(`/api/tasks?id=${encodeURIComponent(id)}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: nextStatus, completed_at: completedAt })
+      body: JSON.stringify({
+        status: nextStatus,
+        completed_at: completedAt,
+        ...(updatedSubtasks ? { subtasks: updatedSubtasks } : {})
+      })
     }).catch(err => console.warn('Erro ao alternar status da tarefa no MongoDB:', err));
   };
 

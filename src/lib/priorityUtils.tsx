@@ -16,19 +16,21 @@ export interface PriorityThermalConfig {
 
 export const getPriorityThermalConfig = (
   priority: Priority = 'media',
-  _isDarkMode: boolean = true
+  isDarkMode: boolean = true
 ): PriorityThermalConfig => {
   switch (priority) {
     case 'urgente':
       return {
         label: 'Urgente',
         temperatureLabel: 'Máxima Temperatura (Crítica)',
-        badgeClass: 'bg-[#ff5577]/15 border-[#ff5577]/35 text-[#ff5577]',
-        dotClass: 'bg-[#ff5577] shadow-[0_0_8px_rgba(255,85,119,0.7)]',
+        badgeClass: 'bg-[#ff5577]/15 border-[#ff5577]/35 text-[#e11d48] dark:text-[#ff5577]',
+        dotClass: 'bg-[#ff5577]',
         borderClass: 'border-[#ff5577]/40',
-        textClass: 'text-[#ff5577]',
+        textClass: 'text-[#e11d48] dark:text-[#ff5577]',
         bgClass: 'bg-[#ff5577]/15',
-        activeButtonClass: 'bg-[#1c1c1c] border-[#ff5577] text-[#ffffff] ring-1 ring-[#ff5577]/30',
+        activeButtonClass: isDarkMode
+          ? 'bg-[#1c1c1c] border-[#ff5577] text-[#ffffff] ring-1 ring-[#ff5577]/30'
+          : 'bg-[#ff5577]/10 border-[#ff5577] text-[#090909] ring-1 ring-[#ff5577]/30',
         icon: <Flame className="w-3 h-3 text-[#ff5577] fill-[#ff5577]/40" />
       };
 
@@ -36,12 +38,14 @@ export const getPriorityThermalConfig = (
       return {
         label: 'Alta',
         temperatureLabel: 'Temperatura Quente (Solar)',
-        badgeClass: 'bg-[#ff7a3d]/15 border-[#ff7a3d]/35 text-[#ff7a3d]',
-        dotClass: 'bg-[#ff7a3d] shadow-[0_0_8px_rgba(255,122,61,0.6)]',
+        badgeClass: 'bg-[#ff7a3d]/15 border-[#ff7a3d]/35 text-[#ea580c] dark:text-[#ff7a3d]',
+        dotClass: 'bg-[#ff7a3d]',
         borderClass: 'border-[#ff7a3d]/40',
-        textClass: 'text-[#ff7a3d]',
+        textClass: 'text-[#ea580c] dark:text-[#ff7a3d]',
         bgClass: 'bg-[#ff7a3d]/15',
-        activeButtonClass: 'bg-[#1c1c1c] border-[#ff7a3d] text-[#ffffff] ring-1 ring-[#ff7a3d]/30',
+        activeButtonClass: isDarkMode
+          ? 'bg-[#1c1c1c] border-[#ff7a3d] text-[#ffffff] ring-1 ring-[#ff7a3d]/30'
+          : 'bg-[#ff7a3d]/10 border-[#ff7a3d] text-[#090909] ring-1 ring-[#ff7a3d]/30',
         icon: <Sun className="w-3 h-3 text-[#ff7a3d]" />
       };
 
@@ -49,12 +53,14 @@ export const getPriorityThermalConfig = (
       return {
         label: 'Média',
         temperatureLabel: 'Temperatura Neutra (Framer Blue)',
-        badgeClass: 'bg-[#0099ff]/15 border-[#0099ff]/35 text-[#0099ff]',
-        dotClass: 'bg-[#0099ff] shadow-[0_0_8px_rgba(0,153,255,0.5)]',
+        badgeClass: 'bg-[#0099ff]/15 border-[#0099ff]/35 text-[#0077cc] dark:text-[#0099ff]',
+        dotClass: 'bg-[#0099ff]',
         borderClass: 'border-[#0099ff]/40',
-        textClass: 'text-[#0099ff]',
+        textClass: 'text-[#0077cc] dark:text-[#0099ff]',
         bgClass: 'bg-[#0099ff]/15',
-        activeButtonClass: 'bg-[#1c1c1c] border-[#0099ff] text-[#ffffff] ring-1 ring-[#0099ff]/25',
+        activeButtonClass: isDarkMode
+          ? 'bg-[#1c1c1c] border-[#0099ff] text-[#ffffff] ring-1 ring-[#0099ff]/25'
+          : 'bg-[#0099ff]/10 border-[#0099ff] text-[#090909] ring-1 ring-[#0099ff]/25',
         icon: <Activity className="w-3 h-3 text-[#0099ff]" />
       };
 
@@ -63,12 +69,16 @@ export const getPriorityThermalConfig = (
       return {
         label: 'Baixa',
         temperatureLabel: 'Temperatura Fria (Tranquila)',
-        badgeClass: 'bg-[#1c1c1c] border-[#262626] text-[#999999]',
+        badgeClass: isDarkMode
+          ? 'bg-[#1c1c1c] border-[#262626] text-[#999999]'
+          : 'bg-[#efefef] border-[#e4e4e7] text-[#666666]',
         dotClass: 'bg-[#22c55e]',
-        borderClass: 'border-[#262626]',
-        textClass: 'text-[#999999]',
-        bgClass: 'bg-[#1c1c1c]',
-        activeButtonClass: 'bg-[#1c1c1c] border-[#22c55e] text-[#ffffff] ring-1 ring-[#22c55e]/25',
+        borderClass: isDarkMode ? 'border-[#262626]' : 'border-[#e4e4e7]',
+        textClass: isDarkMode ? 'text-[#999999]' : 'text-[#666666]',
+        bgClass: isDarkMode ? 'bg-[#1c1c1c]' : 'bg-[#efefef]',
+        activeButtonClass: isDarkMode
+          ? 'bg-[#1c1c1c] border-[#22c55e] text-[#ffffff] ring-1 ring-[#22c55e]/25'
+          : 'bg-[#22c55e]/10 border-[#22c55e] text-[#090909] ring-1 ring-[#22c55e]/25',
         icon: <Sparkles className="w-3 h-3 text-[#22c55e]" />
       };
   }
@@ -130,20 +140,20 @@ export const getEnergyThermalConfig = (
     case 'high':
       return {
         label: 'Energia Alta',
-        badgeClass: 'bg-[#ff7a3d]/10 border-[#ff7a3d]/25 text-[#ff7a3d]',
+        badgeClass: 'bg-[#ff7a3d]/10 border-[#ff7a3d]/25 text-[#ea580c] dark:text-[#ff7a3d]',
         icon: <Flame className="w-3 h-3 text-[#ff7a3d] fill-[#ff7a3d]/40" />
       };
     case 'medium':
       return {
         label: 'Energia Média',
-        badgeClass: 'bg-[#0099ff]/10 border-[#0099ff]/25 text-[#0099ff]',
+        badgeClass: 'bg-[#0099ff]/10 border-[#0099ff]/25 text-[#0077cc] dark:text-[#0099ff]',
         icon: <Activity className="w-3 h-3 text-[#0099ff]" />
       };
     case 'low':
     default:
       return {
         label: 'Energia Baixa',
-        badgeClass: 'bg-[#22c55e]/10 border-[#22c55e]/25 text-[#22c55e]',
+        badgeClass: 'bg-[#22c55e]/10 border-[#22c55e]/25 text-[#16a34a] dark:text-[#22c55e]',
         icon: <Sparkles className="w-3 h-3 text-[#22c55e]" />
       };
   }
