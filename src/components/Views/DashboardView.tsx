@@ -608,20 +608,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           }`}
           data-purpose="hero-focus-card"
         >
-          {/* Top Right Controls: Concluir Tarefa (sempre disponível para avançar a fila!) + Editar */}
+          {/* Top Right Controls: Editar */}
           <div className="absolute top-5 right-5 flex items-center gap-2 z-20">
-            <button
-              type="button"
-              onClick={() => handleCompleteTaskAndAdvanceQueue(currentHeroTask)}
-              className={`px-4 py-2 rounded-full bg-[#22c55e] hover:bg-[#16a34a] text-[#000000] font-semibold text-[13px] tracking-[-0.13px] flex items-center gap-1.5 transition-all cursor-pointer shadow-lg active:scale-[0.97] ${
-                allSubtasksCompleted ? 'ring-2 ring-white animate-pulse' : ''
-              }`}
-              title="Marcar como concluída, mover para a Fila de Concluídas e subir a próxima tarefa"
-            >
-              <Check className="w-4 h-4 stroke-[2.5]" />
-              <span>Concluir tarefa</span>
-            </button>
-
             <button
               type="button"
               onClick={() => {
@@ -658,7 +646,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </div>
 
               {/* Título da Tarefa #1 da Fila */}
-              <h2 className="text-[24px] sm:text-[32px] font-medium tracking-[-1.0px] text-[#ffffff] leading-[1.13] break-words pr-28">
+              <h2 className="text-[24px] sm:text-[32px] font-medium tracking-[-1.0px] text-[#ffffff] leading-[1.13] break-words pr-10">
                 {currentHeroTask.title}
               </h2>
 
@@ -826,11 +814,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   )}
                 </div>
 
-                {/* Botão Concluir Tarefa diretamente abaixo do botão de Foco */}
+                {/* Único Botão Concluir Tarefa diretamente abaixo do botão de Foco */}
                 <button
                   type="button"
                   onClick={() => handleCompleteTaskAndAdvanceQueue(currentHeroTask)}
-                  className="w-full max-w-[200px] py-[10px] px-[18px] rounded-full text-[13px] font-semibold tracking-[-0.13px] bg-[#22c55e] hover:bg-[#16a34a] text-[#000000] active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
+                  className={`w-full max-w-[200px] py-[10px] px-[18px] rounded-full text-[13px] font-semibold tracking-[-0.13px] bg-[#22c55e] hover:bg-[#16a34a] text-[#000000] active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md ${
+                    allSubtasksCompleted ? 'ring-2 ring-white animate-pulse' : ''
+                  }`}
                   title="Marcar como concluída, colocar na Fila de Concluídas e subir a próxima tarefa"
                 >
                   <Check className="w-4 h-4 stroke-[2.5]" />
