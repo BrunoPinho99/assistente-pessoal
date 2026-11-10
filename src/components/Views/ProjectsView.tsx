@@ -827,69 +827,27 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
               <div key={slotKey} className="flex flex-col space-y-2">
                 <div className="flex items-center justify-between text-xs px-1">
                   <span className="font-bold text-[#747E98] dark:text-slate-400 flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-slate-400" />
+                    <span className="w-2 h-2 rounded-full bg-slate-500/40" />
                     {config.name}
                   </span>
-                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-500/15 text-slate-400 border border-slate-500/20">
-                    VAGO (0/1)
+                  <span className="text-[11px] font-mono text-[#747E98] dark:text-slate-400">
+                    {config.cognitiveLoad}
                   </span>
                 </div>
 
-                <div className={`rounded-2xl border-2 border-dashed h-80 sm:h-88 p-6 flex flex-col justify-between text-left transition-all ${
-                  isDarkMode 
-                    ? 'border-[#263248] bg-[#141C2E]/40 hover:bg-[#141C2E]/70' 
-                    : 'border-[#CBD5E1] bg-[#F8FAFC] hover:bg-[#F1F5F9]'
-                }`}>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border ${config.badgeClass}`}>
-                        Slot {slotIdx + 1} • {config.subtitle}
-                      </span>
-                      <span className="text-xs text-[#8E9BB5] font-mono">
-                        {config.cognitiveLoad}
-                      </span>
-                    </div>
-
-                    <div className="space-y-1.5 pt-2">
-                      <h3 className={`text-base font-bold ${isDarkMode ? 'text-white' : 'text-[#171D38]'}`}>
-                        Slot Disponível
-                      </h3>
-                      <p className="text-xs text-[#8E9BB5] leading-relaxed">
-                        {config.definition}
-                      </p>
-                      <p className="text-[11px] text-[#747E98] italic pt-1">
-                        "{config.behavior}"
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-dashed border-white/10 space-y-2">
-                    {lockedProjects.length > 0 ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const firstLocked = lockedProjects[0];
-                          if (firstLocked && onToggleLock) {
-                            onToggleLock(firstLocked.id, slotKey);
-                          }
-                        }}
-                        className="w-full py-2.5 px-3 rounded-xl bg-[#315DFF]/15 hover:bg-[#315DFF]/25 border border-[#315DFF]/40 text-[#315DFF] dark:text-blue-300 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
-                      >
-                        <Unlock className="w-3.5 h-3.5" />
-                        <span>Destrancar "{lockedProjects[0].title.slice(0, 20)}..." para este Slot</span>
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => setShowAddModal(true)}
-                        className="w-full py-2.5 px-3 rounded-xl bg-[#315DFF] hover:bg-[#254BE0] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer shadow-xs"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Criar Projeto para este Slot</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
+                {/* Retângulo vazio: apenas o contorno pontilhado */}
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(true)}
+                  className={`rounded-2xl border-2 border-dashed h-80 sm:h-88 w-full flex items-center justify-center transition-all duration-200 cursor-pointer bg-transparent group ${
+                    isDarkMode 
+                      ? 'border-white/15 hover:border-white/30 text-white/20 hover:text-white/40' 
+                      : 'border-[#CBD5E1] hover:border-[#94A3B8] text-[#94A3B8]/40 hover:text-[#94A3B8]'
+                  }`}
+                  title={`Slot Vazio • Clique para alocar projeto em ${config.name}`}
+                >
+                  <Plus className="w-6 h-6 stroke-[1.5] transition-transform duration-200 group-hover:scale-110" />
+                </button>
               </div>
             );
           })}
