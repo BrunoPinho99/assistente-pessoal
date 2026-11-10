@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import confetti from 'canvas-confetti';
 import { 
   Check,
@@ -21,9 +21,10 @@ import {
   Unlock,
   Sparkles,
   AlertTriangle,
-  ShieldCheck
+  ShieldCheck,
+  FolderKanban
 } from 'lucide-react';
-import { Task, Project, Habit, StudySubject, ThemeMode } from '../../types';
+import { Task, Project, Habit, StudySubject, ThemeMode, Priority } from '../../types';
 import { soundSynthesizer } from '../../lib/audioSynthesizer';
 import { validateTaskForFocus } from '../../lib/focusProtection';
 
@@ -210,6 +211,132 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const totalCompanyTasks = companyTasks.length;
   const completedCompanyTasks = companyTasks.filter(t => t.status === 'concluido').length;
   const pendingCompanyTasks = companyTasks.filter(t => t.status !== 'concluido').length;
+
+  const PRIORITY_WEIGHT: Record<Priority, number> = {
+    urgente: 4,
+    alta: 3,
+    media: 2,
+    baixa: 1
+  };
+
+  const getPriorityBadge = (priority: Priority) => {
+    switch (priority) {
+      case 'urgente':
+        return (
+          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/15 border border-rose-500/35 text-rose-400 flex items-center gap-1 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse" />
+            Urgente
+          </span>
+        );
+      case 'alta':
+        return (
+          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 border border-amber-500/30 text-amber-400 shrink-0">
+            Alta
+          </span>
+        );
+      case 'media':
+        return (
+          <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-500/10 border border-blue-500/20 text-blue-300 shrink-0">
+            Média
+          </span>
+        );
+      case 'baixa':
+        return (
+          <span className="px-1.5 py-0.5 rounded text-[10px] font-normal text-slate-400 shrink-0">
+            Baixa
+          </span>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const formatDeadline = (raw?: string | null): string => {
+    if (!raw) return '';
+    const trimmed = raw.trim();
+    if (trimmed.includes('T') || (trimmed.includes('-') && trimmed.length >= 10)) {
+      const d = new Date(trimmed);
+      if (!isNaN(d.getTime())) {
+        const today = new Date();
+        if (
+          d.getDate() === today.getDate() &&
+          d.getMonth() === today.getMonth() &&
+          d.getFullYear() === today.getFullYear()
+        ) {
+          return 'Hoje';
+        }
+        return d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' }).replace('.', '');
+      }
+    }
+    return trimmed;
+  };
+
+  interface TaskGroup {
+    id: string;
+    projectName: string;
+    companyName: string;
+    tasks: Task[];
+    maxPriorityWeight: number;
+  }
+
+  // Agrupamento por Projeto com separação por Empresa e ordenação estrita por Urgência
+  const groupedTasks = useMemo(() => {
+    const groupsMap = new Map<string, TaskGroup>();
+
+    displayTasks.forEach(task => {
+      const project = task.project_id ? projects.find(p => p.id === task.project_id) : undefined;
+      const groupId = project ? project.id : (task.area || 'Geral');
+      const projectName = project ? project.title : (task.area ? `Operações ${task.area}` : 'Geral');
+      const companyName = project?.area || task.area || 'Empresas';
+
+      if (!groupsMap.has(groupId)) {
+        groupsMap.set(groupId, {
+          id: groupId,
+          projectName,
+          companyName,
+          tasks: [],
+          maxPriorityWeight: 0
+        });
+      }
+
+      groupsMap.get(groupId)!.tasks.push(task);
+    });
+
+    const groups = Array.from(groupsMap.values());
+
+    // 1. Em cada projeto/empresa, ordena as tarefas começando pela MAIS URGENTE
+    groups.forEach(g => {
+      g.tasks.sort((a, b) => {
+        // Concluídas vão para o final
+        const aDone = a.status === 'concluido' ? 1 : 0;
+        const bDone = b.status === 'concluido' ? 1 : 0;
+        if (aDone !== bDone) return aDone - bDone;
+
+        // Mais urgente primeiro (urgente > alta > media > baixa)
+        const weightA = PRIORITY_WEIGHT[a.priority] || 2;
+        const weightB = PRIORITY_WEIGHT[b.priority] || 2;
+        if (weightA !== weightB) return weightB - weightA;
+
+        return 0;
+      });
+
+      // Peso máximo de urgência no grupo para ordenar os projetos
+      const pendingTasks = g.tasks.filter(t => t.status !== 'concluido');
+      g.maxPriorityWeight = pendingTasks.length > 0
+        ? Math.max(...pendingTasks.map(t => PRIORITY_WEIGHT[t.priority] || 2))
+        : 0;
+    });
+
+    // 2. Ordena os projetos colocando o mais urgente no topo da hierarquia
+    groups.sort((a, b) => {
+      if (a.maxPriorityWeight !== b.maxPriorityWeight) {
+        return b.maxPriorityWeight - a.maxPriorityWeight;
+      }
+      return a.projectName.localeCompare(b.projectName);
+    });
+
+    return groups;
+  }, [displayTasks, projects]);
 
   // Badge da empresa (garantindo letras brancas e sem azul ilegível no modo escuro)
   const getCompanyBadge = (task: Task) => {
@@ -558,8 +685,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
         </div>
 
-        {/* List of Tasks (Linear Horizontal Rows) */}
-        <div className="flex flex-col gap-2 min-w-0">
+        {/* List of Tasks Grouped by Project with Fine Separator Line */}
+        <div className="flex flex-col gap-4 min-w-0">
           {displayTasks.length === 0 ? (
             <div className={`py-12 px-4 rounded-xl border text-center space-y-1 ${
               isDark 
@@ -570,76 +697,118 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <p className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-[#747E98]'}`}>Tudo em dia nas suas operações executivas.</p>
             </div>
           ) : (
-            displayTasks.map((task) => {
-              const isCompleted = task.status === 'concluido';
-              const isSelectedHero = Boolean(currentHeroTask?.id && task.id === currentHeroTask.id);
-
-              return (
-                <div
-                  key={task.id}
-                  onClick={() => {
-                    setSelectedFocusTaskId(task.id);
-                    if (onEditTask) onEditTask(task);
-                  }}
-                  className={`group px-4 py-3 rounded-xl border flex items-center justify-between gap-3 transition-colors cursor-pointer shadow-xs min-w-0 ${
-                    isDark 
-                      ? isSelectedHero 
-                        ? 'bg-[#182238] border-white/40 ring-1 ring-white/20' 
-                        : 'bg-[#151D31] border-[rgba(255,255,255,0.08)] hover:border-slate-600'
-                      : isSelectedHero
-                        ? 'bg-white border-[#315DFF] ring-1 ring-[#315DFF]/20'
-                        : 'bg-white border-[#E3E8F3] hover:border-[#CBD5E1]'
-                  } ${isCompleted ? 'opacity-60' : 'opacity-100'}`}
-                >
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    {/* Checkbox */}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleTask(task.id);
-                      }}
-                      className={`w-4.5 h-4.5 rounded-full border flex items-center justify-center transition-colors cursor-pointer shrink-0 ${
-                        isCompleted
-                          ? 'bg-[#315DFF] border-[#315DFF] text-white'
-                          : isDark
-                            ? 'border-slate-600 hover:border-white bg-[#151D31]'
-                            : 'border-[#CBD5E1] hover:border-[#315DFF] bg-white'
-                      }`}
-                      title={isCompleted ? "Marcar como pendente" : "Marcar como concluída"}
-                    >
-                      {isCompleted && <Check className="w-2.5 h-2.5 text-white stroke-[3]" />}
-                    </button>
-
-                    {/* Task Title (Sem texto azul no modo escuro) */}
-                    <span className={`text-xs sm:text-[13.5px] font-medium truncate transition-colors ${
-                      isCompleted 
-                        ? isDark ? 'line-through text-slate-500' : 'line-through text-[#747E98]' 
-                        : isDark
-                          ? 'text-white group-hover:text-slate-100'
-                          : 'text-[#171D38] group-hover:text-[#315DFF]'
+            groupedTasks.map((group, groupIdx) => (
+              <div 
+                key={group.id} 
+                className={`space-y-2.5 ${
+                  groupIdx > 0 
+                    ? isDark 
+                      ? 'pt-4 border-t border-white/10' 
+                      : 'pt-4 border-t border-[#E3E8F3]' 
+                    : ''
+                }`}
+              >
+                {/* Linha de Identificação do Projeto / Empresa */}
+                <div className="flex items-center justify-between px-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#315DFF]" />
+                    <span className={`text-xs font-bold tracking-tight ${isDark ? 'text-white' : 'text-[#171D38]'}`}>
+                      {group.projectName}
+                    </span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
+                      group.companyName.toLowerCase().includes('littera')
+                        ? isDark ? 'bg-blue-950/70 text-blue-300 border-blue-600/40' : 'bg-blue-50 text-blue-600 border-blue-200'
+                        : group.companyName.toLowerCase().includes('aura')
+                          ? isDark ? 'bg-purple-950/70 text-purple-300 border-purple-500/40' : 'bg-purple-50 text-purple-600 border-purple-200'
+                          : isDark ? 'bg-slate-800/80 text-slate-300 border-white/10' : 'bg-slate-100 text-slate-600 border-slate-200'
                     }`}>
-                      {task.title}
+                      {group.companyName}
                     </span>
                   </div>
 
-                  {/* Right side: Company Badge, Deadline & Chevron */}
-                  <div className="flex items-center gap-2.5 shrink-0">
-                    {getCompanyBadge(task)}
-                    
-                    {task.deadline && (
-                      <span className={`hidden sm:inline-flex text-[11px] font-medium ${isDark ? 'text-slate-300' : 'text-[#747E98]'}`}>
-                        {task.deadline}
-                      </span>
-                    )}
-
-                    <ChevronRight className={`w-4 h-4 transition-transform group-hover:translate-x-0.5 ${
-                      isDark ? 'text-slate-500 group-hover:text-white' : 'text-[#CBD5E1] group-hover:text-[#315DFF]'
-                    }`} />
-                  </div>
+                  <span className={`text-[11px] font-mono font-medium ${isDark ? 'text-slate-400' : 'text-[#747E98]'}`}>
+                    {group.tasks.length} {group.tasks.length === 1 ? 'tarefa' : 'tarefas'}
+                  </span>
                 </div>
-              );
-            })
+
+                {/* Lista de Tarefas do Projeto (Hierarquia pela Mais Urgente) */}
+                <div className="flex flex-col gap-2">
+                  {group.tasks.map((task) => {
+                    const isCompleted = task.status === 'concluido';
+                    const isSelectedHero = Boolean(currentHeroTask?.id && task.id === currentHeroTask.id);
+
+                    return (
+                      <div
+                        key={task.id}
+                        onClick={() => {
+                          setSelectedFocusTaskId(task.id);
+                          if (onEditTask) onEditTask(task);
+                        }}
+                        className={`group px-4 py-3 rounded-xl border flex items-center justify-between gap-3 transition-colors cursor-pointer shadow-xs min-w-0 ${
+                          isDark 
+                            ? isSelectedHero 
+                              ? 'bg-[#182238] border-white/40 ring-1 ring-white/20' 
+                              : 'bg-[#151D31] border-[rgba(255,255,255,0.08)] hover:border-slate-600'
+                            : isSelectedHero
+                              ? 'bg-white border-[#315DFF] ring-1 ring-[#315DFF]/20'
+                              : 'bg-white border-[#E3E8F3] hover:border-[#CBD5E1]'
+                        } ${isCompleted ? 'opacity-60' : 'opacity-100'}`}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          {/* Checkbox */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onToggleTask(task.id);
+                            }}
+                            className={`w-4.5 h-4.5 rounded-full border flex items-center justify-center transition-colors cursor-pointer shrink-0 ${
+                              isCompleted
+                                ? 'bg-[#315DFF] border-[#315DFF] text-white'
+                                : isDark
+                                  ? 'border-slate-600 hover:border-white bg-[#151D31]'
+                                  : 'border-[#CBD5E1] hover:border-[#315DFF] bg-white'
+                            }`}
+                            title={isCompleted ? "Marcar como pendente" : "Marcar como concluída"}
+                          >
+                            {isCompleted && <Check className="w-2.5 h-2.5 text-white stroke-[3]" />}
+                          </button>
+
+                          {/* Badge de Prioridade (Hierarquia visual clara) */}
+                          {getPriorityBadge(task.priority)}
+
+                          {/* Task Title */}
+                          <span className={`text-xs sm:text-[13.5px] font-medium truncate transition-colors ${
+                            isCompleted 
+                              ? isDark ? 'line-through text-slate-500' : 'line-through text-[#747E98]' 
+                              : isDark
+                                ? 'text-white group-hover:text-slate-100'
+                                : 'text-[#171D38] group-hover:text-[#315DFF]'
+                          }`}>
+                            {task.title}
+                          </span>
+                        </div>
+
+                        {/* Right side: Company Badge, Deadline & Chevron */}
+                        <div className="flex items-center gap-2.5 shrink-0">
+                          {getCompanyBadge(task)}
+                          
+                          {task.deadline && (
+                            <span className={`hidden sm:inline-flex text-[11px] font-medium ${isDark ? 'text-slate-300' : 'text-[#747E98]'}`}>
+                              {formatDeadline(task.deadline)}
+                            </span>
+                          )}
+
+                          <ChevronRight className={`w-4 h-4 transition-transform group-hover:translate-x-0.5 ${
+                            isDark ? 'text-slate-500 group-hover:text-white' : 'text-[#CBD5E1] group-hover:text-[#315DFF]'
+                          }`} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))
           )}
         </div>
       </section>
