@@ -16,8 +16,6 @@ interface SidebarProps {
   userRole?: string;
   themeMode?: ThemeMode;
   onChangeThemeMode?: (mode: ThemeMode) => void;
-  isCalmMode: boolean;
-  onToggleCalmMode: () => void;
   isMobileOpen?: boolean;
   onCloseMobile?: () => void;
 }
@@ -29,8 +27,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   userRole = 'Espaço pessoal',
   themeMode = 'dark',
   onChangeThemeMode,
-  isCalmMode,
-  onToggleCalmMode,
   isMobileOpen = false,
   onCloseMobile
 }) => {
@@ -149,7 +145,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </nav>
         </div>
 
-        {/* Bottom Section: Theme Switcher (Dark/Light), Focus Mode & User Profile */}
+        {/* Bottom Section: Theme Switcher (Dark/Light) & User Profile */}
         <div className="space-y-2.5">
           {/* Theme Switcher Pill (Versão Escura / Versão Clara) */}
           {onChangeThemeMode && (
@@ -186,70 +182,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </button>
             </div>
           )}
-
-          {/* Focus Mode Toggle Card */}
-          <div
-            onClick={onToggleCalmMode}
-            className={`px-3.5 py-3 rounded-[15px] border transition-colors cursor-pointer ${
-              isDark
-                ? 'bg-[#141414] border-[#262626] hover:bg-[#1c1c1c]'
-                : 'bg-[#f7f7f8] border-[#e4e4e7] hover:bg-[#efefef]'
-            }`}
-            data-purpose="focus-mode-toggle"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#0099ff]" />
-                <span
-                  className={`text-[13px] font-medium tracking-[-0.13px] ${
-                    isDark ? 'text-[#ffffff]' : 'text-[#090909]'
-                  }`}
-                >
-                  Modo foco
-                </span>
-              </div>
-
-              {/* Switch Toggle */}
-              <button
-                type="button"
-                role="switch"
-                aria-checked={isCalmMode}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleCalmMode();
-                }}
-                className={`w-9 h-5 rounded-full relative transition-colors cursor-pointer border ${
-                  isCalmMode
-                    ? isDark
-                      ? 'bg-[#ffffff] border-[#ffffff]'
-                      : 'bg-[#090909] border-[#090909]'
-                    : isDark
-                      ? 'bg-[#090909] border-[#262626]'
-                      : 'bg-[#e4e4e7] border-[#d4d4d8]'
-                }`}
-              >
-                <span
-                  className={`w-3.5 h-3.5 rounded-full absolute top-0.5 transition-all duration-200 ${
-                    isCalmMode
-                      ? isDark
-                        ? 'right-0.5 bg-[#000000]'
-                        : 'right-0.5 bg-[#ffffff]'
-                      : isDark
-                        ? 'left-0.5 bg-[#999999]'
-                        : 'left-0.5 bg-[#ffffff]'
-                  }`}
-                />
-              </button>
-            </div>
-
-            <p
-              className={`text-[12px] mt-1 font-normal tracking-[-0.12px] leading-snug ${
-                isDark ? 'text-[#999999]' : 'text-[#666666]'
-              }`}
-            >
-              Sem distrações visuais
-            </p>
-          </div>
 
           {/* User Profile Card */}
           <div

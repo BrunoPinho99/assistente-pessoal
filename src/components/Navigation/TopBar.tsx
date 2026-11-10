@@ -19,8 +19,6 @@ interface TopBarProps {
   onSearchChange: (query: string) => void;
   isDarkMode: boolean;
   onToggleTheme: () => void;
-  isCalmMode: boolean;
-  onToggleCalmMode: () => void;
   isOverloaded: boolean;
   todayEstimatedMinutes: number;
   onOpenQuickCapture: () => void;
@@ -35,8 +33,6 @@ export const TopBar: React.FC<TopBarProps> = ({
   onSearchChange,
   isDarkMode,
   onToggleTheme,
-  isCalmMode,
-  onToggleCalmMode,
   isOverloaded,
   todayEstimatedMinutes,
   onOpenQuickCapture,

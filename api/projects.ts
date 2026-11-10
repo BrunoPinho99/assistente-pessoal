@@ -109,69 +109,6 @@ type VercelResponse = ServerResponse & {
   send: (body: any) => void;
 };
 
-// Seed inicial caso o MongoDB esteja vazio
-const DEFAULT_SEED_PROJECTS = [
-  {
-    id: 'proj_littera',
-    title: 'Littera EdTech Engine',
-    area: 'Littera',
-    category: 'profissional',
-    main_goal: 'Lançar MVP de recomendação de leitura adaptativa com IA',
-    status: 'ativo',
-    slot: 'ancora',
-    locked: false,
-    next_step: 'Finalizar testes de integração do pipeline de analytics',
-    stages: [
-      { id: 'st_l1', title: 'Arquitetura do pipeline de leitura', completed: true },
-      { id: 'st_l2', title: 'Integração de recomendação adaptativa', completed: true },
-      { id: 'st_l3', title: 'Testes de carga e deploy de produção', completed: false }
-    ],
-    documents: [],
-    decision_history: [
-      { id: 'dh_1', date: '2026-11-01', decision: 'Priorizar estabilidade da API antes de novas features' }
-    ]
-  },
-  {
-    id: 'proj_aura',
-    title: 'Aura Studio Digital',
-    area: 'Aura',
-    category: 'profissional',
-    main_goal: 'Estruturar esteira de entregas de design system e branding tech',
-    status: 'ativo',
-    slot: 'satelite',
-    locked: false,
-    next_step: 'Revisar protótipo de alta fidelidade do dashboard v2',
-    stages: [
-      { id: 'st_a1', title: 'Refatoração da identidade visual', completed: true },
-      { id: 'st_a2', title: 'Design System de alta conversão', completed: false },
-      { id: 'st_a3', title: 'Captação ativa dos primeiros 3 clientes enterprise', completed: false }
-    ],
-    documents: [],
-    decision_history: []
-  },
-  {
-    id: 'proj_idp',
-    title: 'IDP Tech & Inovação',
-    area: 'IDP',
-    category: 'academico',
-    main_goal: 'Concluir módulo de pesquisa aplicada e laboratório de IA',
-    status: 'pausado',
-    slot: null,
-    locked: true,
-    unlockConditions: [
-      'Entregar milestone crítico do Littera',
-      'Liberar 1 dos 3 slots de banda (Regra de Substituição)'
-    ],
-    next_step: 'Reavaliar no ciclo trimestral de estudos',
-    stages: [
-      { id: 'st_idp1', title: 'Submissão de artigo de pesquisa', completed: true },
-      { id: 'st_idp2', title: 'Implementação de prova de conceito', completed: false }
-    ],
-    documents: [],
-    decision_history: []
-  }
-];
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const sendJson = (status: number, data: any) => {
     res.statusCode = status;
@@ -218,27 +155,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method === 'GET') {
       let docs = await ProjectModel.find({}).sort({ updatedAt: -1, createdAt: -1 }).lean();
 
-      // Se a coleção estiver vazia, faz o seed inicial dos projetos padrão
-      if (!docs || docs.length === 0) {
-        await ProjectModel.insertMany(DEFAULT_SEED_PROJECTS);
-        docs = await ProjectModel.find({}).sort({ updatedAt: -1, createdAt: -1 }).lean();
-      }
-
-      // Normaliza campos para compatibilidade com o frontend e Protocolo 1-1-1
-      const activeSlotsAssigned = new Set<string>();
+      // Leitura pura: nenhum registro é criado, atualizado ou removido durante o GET.
       const normalizedProjects = docs.map((doc: any) => {
         const isLocked = doc.locked !== undefined ? Boolean(doc.locked) : Boolean(doc.isLocked);
-        let slot = doc.slot || null;
-
-        if (!isLocked) {
-          if (!slot || activeSlotsAssigned.has(slot)) {
-            const freeSlot = (['ancora', 'satelite', 'valvula'] as const).find(s => !activeSlotsAssigned.has(s)) || 'valvula';
-            slot = freeSlot;
-          }
-          activeSlotsAssigned.add(slot);
-        } else {
-          slot = null;
-        }
 
         return {
           id: doc.id || String(doc._id),
@@ -249,7 +168,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           main_goal: doc.main_goal || doc.mainGoal || '',
           next_step: doc.next_step || doc.nextStep || '',
           status: doc.status || 'ativo',
-          slot,
+          slot: doc.slot || null,
           locked: isLocked,
           unlockConditions: doc.unlockConditions || [],
           stages: Array.isArray(doc.stages) ? doc.stages.map((st: any) => ({

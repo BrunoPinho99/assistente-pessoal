@@ -144,7 +144,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const rawAudio = body?.audio;
     const message = (body?.message || body?.prompt || '').trim();
-    if (!message && !rawAudio?.data) {
+    const hasAudio = Boolean(rawAudio?.data);
+    const audioPlaceholder = 'Mensagem de áudio';
+    const usableMessage = message && message !== audioPlaceholder ? message : '';
+
+    if (!usableMessage && !hasAudio) {
       return sendJson(400, { error: 'Mensagem ou áudio é obrigatório.' });
     }
 
@@ -154,7 +158,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const pendingTasks = Array.isArray(context.pendingTasks) ? context.pendingTasks : [];
     const parkedCount = context.parkedCount || 0;
     const history: ChatHistoryItem[] = Array.isArray(body?.history) ? body.history : [];
-    const isAudioMessage = Boolean(rawAudio?.data) || body?.isAudio;
+    const isAudioMessage = hasAudio || body?.isAudio;
 
     // Função auxiliar para interpretação inteligente local
     const interpretTaskLocally = (text: string) => {
@@ -221,12 +225,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // 4. Se não há chave de IA configurada
     if (!geminiKey && !openAiKey) {
-      if (message) {
-        const parsed = interpretTaskLocally(message);
+      if (usableMessage) {
+        const parsed = interpretTaskLocally(usableMessage);
         return sendJson(200, {
           success: true,
           provider: 'local-audio-interpreter',
           reply: parsed.reply
+        });
+      }
+
+      if (hasAudio) {
+        return sendJson(200, {
+          success: false,
+          requiresKey: true,
+          error: 'Recebi o áudio, mas preciso de uma chave Gemini para ouvi-lo e transformar o pedido em uma tarefa.'
         });
       }
 
@@ -336,10 +348,10 @@ ${taskListFormatted || '  - Nenhuma tarefa pendente'}`;
           });
         }
 
-        const promptText = message
+        const promptText = usableMessage
           ? isAudioMessage
-            ? `O usuário enviou um áudio com a seguinte transcrição/mensagem: "${message}". Ouça o áudio, transcreva precisamente e interprete a tarefa ou ação a criar no dashboard com o bloco action create_task.`
-            : message
+            ? `O usuário enviou um áudio com a seguinte transcrição/mensagem: "${usableMessage}". Ouça o áudio, transcreva precisamente e interprete a tarefa ou ação a criar no dashboard com o bloco action create_task.`
+            : usableMessage
           : 'Ouça atentamente este áudio gravado pelo usuário, transcreva o que ele disse e interprete a tarefa ou ação para o dashboard, gerando a respectiva ação create_task.';
 
         currentParts.push({ text: promptText });
@@ -464,12 +476,20 @@ ${taskListFormatted || '  - Nenhuma tarefa pendente'}`;
     }
 
     // Se houve falha nas chamadas externas, mas temos mensagem/áudio para interpretar:
-    if (message) {
-      const parsed = interpretTaskLocally(message);
+    if (usableMessage) {
+      const parsed = interpretTaskLocally(usableMessage);
       return sendJson(200, {
         success: true,
         provider: 'local-audio-interpreter',
         reply: parsed.reply
+      });
+    }
+
+    if (hasAudio) {
+      return sendJson(200, {
+        success: false,
+        requiresKey: true,
+        error: 'Não consegui interpretar o áudio. Verifique a chave Gemini e tente novamente.'
       });
     }
 
