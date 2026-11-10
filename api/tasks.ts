@@ -100,70 +100,6 @@ type VercelResponse = ServerResponse & {
   send: (body: any) => void;
 };
 
-// Seed inicial de tarefas para persistência contínua
-const DEFAULT_SEED_TASKS = [
-  {
-    id: 'task_prioridades_empresas',
-    title: 'Definir as 3 prioridades essenciais de hoje',
-    area: 'Littera',
-    description: 'Escrever no topo do dia para não se perder em tarefas secundárias.',
-    category: 'profissional',
-    project_id: 'proj_littera',
-    priority: 'urgente',
-    estimated_minutes: 45,
-    difficulty: 'medio',
-    energy_level: 'high',
-    status: 'em_andamento',
-    deadline: 'Hoje, até 10h',
-    subtasks: [
-      { id: 'sub_pe1', title: 'Mapear entregas críticas do Littera', completed: true },
-      { id: 'sub_pe2', title: 'Alinhar blockers com Tales (Pinho Media)', completed: false }
-    ],
-    notes: 'Manter foco exclusivo na esteira das duas empresas ativas.',
-    created_at: new Date().toISOString()
-  },
-  {
-    id: 'task_littera_landing',
-    title: 'Finalizar landing page do Littera',
-    area: 'Littera',
-    description: 'Ajustar copy de conversão e formulário de lista de espera.',
-    category: 'profissional',
-    project_id: 'proj_littera',
-    priority: 'alta',
-    estimated_minutes: 45,
-    difficulty: 'medio',
-    energy_level: 'medium',
-    status: 'a_fazer',
-    deadline: 'Hoje, 15h',
-    subtasks: [
-      { id: 'sub_ll1', title: 'Revisar hero section no Figma', completed: true },
-      { id: 'sub_ll2', title: 'Conectar envio do form ao banco', completed: false }
-    ],
-    notes: 'Prioridade alta para validação do produto.',
-    created_at: new Date().toISOString()
-  },
-  {
-    id: 'task_aura_reuniao_tales',
-    title: 'Reunião com Tales – Pinho Media',
-    area: 'Aura',
-    description: 'Alinhamento estratégico do trimestre e novos entregáveis.',
-    category: 'profissional',
-    project_id: 'proj_aura',
-    priority: 'alta',
-    estimated_minutes: 30,
-    difficulty: 'facil',
-    energy_level: 'medium',
-    status: 'a_fazer',
-    deadline: 'Hoje, 17h',
-    subtasks: [
-      { id: 'sub_art1', title: 'Pauta com tópicos de sprint', completed: true },
-      { id: 'sub_art2', title: 'Definir metas de entrega de novembro', completed: false }
-    ],
-    notes: 'Trazer métricas consolidadas.',
-    created_at: new Date().toISOString()
-  }
-];
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const sendJson = (status: number, data: any) => {
     res.statusCode = status;
@@ -209,12 +145,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // --------------------------------------------------------------------------
     if (req.method === 'GET') {
       let docs = await TaskModel.find({}).sort({ createdAt: -1 }).lean();
-
-      // Se vazio, seed inicial
-      if (!docs || docs.length === 0) {
-        await TaskModel.insertMany(DEFAULT_SEED_TASKS);
-        docs = await TaskModel.find({}).sort({ createdAt: -1 }).lean();
-      }
 
       const normalizedTasks = docs.map((doc: any) => ({
         id: doc.id || String(doc._id),
@@ -377,4 +307,3 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 }
-

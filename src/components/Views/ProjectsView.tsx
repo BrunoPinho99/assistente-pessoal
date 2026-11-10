@@ -285,9 +285,8 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
           <img
             src={getProjectCover(projectDraft.area, 0)}
             alt={projectDraft.title}
-            className="w-full h-full object-cover opacity-45"
+            className="w-full h-full object-cover opacity-70"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#090909] via-[#090909]/60 to-transparent" />
 
           <div className="absolute inset-0 p-6 sm:p-8 flex flex-col justify-between">
             <div className="flex items-center justify-between gap-2">
@@ -820,12 +819,6 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
 
             if (slotProject) {
               const coverUrl = getProjectCover(slotProject.area, slotIdx);
-              const spotlightGradient = 
-                slotKey === 'ancora' 
-                  ? 'radial-gradient(circle at 80% 15%, rgba(106, 76, 245, 0.42) 0%, rgba(20, 20, 20, 0.96) 72%)'
-                  : slotKey === 'satelite'
-                    ? 'radial-gradient(circle at 80% 15%, rgba(255, 122, 61, 0.42) 0%, rgba(20, 20, 20, 0.96) 72%)'
-                    : 'radial-gradient(circle at 80% 15%, rgba(212, 77, 240, 0.42) 0%, rgba(20, 20, 20, 0.96) 72%)';
 
               return (
                 <div key={slotKey} className="flex flex-col space-y-2">
@@ -847,24 +840,16 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                   {/* Card do Projeto Ocupando o Slot (Framer 30px Atmosphere Spotlight Card) */}
                   <article
                     onClick={() => handleOpenProjectEditor(slotProject!)}
-                    className="relative rounded-[30px] overflow-hidden h-80 sm:h-88 flex flex-col justify-between p-6 sm:p-7 border border-[#262626] bg-[#141414] cursor-pointer group select-none transition-all duration-200 hover:border-[#444444] shadow-lg"
-                    style={{ background: spotlightGradient }}
+                    className="relative rounded-[30px] overflow-hidden min-h-80 sm:min-h-88 flex flex-col border border-[#262626] bg-[#141414] cursor-pointer group select-none transition-all duration-200 hover:border-[#444444] shadow-lg"
                     data-purpose="project-active-card"
                   >
-                    <img 
-                      src={coverUrl} 
-                      alt={slotProject.title}
-                      className="absolute inset-0 w-full h-full object-cover opacity-25 mix-blend-luminosity group-hover:opacity-35 transition-opacity duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-[#141414]/65 to-transparent pointer-events-none" />
-
                     {/* Topo do Card */}
-                    <div className="relative z-20 flex items-center justify-between">
+                    <div className="relative z-20 flex items-center justify-between gap-3 p-6 sm:p-7">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="px-3 py-1 rounded-full text-[12px] font-medium bg-[#1c1c1c]/90 backdrop-blur-md border border-[#262626] text-[#ffffff]">
+                        <span className="px-3 py-1 rounded-full text-[12px] font-medium bg-[#1c1c1c] border border-[#262626] text-[#ffffff]">
                           {slotProject.area}
                         </span>
-                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#141414]/90 border border-[#262626] text-[#999999] backdrop-blur-md">
+                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#141414] border border-[#262626] text-[#999999]">
                           {config.subtitle}
                         </span>
                       </div>
@@ -891,8 +876,14 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                       </div>
                     </div>
 
+                    <img
+                      src={coverUrl}
+                      alt={slotProject.title}
+                      className="relative w-full h-32 object-cover opacity-60 group-hover:opacity-75 transition-opacity duration-500"
+                    />
+
                     {/* Base do Card */}
-                    <div className="relative z-20 space-y-1.5 text-left">
+                    <div className="relative z-20 space-y-1.5 text-left p-6 sm:p-7 pt-5 mt-auto">
                       <h2 className="text-[22px] sm:text-[26px] font-medium text-[#ffffff] tracking-[-0.9px] leading-[1.15]">
                         {slotProject.title}
                       </h2>
@@ -992,28 +983,15 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                 <article
                   key={proj.id}
                   onClick={() => handleOpenProjectEditor(proj)}
-                  className={`relative rounded-[20px] overflow-hidden h-72 flex flex-col justify-between p-5 border cursor-pointer group select-none transition-all duration-200 ${
+                  className={`relative rounded-[20px] overflow-hidden min-h-72 flex flex-col border cursor-pointer group select-none transition-all duration-200 ${
                     isDarkMode
                       ? 'border-[#262626] bg-[#141414] hover:border-[#444444]'
                       : 'border-[#e4e4e7] bg-[#ffffff] hover:border-[#090909]/40 shadow-[0_1px_4px_rgba(0,0,0,0.03)]'
                   }`}
                   data-purpose="project-locked-card"
                 >
-                  <img 
-                    src={coverUrl} 
-                    alt={proj.title}
-                    className={`absolute inset-0 w-full h-full object-cover filter grayscale transition-opacity duration-300 ${
-                      isDarkMode ? 'opacity-20 group-hover:opacity-30' : 'opacity-10 group-hover:opacity-15'
-                    }`}
-                  />
-                  <div
-                    className={`absolute inset-0 pointer-events-none ${
-                      isDarkMode ? 'bg-[#141414]/80' : 'bg-[#ffffff]/85'
-                    }`}
-                  />
-
                   {/* Topo do Card Trancado */}
-                  <div className="relative z-20 flex items-center justify-between">
+                  <div className="relative z-20 flex items-center justify-between gap-3 p-5">
                     <span
                       className={`px-3 py-1 rounded-full text-[11px] font-medium border ${
                         isDarkMode
@@ -1044,8 +1022,14 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                     )}
                   </div>
 
+                  <img
+                    src={coverUrl}
+                    alt={proj.title}
+                    className="relative w-full h-28 object-cover filter grayscale opacity-45 group-hover:opacity-60 transition-opacity duration-300"
+                  />
+
                   {/* Centro: Indicador de Cadeado */}
-                  <div className="relative z-20 flex flex-col gap-1.5">
+                  <div className="relative z-20 flex flex-col gap-1.5 px-5 pt-4">
                     <div className="flex items-center gap-2 text-[#e11d48] dark:text-[#ff5577] bg-[#ff5577]/10 px-3 py-1.5 rounded-full border border-[#ff5577]/30 w-fit">
                       <Lock className="w-3.5 h-3.5" />
                       <span className="text-[10px] font-medium font-mono tracking-wider">
@@ -1076,7 +1060,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                   </div>
 
                   {/* Base do Card */}
-                  <div className="relative z-20 space-y-1 text-left">
+                  <div className="relative z-20 space-y-1 text-left p-5 pt-4 mt-auto">
                     <div className="flex items-center gap-2">
                       <h3
                         className={`text-[18px] font-semibold tracking-[-0.4px] truncate ${

@@ -33,8 +33,6 @@ export function App() {
     themeMode,
     setThemeMode,
     isDarkMode,
-    isCalmMode,
-    setIsCalmMode,
     // Tasks
     addTask,
     updateTask,
@@ -172,8 +170,6 @@ export function App() {
         userRole="Espaço pessoal"
         themeMode={themeMode}
         onChangeThemeMode={setThemeMode}
-        isCalmMode={isCalmMode}
-        onToggleCalmMode={() => setIsCalmMode(!isCalmMode)}
         isMobileOpen={isMobileMenuOpen}
         onCloseMobile={() => setIsMobileMenuOpen(false)}
       />
@@ -194,7 +190,6 @@ export function App() {
               projects={projects}
               habits={habits}
               subjects={subjects}
-              isCalmMode={isCalmMode}
               themeMode={themeMode}
               isDarkMode={isDarkMode}
               externalFocusTask={activeFocusTask}

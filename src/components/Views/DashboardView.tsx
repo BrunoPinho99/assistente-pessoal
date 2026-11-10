@@ -34,7 +34,6 @@ interface DashboardViewProps {
   projects: Project[];
   habits: Habit[];
   subjects?: StudySubject[];
-  isCalmMode: boolean;
   themeMode?: ThemeMode;
   isDarkMode?: boolean;
   externalFocusTask?: Task | null;

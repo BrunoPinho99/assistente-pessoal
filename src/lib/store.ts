@@ -36,7 +36,6 @@ const STORAGE_KEYS = {
   NOTES: 'personal_os_notes',
   FOCUS: 'personal_os_focus_sessions',
   THEME: 'personal_os_theme',
-  CALM_MODE: 'personal_os_calm_mode'
 };
 
 export function usePersonalOS() {
@@ -138,11 +137,6 @@ export function usePersonalOS() {
     setThemeMode(nextDark ? 'dark' : 'light');
   };
 
-  const [isCalmMode, setIsCalmMode] = useState<boolean>(() => {
-    const raw = localStorage.getItem(STORAGE_KEYS.CALM_MODE);
-    return raw === 'true';
-  });
-
   // Sincronização contínua com o MongoDB Atlas (Projetos e Tarefas)
   useEffect(() => {
     let isMounted = true;
@@ -155,19 +149,7 @@ export function usePersonalOS() {
       })
       .then(data => {
         if (isMounted && data.success && Array.isArray(data.projects) && data.projects.length > 0) {
-          // Normaliza slots para garantir que o Protocolo 1-1-1 seja respeitado
-          const occupied = new Set<string>();
-          const normalized = data.projects.map((p: Project) => {
-            if (p.locked) return { ...p, slot: null };
-            if (p.slot && ['ancora', 'satelite', 'valvula'].includes(p.slot) && !occupied.has(p.slot)) {
-              occupied.add(p.slot);
-              return p;
-            }
-            const freeSlot = (['ancora', 'satelite', 'valvula'] as BandwidthSlot[]).find(s => !occupied.has(s)) || 'valvula';
-            occupied.add(freeSlot);
-            return { ...p, slot: freeSlot };
-          });
-          setProjects(normalized);
+          setProjects(data.projects);
         }
       })
       .catch(err => {
@@ -231,10 +213,6 @@ export function usePersonalOS() {
       document.documentElement.classList.add('light');
     }
   }, [themeMode]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.CALM_MODE, String(isCalmMode));
-  }, [isCalmMode]);
 
   // ----------------------------------------------------------------------------
   // Tasks Actions (com sincronização contínua com MongoDB Atlas)
@@ -838,8 +816,6 @@ export function usePersonalOS() {
     setThemeMode,
     isDarkMode,
     setIsDarkMode,
-    isCalmMode,
-    setIsCalmMode,
     // Task operations
     addTask,
     updateTask,
@@ -882,4 +858,3 @@ export function usePersonalOS() {
     exportData
   };
 }
-
