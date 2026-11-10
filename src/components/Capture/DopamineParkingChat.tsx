@@ -8,10 +8,16 @@ import {
   Key,
   Check,
   Trash2,
-  ExternalLink
+  ExternalLink,
+  Mic,
+  Square,
+  Paperclip,
+  Radio
 } from 'lucide-react';
 import { Project, ContextArea, Task, NavigationTab } from '../../types';
 import { processAssistantMessage, AssistantActionExecuted } from '../../lib/assistantAgent';
+import { AudioRecorderService, RecordedAudioData } from '../../lib/audioRecorder';
+import { AudioMessagePlayer } from '../Common/AudioMessagePlayer';
 import confetti from 'canvas-confetti';
 
 interface DopamineParkingChatProps {
@@ -42,6 +48,9 @@ interface ChatMessage {
   id: string;
   sender: 'assistant' | 'user';
   text: string;
+  audioUrl?: string;
+  audioDuration?: number;
+  isAudio?: boolean;
   actionsExecuted?: AssistantActionExecuted[];
   timestamp: string;
 }
@@ -77,10 +86,18 @@ export const DopamineParkingChat: React.FC<DopamineParkingChatProps> = ({
   const [isTestingKey, setIsTestingKey] = useState(false);
   const [keyFeedback, setKeyFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+  // Estados de Gravação e Áudio
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const [liveTranscript, setLiveTranscript] = useState('');
+  const audioRecorderRef = useRef<AudioRecorderService | null>(null);
+  const recordingTimerRef = useRef<any>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
   const initialMessage: ChatMessage = {
     id: 'msg_welcome',
     sender: 'assistant',
-    text: `Oi, ${userName}! Sobre o que você quer conversar, ter ideias ou alterar no dashboard agora?`,
+    text: `Oi, ${userName}! Sobre o que você quer conversar, ter ideias ou alterar no dashboard agora? Você também pode me mandar um áudio gravado que eu interpreto sua tarefa! 🎙️`,
     timestamp: 'Agora'
   };
 
@@ -96,6 +113,13 @@ export const DopamineParkingChat: React.FC<DopamineParkingChatProps> = ({
       scrollToBottom();
     }
   }, [messages, isOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+      if (audioRecorderRef.current) audioRecorderRef.current.cancelRecording();
+    };
+  }, []);
 
   const handleTestAndSaveKey = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -209,6 +233,172 @@ export const DopamineParkingChat: React.FC<DopamineParkingChatProps> = ({
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const startRecordingAudio = async () => {
+    try {
+      const recorder = new AudioRecorderService();
+      audioRecorderRef.current = recorder;
+      setLiveTranscript('');
+      setRecordingDuration(0);
+      setIsRecording(true);
+
+      await recorder.startRecording((transcript) => {
+        setLiveTranscript(transcript);
+      });
+
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingDuration(prev => prev + 1);
+      }, 1000);
+    } catch (err: any) {
+      console.error('Erro ao acessar microfone:', err);
+      setIsRecording(false);
+      alert('Não foi possível acessar o microfone. Verifique as permissões de áudio no seu navegador.');
+    }
+  };
+
+  const cancelRecordingAudio = () => {
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+    if (audioRecorderRef.current) {
+      audioRecorderRef.current.cancelRecording();
+      audioRecorderRef.current = null;
+    }
+    setIsRecording(false);
+    setRecordingDuration(0);
+    setLiveTranscript('');
+  };
+
+  const stopAndSendAudio = async () => {
+    if (!audioRecorderRef.current) return;
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+
+    try {
+      setIsRecording(false);
+      setIsProcessing(true);
+
+      const audioData = await audioRecorderRef.current.stopRecording();
+      audioRecorderRef.current = null;
+
+      await handleProcessAudioMessage(audioData);
+    } catch (err) {
+      console.error('Erro ao parar gravação:', err);
+      setIsProcessing(false);
+    }
+  };
+
+  const handleAudioFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsProcessing(true);
+      const audioData = await AudioRecorderService.processAudioFile(file);
+      await handleProcessAudioMessage(audioData);
+    } catch (err) {
+      console.error('Erro ao processar arquivo de áudio:', err);
+      setIsProcessing(false);
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleProcessAudioMessage = async (audioData: RecordedAudioData) => {
+    const transcriptText = audioData.transcript || liveTranscript || '';
+    setLiveTranscript('');
+
+    const userMsg: ChatMessage = {
+      id: 'user_audio_' + Date.now(),
+      sender: 'user',
+      text: transcriptText ? `🎙️ "${transcriptText}"` : '🎙️ Áudio enviado',
+      audioUrl: audioData.audioUrl,
+      audioDuration: audioData.durationSeconds,
+      isAudio: true,
+      timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    };
+
+    setMessages(prev => [...prev, userMsg]);
+    setIsProcessing(true);
+
+    try {
+      const historyPayload = messages
+        .filter(m => m.id !== 'msg_welcome')
+        .slice(-10)
+        .map(m => ({
+          role: m.sender === 'user' ? ('user' as const) : ('model' as const),
+          text: m.text
+        }));
+
+      const promptText = transcriptText
+        ? `Áudio transcrito do usuário: "${transcriptText}". Ouça o áudio ou use a transcrição para interpretar o que deve ser feito e crie a respectiva tarefa no dashboard.`
+        : 'Por favor, escute este áudio gravado e interprete a tarefa ou ação a ser criada no dashboard.';
+
+      const response = await processAssistantMessage(promptText, {
+        userName,
+        tasks,
+        projects,
+        activeProjects,
+        parkedProjects,
+        history: historyPayload,
+        audio: {
+          data: audioData.base64,
+          mimeType: audioData.mimeType,
+          transcript: transcriptText
+        },
+        onAddTask: onAddTask || (t => ({ ...t, id: 'temp_' + Date.now(), created_at: new Date().toISOString() })),
+        onUpdateTask,
+        onDeleteTask,
+        onToggleTask: onToggleTask || (() => {}),
+        onSliceTask,
+        onAddProject,
+        onUpdateProject,
+        onDeleteProject,
+        onParkIdea,
+        onStartFocus,
+        onNavigateTab
+      });
+
+      const assistantReply: ChatMessage = {
+        id: 'asst_' + Date.now(),
+        sender: 'assistant',
+        text: response.replyText,
+        actionsExecuted: response.actionsExecuted,
+        timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      };
+
+      setMessages(prev => [...prev, assistantReply]);
+
+      if (response.actionsExecuted && response.actionsExecuted.length > 0) {
+        confetti({
+          particleCount: 25,
+          spread: 45,
+          origin: { x: 0.85, y: 0.85 }
+        });
+      }
+    } catch {
+      setMessages(prev => [
+        ...prev,
+        {
+          id: 'err_' + Date.now(),
+          sender: 'assistant',
+          text: 'Tive um contratempo ao analisar seu áudio. Pode tentar gravar novamente ou digitar?',
+          timestamp: 'Agora'
+        }
+      ]);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const formatRecordingTime = (secs: number) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
   const renderFormattedText = (text: string) => {
@@ -424,6 +614,16 @@ export const DopamineParkingChat: React.FC<DopamineParkingChatProps> = ({
                           : 'bg-[#090909] text-[#ffffff] font-normal'
                     }`}
                   >
+                    {msg.audioUrl && (
+                      <div className="mb-2">
+                        <AudioMessagePlayer
+                          audioUrl={msg.audioUrl}
+                          durationSeconds={msg.audioDuration}
+                          isDarkMode={isDarkMode}
+                        />
+                      </div>
+                    )}
+
                     {isAsst ? (
                       renderFormattedText(msg.text)
                     ) : (
@@ -470,40 +670,129 @@ export const DopamineParkingChat: React.FC<DopamineParkingChatProps> = ({
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input Limpo */}
-          <form
-            onSubmit={e => handleSendMessage(e)}
-            className={`p-3 border-t flex items-center gap-2 shrink-0 ${
-              isDarkMode
-                ? 'bg-[#141414] border-[#262626]'
-                : 'bg-[#ffffff] border-[#e4e4e7]'
-            }`}
-          >
-            <input
-              type="text"
-              value={inputMessage}
-              onChange={e => setInputMessage(e.target.value)}
-              placeholder="Converse, peça ideias ou altere o dashboard..."
-              disabled={isProcessing}
-              className={`flex-1 px-4 py-2.5 rounded-full text-xs sm:text-[13px] border focus:outline-none focus:border-[#0099ff] focus:ring-1 focus:ring-[#0099ff] transition-all ${
-                isDarkMode
-                  ? 'bg-[#1c1c1c] border-[#262626] text-[#ffffff] placeholder-[#999999]'
-                  : 'bg-[#f7f7f8] border-[#e4e4e7] text-[#090909] placeholder-[#666666]'
+          {/* Barra de Gravação de Áudio ao Vivo ou Input */}
+          {isRecording ? (
+            <div
+              className={`p-3 border-t flex items-center justify-between gap-3 shrink-0 animate-in fade-in duration-150 ${
+                isDarkMode ? 'bg-[#1a1414] border-[#3b2020]' : 'bg-[#fff5f5] border-[#fecaca]'
               }`}
-            />
-            <button
-              type="submit"
-              disabled={!inputMessage.trim() || isProcessing}
-              className={`w-9 h-9 rounded-full disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shrink-0 flex items-center justify-center ${
-                isDarkMode
-                  ? 'bg-[#ffffff] hover:bg-[#f0f0f0] text-[#000000]'
-                  : 'bg-[#090909] hover:bg-[#222222] text-[#ffffff]'
-              }`}
-              title="Enviar"
             >
-              <Send className="w-4 h-4" />
-            </button>
-          </form>
+              <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                <span className="relative flex h-3 w-3 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500" />
+                </span>
+
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-semibold text-rose-600 dark:text-rose-400 font-mono tracking-wider">
+                    {formatRecordingTime(recordingDuration)}
+                  </span>
+                  <span className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">
+                    {liveTranscript ? `"${liveTranscript}"` : 'Gravando áudio... fale a tarefa'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={cancelRecordingAudio}
+                  className={`p-2 rounded-full transition-colors cursor-pointer ${
+                    isDarkMode
+                      ? 'text-[#999999] hover:text-rose-400 hover:bg-[#262626]'
+                      : 'text-[#666666] hover:text-rose-600 hover:bg-[#efefef]'
+                  }`}
+                  title="Cancelar gravação"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={stopAndSendAudio}
+                  className="px-3.5 py-1.5 rounded-full bg-[#0099ff] hover:bg-[#0088ee] text-white font-medium text-xs flex items-center gap-1.5 shadow-md transition-all active:scale-95 cursor-pointer"
+                  title="Concluir e enviar áudio"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Enviar</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <form
+              onSubmit={e => handleSendMessage(e)}
+              className={`p-2.5 sm:p-3 border-t flex items-center gap-2 shrink-0 ${
+                isDarkMode
+                  ? 'bg-[#141414] border-[#262626]'
+                  : 'bg-[#ffffff] border-[#e4e4e7]'
+              }`}
+            >
+              {/* Input oculto para carregar arquivo de áudio */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="audio/*"
+                onChange={handleAudioFileUpload}
+                className="hidden"
+              />
+
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isProcessing}
+                className={`p-2 rounded-full transition-colors cursor-pointer shrink-0 disabled:opacity-40 ${
+                  isDarkMode
+                    ? 'text-[#999999] hover:text-[#ffffff] hover:bg-[#1c1c1c]'
+                    : 'text-[#666666] hover:text-[#090909] hover:bg-[#efefef]'
+                }`}
+                title="Anexar arquivo de áudio"
+              >
+                <Paperclip className="w-4 h-4" />
+              </button>
+
+              <input
+                type="text"
+                value={inputMessage}
+                onChange={e => setInputMessage(e.target.value)}
+                placeholder="Fale no microfone ou digite..."
+                disabled={isProcessing}
+                className={`flex-1 px-3.5 py-2 rounded-full text-xs sm:text-[13px] border focus:outline-none focus:border-[#0099ff] focus:ring-1 focus:ring-[#0099ff] transition-all ${
+                  isDarkMode
+                    ? 'bg-[#1c1c1c] border-[#262626] text-[#ffffff] placeholder-[#999999]'
+                    : 'bg-[#f7f7f8] border-[#e4e4e7] text-[#090909] placeholder-[#666666]'
+                }`}
+              />
+
+              {/* Botão de Gravar Áudio */}
+              <button
+                type="button"
+                onClick={startRecordingAudio}
+                disabled={isProcessing}
+                className={`w-9 h-9 rounded-full transition-all shrink-0 flex items-center justify-center cursor-pointer active:scale-95 disabled:opacity-40 ${
+                  isDarkMode
+                    ? 'bg-[#1c1c1c] border border-[#262626] text-[#0099ff] hover:bg-[#262626] hover:text-[#38bdf8]'
+                    : 'bg-[#f7f7f8] border border-[#e4e4e7] text-[#0099ff] hover:bg-[#ebebeb]'
+                }`}
+                title="Gravar áudio da tarefa"
+              >
+                <Mic className="w-4 h-4" />
+              </button>
+
+              {/* Botão de Enviar Mensagem */}
+              <button
+                type="submit"
+                disabled={!inputMessage.trim() || isProcessing}
+                className={`w-9 h-9 rounded-full disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer shrink-0 flex items-center justify-center ${
+                  isDarkMode
+                    ? 'bg-[#ffffff] hover:bg-[#f0f0f0] text-[#000000]'
+                    : 'bg-[#090909] hover:bg-[#222222] text-[#ffffff]'
+                }`}
+                title="Enviar mensagem"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </form>
+          )}
         </div>
       )}
     </>

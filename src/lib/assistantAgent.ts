@@ -18,6 +18,12 @@ export interface AssistantActionExecuted {
   details?: any;
 }
 
+export interface AssistantAudioPayload {
+  data: string; // Base64
+  mimeType: string;
+  transcript?: string;
+}
+
 export interface AssistantResponse {
   replyText: string;
   actionExecuted?: AssistantActionExecuted;
@@ -32,6 +38,7 @@ export interface AssistantContext {
   parkedProjects: Project[];
   history?: Array<{ role: 'user' | 'assistant' | 'model'; text: string }>;
   apiKey?: string;
+  audio?: AssistantAudioPayload;
   onAddTask: (task: Omit<Task, 'id' | 'created_at'>) => Task;
   onUpdateTask?: (id: string, updates: Partial<Task>) => void;
   onDeleteTask?: (id: string) => void;
@@ -91,6 +98,8 @@ export async function processAssistantMessage(
       headers,
       body: JSON.stringify({
         message: query,
+        audio: context.audio,
+        isAudio: Boolean(context.audio),
         history: context.history || [],
         geminiApiKey: savedGeminiKey,
         openAiApiKey: savedOpenAiKey,
