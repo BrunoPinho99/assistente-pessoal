@@ -96,6 +96,7 @@ export async function processAssistantMessage(
     const chatRes = await fetch('/api/chat', {
       method: 'POST',
       headers,
+      signal: AbortSignal.timeout(10000),
       body: JSON.stringify({
         message: query,
         audio: context.audio,
@@ -350,8 +351,34 @@ export async function processAssistantMessage(
     }
   } catch (apiErr: any) {
     console.error('[AssistantAgent] Erro na chamada à IA:', apiErr);
+    if (context.audio && query && query !== 'Mensagem de áudio') {
+      const lower = query.toLowerCase();
+      const isGreeting = ['oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite'].some(g => lower === g);
+      if (isGreeting) {
+        return {
+          replyText: `🎙️ Oi, ${userName}! Te ouvi perfeitamente no áudio. Me diga uma tarefa que você queira cadastrar no dashboard!`
+        };
+      }
+      const created = onAddTask({
+        title: query.charAt(0).toUpperCase() + query.slice(1),
+        area: 'Littera',
+        category: 'profissional',
+        description: 'Criada via áudio',
+        priority: 'media',
+        estimated_minutes: 25,
+        difficulty: 'medio',
+        energy_level: 'medium',
+        status: 'a_fazer',
+        subtasks: []
+      });
+      return {
+        replyText: `🎙️ **Áudio capturado!**\n\nAdicionei sua tarefa ao dashboard:\n- **${created.title}** (25 min, Littera)`,
+        actionExecuted: { type: 'task_created', title: `Tarefa criada: ${created.title}` },
+        actionsExecuted: [{ type: 'task_created', title: `Tarefa criada: ${created.title}` }]
+      };
+    }
     return {
-      replyText: 'Erro de conexão com a IA. Verifique sua internet e tente novamente.'
+      replyText: 'Erro de conexão com a IA. Tente novamente em instantes.'
     };
   }
 

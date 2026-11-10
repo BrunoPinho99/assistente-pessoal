@@ -156,23 +156,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const history: ChatHistoryItem[] = Array.isArray(body?.history) ? body.history : [];
     const isAudioMessage = Boolean(rawAudio?.data) || body?.isAudio;
 
-    // Função auxiliar para interpretação inteligente local caso não haja chave de IA
+    // Função auxiliar para interpretação inteligente local
     const interpretTaskLocally = (text: string) => {
-      let cleanText = text.replace(/^(preciso|lembrar de|tenho que|criar tarefa|anotar|fazer|agendar)\s+/i, '').trim();
-      if (!cleanText) cleanText = 'Nova tarefa via áudio';
+      const lower = text.trim().toLowerCase();
+
+      // Saudações e interações comuns — não criam tarefa desnecessária
+      const greetings = ['oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'e aí', 'e ai', 'fala', 'alô', 'alo', 'teste', 'testando'];
+      const isGreeting = greetings.some(g => lower === g || lower.startsWith(`${g} `) || lower.startsWith(`${g}!`) || lower.startsWith(`${g}?`));
+
+      if (isGreeting || lower === 'mensagem de áudio' || lower.length < 2) {
+        return {
+          isTask: false,
+          reply: `🎙️ Oi, ${userName}! Te ouvi perfeitamente no áudio.\n\nEstou pronto! Me diga qualquer tarefa que queira cadastrar (ex: *"Lembrar de comprar café amanhã"* ou *"Preparar apresentação do Littera"*) que eu crio e organizo no dashboard!`
+        };
+      }
+
+      let cleanText = text
+        .replace(/^(preciso|lembrar de|tenho que|criar tarefa|anotar|fazer|agendar|adicionar|marcar)\s+/i, '')
+        .replace(/^(tarefa|lembrete|compromisso)\s*(de\s+um|de\s+uma|sobre|de|do|da)?\s*/i, '')
+        .trim();
+
+      if (!cleanText) cleanText = text.trim();
 
       // Detectar área mencionada
       let detectedArea: 'Littera' | 'Aura' | 'IDP' | 'Pessoal' = 'Littera';
-      const lower = text.toLowerCase();
       if (lower.includes('aura')) detectedArea = 'Aura';
-      else if (lower.includes('idp') || lower.includes('faculdade') || lower.includes('estudo') || lower.includes('aula')) detectedArea = 'IDP';
-      else if (lower.includes('pessoal') || lower.includes('casa') || lower.includes('comprar') || lower.includes('médico') || lower.includes('treino')) detectedArea = 'Pessoal';
+      else if (lower.includes('idp') || lower.includes('faculdade') || lower.includes('estudo') || lower.includes('aula') || lower.includes('matéria')) detectedArea = 'IDP';
+      else if (lower.includes('pessoal') || lower.includes('casa') || lower.includes('comprar') || lower.includes('médico') || lower.includes('treino') || lower.includes('farmácia')) detectedArea = 'Pessoal';
 
       // Detectar urgência
       let detectedPriority: 'urgente' | 'alta' | 'media' | 'baixa' = 'media';
       if (lower.includes('urgente') || lower.includes('hoje') || lower.includes('agora') || lower.includes('rápido')) {
         detectedPriority = 'alta';
-      } else if (lower.includes('baixa prioridade') || lower.includes('quando der')) {
+      } else if (lower.includes('baixa prioridade') || lower.includes('quando der') || lower.includes('sem pressa')) {
         detectedPriority = 'baixa';
       }
 
@@ -185,23 +201,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const formattedTitle = cleanText.charAt(0).toUpperCase() + cleanText.slice(1);
 
-      return {
+      const actionData = {
+        type: 'create_task',
         title: formattedTitle,
         area: detectedArea,
         priority: detectedPriority,
         estimated_minutes: estimatedMinutes
       };
+
+      return {
+        isTask: true,
+        title: formattedTitle,
+        area: detectedArea,
+        priority: detectedPriority,
+        estimated_minutes: estimatedMinutes,
+        reply: `🎙️ **Áudio interpretado com sucesso!**\n\nIdentifiquei a sua tarefa e já adicionei ao seu dashboard:\n- **Título:** ${formattedTitle}\n- **Área:** ${detectedArea}\n- **Prioridade:** ${detectedPriority}\n- **Tempo estimado:** ${estimatedMinutes} min\n\n\`\`\`action\n${JSON.stringify(actionData, null, 2)}\n\`\`\``
+      };
     };
 
     // 4. Se não há chave de IA configurada
     if (!geminiKey && !openAiKey) {
-      // Se foi enviado um texto de áudio transcrito, podemos interpretar e criar a tarefa localmente!
       if (message) {
         const parsed = interpretTaskLocally(message);
         return sendJson(200, {
           success: true,
           provider: 'local-audio-interpreter',
-          reply: `🎙️ **Áudio interpretado com sucesso!**\n\nIdentifiquei a sua tarefa e adicionei ao seu dashboard:\n- **Título:** ${parsed.title}\n- **Área:** ${parsed.area}\n- **Prioridade:** ${parsed.priority}\n- **Tempo estimado:** ${parsed.estimated_minutes} min\n\n\`\`\`action\n{\n  "type": "create_task",\n  "title": "${parsed.title}",\n  "area": "${parsed.area}",\n  "priority": "${parsed.priority}",\n  "estimated_minutes": ${parsed.estimated_minutes}\n}\n\`\`\``
+          reply: parsed.reply
         });
       }
 
@@ -339,6 +364,7 @@ ${taskListFormatted || '  - Nenhuma tarefa pendente'}`;
               {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                signal: AbortSignal.timeout(4000),
                 body: JSON.stringify({
                   systemInstruction: {
                     parts: [{ text: systemPrompt }]
@@ -373,9 +399,14 @@ ${taskListFormatted || '  - Nenhuma tarefa pendente'}`;
             } else {
               const errBody = await geminiRes.json().catch(() => ({}));
               console.warn(`[Gemini Model ${model} failed]:`, geminiRes.status, errBody?.error?.message);
+              // Erro de autorização ou argumento: não adianta testar outros modelos, aborta para o fallback imediato
+              if (geminiRes.status === 400 || geminiRes.status === 401 || geminiRes.status === 403) {
+                break;
+              }
             }
           } catch (modelErr: any) {
             console.warn(`[Gemini Model ${model} exception]:`, modelErr.message);
+            break;
           }
         }
       } catch (geminiErr: any) {
@@ -438,7 +469,7 @@ ${taskListFormatted || '  - Nenhuma tarefa pendente'}`;
       return sendJson(200, {
         success: true,
         provider: 'local-audio-interpreter',
-        reply: `🎙️ **Áudio interpretado com sucesso!**\n\nIdentifiquei a sua tarefa e adicionei ao seu dashboard:\n- **Título:** ${parsed.title}\n- **Área:** ${parsed.area}\n- **Prioridade:** ${parsed.priority}\n- **Tempo estimado:** ${parsed.estimated_minutes} min\n\n\`\`\`action\n{\n  "type": "create_task",\n  "title": "${parsed.title}",\n  "area": "${parsed.area}",\n  "priority": "${parsed.priority}",\n  "estimated_minutes": ${parsed.estimated_minutes}\n}\n\`\`\``
+        reply: parsed.reply
       });
     }
 

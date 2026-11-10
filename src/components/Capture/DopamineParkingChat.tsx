@@ -334,9 +334,7 @@ export const DopamineParkingChat: React.FC<DopamineParkingChatProps> = ({
           text: m.text
         }));
 
-      const promptText = transcriptText
-        ? `Áudio transcrito do usuário: "${transcriptText}". Ouça o áudio ou use a transcrição para interpretar o que deve ser feito e crie a respectiva tarefa no dashboard.`
-        : 'Por favor, escute este áudio gravado e interprete a tarefa ou ação a ser criada no dashboard.';
+      const promptText = transcriptText.trim() || 'Mensagem de áudio';
 
       const response = await processAssistantMessage(promptText, {
         userName,
