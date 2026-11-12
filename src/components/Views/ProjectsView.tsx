@@ -202,11 +202,11 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
       <div className="flex flex-col gap-6 text-left pb-14 animate-in fade-in duration-150" data-purpose="project-full-page">
         {/* Barra Superior de Navegação e Ações */}
         <header
-          className={`flex flex-wrap items-center justify-between gap-3 pb-3 border-b ${
+          className={`flex flex-col items-stretch justify-between gap-3 pb-3 border-b sm:flex-row sm:items-center ${
             isDarkMode ? 'border-[#262626]' : 'border-[#e4e4e7]'
           }`}
         >
-          <div className="flex items-center gap-2 text-[13px]">
+          <div className="flex min-w-0 items-center gap-2 text-[13px]">
             <button
               type="button"
               onClick={handleCloseProjectEditor}
@@ -220,12 +220,12 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
               <span>Voltar para Projetos</span>
             </button>
             <span className={isDarkMode ? 'text-[#262626]' : 'text-[#d4d4d8]'}>/</span>
-            <span className={`font-medium truncate max-w-[240px] ${isDarkMode ? 'text-[#ffffff]' : 'text-[#090909]'}`}>
+            <span className={`min-w-0 truncate font-medium max-w-[min(240px,45vw)] ${isDarkMode ? 'text-[#ffffff]' : 'text-[#090909]'}`}>
               {projectDraft.title}
             </span>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2.5">
             {saveFeedback && (
               <span className="text-[13px] font-medium text-[#22c55e] flex items-center gap-1">
                 <Check className="w-3.5 h-3.5" />
@@ -270,10 +270,10 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
         </header>
 
         {/* Capa Hero do Projeto em Largura Total */}
-        <div className="relative h-48 sm:h-56 rounded-[30px] overflow-hidden border border-[#262626] bg-[#141414]">
+        <div className="relative min-h-56 overflow-hidden rounded-[30px] border border-[#262626] bg-[#141414] sm:h-56">
           <ProjectCover project={projectDraft} tasks={tasks} isDarkMode={isDarkMode} />
 
-          <div className="absolute inset-0 p-6 sm:p-8 flex flex-col justify-between">
+          <div className="absolute inset-0 flex flex-col justify-between p-4 sm:p-8">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <select
@@ -342,7 +342,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                 value={projectDraft.title}
                 onChange={e => setProjectDraft(prev => (prev ? { ...prev, title: e.target.value } : null))}
                 placeholder="Nome do projeto..."
-                className="w-full text-[28px] sm:text-[36px] font-medium tracking-[-1.5px] text-[#ffffff] bg-transparent border-b border-transparent hover:border-[#262626] focus:border-[#0099ff] focus:outline-none transition-colors py-0.5"
+                className="w-full min-w-0 break-words bg-transparent py-0.5 text-[25px] font-medium tracking-[-1.5px] text-[#ffffff] transition-colors hover:border-[#262626] focus:border-[#0099ff] focus:outline-none sm:text-[36px]"
               />
             </div>
           </div>

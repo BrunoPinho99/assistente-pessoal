@@ -54,7 +54,7 @@ export const ProjectCover: React.FC<ProjectCoverProps> = ({
   return (
     <div
       className={`relative overflow-hidden rounded-[24px] border ${
-        compact ? 'min-h-44 p-4' : 'min-h-52 p-6'
+        compact ? 'min-h-44 p-4' : 'min-h-52 p-4 sm:p-6'
       } ${isDarkMode ? 'border-[#263449] text-white' : 'border-[#cbd5e1] text-slate-950'}`}
       style={{
         background: `radial-gradient(circle at 85% 10%, ${areaStyle.accent}35, transparent 42%), linear-gradient(135deg, #07111f 0%, #0b1b31 55%, #07101d 100%)`
@@ -64,7 +64,7 @@ export const ProjectCover: React.FC<ProjectCoverProps> = ({
       <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full border border-white/10" />
       <div className="absolute -right-2 top-7 h-24 w-24 rounded-full border border-white/10" />
 
-      <div className="relative z-10 flex h-full flex-col justify-between gap-6">
+      <div className="relative z-10 flex h-full min-w-0 flex-col justify-between gap-5 sm:gap-6">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-lg" aria-hidden="true">
@@ -82,13 +82,13 @@ export const ProjectCover: React.FC<ProjectCoverProps> = ({
         </div>
 
         <div>
-          <h3 className={`${compact ? 'text-xl' : 'text-2xl'} max-w-[85%] font-semibold leading-tight tracking-[-0.04em]`}>
+          <h3 className={`${compact ? 'text-xl' : 'text-2xl'} max-w-full break-words font-semibold leading-tight tracking-[-0.04em]`}>
             {project.title}
           </h3>
           <div className="mt-4 flex items-end justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <div className="mb-1.5 flex items-center justify-between text-[11px] text-cyan-50/75">
-                <span>{progress.hasPlanningPending ? 'Planejamento pendente' : `${progress.completed} de ${progress.total} tarefas concluídas`}</span>
+              <div className="mb-1.5 flex min-w-0 items-center justify-between gap-2 text-[11px] text-cyan-50/75">
+                <span className="min-w-0 truncate">{progress.hasPlanningPending ? 'Planejamento pendente' : `${progress.completed} de ${progress.total} tarefas concluídas`}</span>
                 <span className="font-mono text-sm font-semibold text-white">
                   {progress.percent === null ? '—' : `${progress.percent}%`}
                 </span>
@@ -105,7 +105,7 @@ export const ProjectCover: React.FC<ProjectCoverProps> = ({
               </div>
             </div>
             {formatDeadline(project.deadline) && (
-              <span className="inline-flex shrink-0 items-center gap-1 text-[11px] text-white/75">
+              <span className="hidden shrink-0 items-center gap-1 text-[11px] text-white/75 xs:inline-flex">
                 <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
                 {formatDeadline(project.deadline)}
               </span>

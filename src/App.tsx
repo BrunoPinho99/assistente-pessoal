@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import confetti from 'canvas-confetti';
+import { Menu } from 'lucide-react';
 import { NavigationTab, Task, Project, ThemeMode } from './types';
 import { usePersonalOS } from './lib/store';
 
@@ -181,6 +182,30 @@ export function App() {
         }`}
         data-purpose="main-content-scroll"
       >
+        <div className={`sticky top-0 z-30 flex items-center justify-between border-b px-4 py-3 md:hidden ${
+          isDarkMode ? 'border-[#262626] bg-[#090909]/95' : 'border-[#e4e4e7] bg-[#f7f7f8]/95'
+        } backdrop-blur-md`}>
+          <button
+            type="button"
+            onClick={() => setIsMobileMenuOpen(true)}
+            className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-3.5 text-sm font-medium ${
+              isDarkMode
+                ? 'border-[#262626] bg-[#141414] text-white'
+                : 'border-[#e4e4e7] bg-white text-[#090909]'
+            }`}
+            aria-label="Abrir menu de navegação"
+          >
+            <Menu className="h-4 w-4" aria-hidden="true" />
+            Menu
+          </button>
+          <span className={`max-w-[55vw] truncate text-sm font-medium ${
+            isDarkMode ? 'text-white' : 'text-[#090909]'
+          }`}>
+            {activeTab === 'hoje' ? 'Hoje' : activeTab === 'tarefas' ? 'Tarefas' : activeTab === 'projetos' ? 'Projetos' : 'Estudos'}
+          </span>
+          <span className="w-[72px]" aria-hidden="true" />
+        </div>
+
         <div className="max-w-[1200px] w-full mx-auto px-5 sm:px-8 lg:px-10 py-7 flex flex-col gap-8 min-w-0">
           {/* 1. MÓDULO HOJE (Meu Dia) */}
           {activeTab === 'hoje' && (
