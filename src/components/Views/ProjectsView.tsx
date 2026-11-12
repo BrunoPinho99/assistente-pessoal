@@ -17,6 +17,8 @@ import {
   Play
 } from 'lucide-react';
 import { Project, Task, ContextFilter, ContextArea, ProjectStage, ProjectCategory, BandwidthSlot, BANDWIDTH_SLOTS_CONFIG } from '../../types';
+import { ProjectCover } from '../Projects/ProjectCover';
+import { getProjectProgress } from '../../lib/projectProgress';
 
 interface ProjectsViewProps {
   projects: Project[];
@@ -146,7 +148,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
     setProjectDraft({ ...projectDraft, stages: updatedStages });
   };
 
-  const activeProjects = projects.filter(p => !p.locked);
+  const activeProjects = projects.filter(p => !p.locked && p.status === 'ativo');
   const lockedProjects = projects.filter(p => p.locked);
 
   const filteredLocked = lockedProjects.filter(p => {
@@ -157,6 +159,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
+    const mustPark = activeProjects.length >= 3;
 
     onAddProject({
       title: title.trim(),
@@ -164,8 +167,8 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
       description: description.trim() || undefined,
       category,
       main_goal: mainGoal.trim() || 'Concluir entregas principais',
-      status: 'ativo',
-      locked: createAsLocked,
+      status: mustPark || createAsLocked ? 'planejamento' : 'ativo',
+      locked: mustPark || createAsLocked,
       next_step: nextStep.trim() || 'Definir primeiro micro-passo',
       stages: [
         { id: 'st_' + Date.now() + '_1', title: 'Planejamento e alinhamento', completed: true },
@@ -184,21 +187,6 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
     setShowAddModal(false);
   };
 
-  const getProjectCover = (projArea: ContextArea, index: number) => {
-    switch (projArea) {
-      case 'Littera':
-        return '/covers/cover-1.jpg';
-      case 'Aura':
-        return '/covers/cover-2.jpg';
-      case 'IDP':
-        return '/covers/cover-idp.jpg';
-      case 'Pessoal':
-      default:
-        const covers = ['/covers/cover-1.jpg', '/covers/cover-2.jpg', '/covers/cover-idp.jpg'];
-        return covers[index % covers.length];
-    }
-  };
-
   const contextOptions: ContextFilter[] = ['todos', 'Aura', 'Littera', 'IDP', 'Pessoal'];
 
   // ==========================================================================
@@ -206,8 +194,9 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
   // ==========================================================================
   if (selectedProject && projectDraft) {
     const projectTasks = tasks.filter(
-      t => t.project_id === projectDraft.id || (t.area === projectDraft.area && !t.project_id)
+      t => t.project_id === projectDraft.id
     );
+    const projectProgress = getProjectProgress(projectDraft.id, tasks);
 
     return (
       <div className="flex flex-col gap-6 text-left pb-14 animate-in fade-in duration-150" data-purpose="project-full-page">
@@ -282,11 +271,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
 
         {/* Capa Hero do Projeto em Largura Total */}
         <div className="relative h-48 sm:h-56 rounded-[30px] overflow-hidden border border-[#262626] bg-[#141414]">
-          <img
-            src={getProjectCover(projectDraft.area, 0)}
-            alt={projectDraft.title}
-            className="w-full h-full object-cover opacity-70"
-          />
+          <ProjectCover project={projectDraft} tasks={tasks} isDarkMode={isDarkMode} />
 
           <div className="absolute inset-0 p-6 sm:p-8 flex flex-col justify-between">
             <div className="flex items-center justify-between gap-2">
@@ -414,7 +399,9 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                       isDarkMode ? 'bg-[#1c1c1c] border-[#262626]' : 'bg-[#f7f7f8] border-[#e4e4e7]'
                     }`}
                   >
-                    {projectDraft.stages.filter(s => s.completed).length}/{projectDraft.stages.length}
+                    {projectProgress.hasPlanningPending
+                      ? 'Planejamento pendente'
+                      : `${projectProgress.completed}/${projectProgress.total} tarefas`}
                   </span>
                 </span>
               </div>
@@ -561,16 +548,18 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
               }`}
             >
               <h3 className={`text-[12px] font-medium uppercase tracking-[0.06em] ${isDarkMode ? 'text-[#999999]' : 'text-[#666666]'}`}>
-                Tarefas deste Contexto ({projectTasks.filter(t => t.status !== 'concluido').length})
+                Tarefas do Projeto ({projectTasks.filter(t => t.status !== 'concluido' && t.status !== 'cancelado').length})
               </h3>
-              {projectTasks.filter(t => t.status !== 'concluido').length === 0 ? (
+              {projectTasks.filter(t => t.status !== 'concluido' && t.status !== 'cancelado').length === 0 ? (
                 <p className={`text-[13px] ${isDarkMode ? 'text-[#999999]' : 'text-[#666666]'}`}>
-                  Nenhuma tarefa pendente vinculada.
+                  {projectProgress.hasPlanningPending
+                    ? 'Planejamento pendente. Crie a próxima tarefa para começar.'
+                    : 'Nenhuma tarefa pendente vinculada.'}
                 </p>
               ) : (
                 <div className="space-y-2">
                   {projectTasks
-                    .filter(t => t.status !== 'concluido')
+                    .filter(t => t.status !== 'concluido' && t.status !== 'cancelado')
                     .slice(0, 6)
                     .map(t => (
                       <div
@@ -803,7 +792,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
 
         {/* Grid dos 3 Slots */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {(['ancora', 'satelite', 'valvula'] as BandwidthSlot[]).map((slotKey, slotIdx) => {
+          {(['ancora', 'satelite', 'valvula'] as BandwidthSlot[]).map((slotKey) => {
             const config = BANDWIDTH_SLOTS_CONFIG[slotKey];
             
             let slotProject = activeProjects.find(p => p.slot === slotKey);
@@ -818,8 +807,6 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
             if (!isVisibleByContext) return null;
 
             if (slotProject) {
-              const coverUrl = getProjectCover(slotProject.area, slotIdx);
-
               return (
                 <div key={slotKey} className="flex flex-col space-y-2">
                   {/* Cabeçalho do Slot */}
@@ -876,11 +863,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                       </div>
                     </div>
 
-                    <img
-                      src={coverUrl}
-                      alt={slotProject.title}
-                      className="relative w-full h-32 object-cover opacity-60 group-hover:opacity-75 transition-opacity duration-500"
-                    />
+                    <ProjectCover project={slotProject} tasks={tasks} isDarkMode={isDarkMode} compact />
 
                     {/* Base do Card */}
                     <div className="relative z-20 space-y-1.5 text-left p-6 sm:p-7 pt-5 mt-auto">
@@ -976,9 +959,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
               </p>
             </div>
           ) : (
-            filteredLocked.map((proj, idx) => {
-              const coverUrl = getProjectCover(proj.area, idx + 2);
-
+            filteredLocked.map((proj) => {
               return (
                 <article
                   key={proj.id}
@@ -1022,11 +1003,7 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                     )}
                   </div>
 
-                  <img
-                    src={coverUrl}
-                    alt={proj.title}
-                    className="relative w-full h-28 object-cover filter grayscale opacity-45 group-hover:opacity-60 transition-opacity duration-300"
-                  />
+                  <ProjectCover project={proj} tasks={tasks} isDarkMode={isDarkMode} compact />
 
                   {/* Centro: Indicador de Cadeado */}
                   <div className="relative z-20 flex flex-col gap-1.5 px-5 pt-4">
@@ -1201,15 +1178,18 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                 <div className="space-y-0.5">
                   <span className="font-medium text-[#ea580c] dark:text-[#ff7a3d] flex items-center gap-1.5">
                     <Lock className="w-3.5 h-3.5" />
-                    Criar como Trancado no Estacionamento
+                    {activeProjects.length >= 3 ? 'Limite atingido: guardar no estacionamento' : 'Criar como Trancado no Estacionamento'}
                   </span>
                   <p className={`text-[12px] ${isDarkMode ? 'text-[#999999]' : 'text-[#666666]'}`}>
-                    Protege o limite dos 3 slots do Protocolo 1-1-1. Você pode destrancar via trade-off.
+                    {activeProjects.length >= 3
+                      ? 'Os 3 projetos ativos estão ocupados. A ideia não será ativada automaticamente.'
+                      : 'Protege o limite dos 3 slots do Protocolo 1-1-1. Você pode destrancar via trade-off.'}
                   </p>
                 </div>
                 <input
                   type="checkbox"
-                  checked={createAsLocked}
+                  checked={createAsLocked || activeProjects.length >= 3}
+                  disabled={activeProjects.length >= 3}
                   onChange={(e) => setCreateAsLocked(e.target.checked)}
                   className="w-4 h-4 rounded accent-[#0099ff] cursor-pointer"
                 />

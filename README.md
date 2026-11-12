@@ -83,6 +83,17 @@ npm run dev
 
 Acesse a aplicação em `http://localhost:3000`.
 
+### Estado das integrações
+
+Sem `MONGODB_URI`, a interface usa os dados de exemplo e persiste alterações no `localStorage`; isso é um fallback local e não representa uma conexão com o MongoDB. O Google Calendar e integrações institucionais ainda não estão conectados: nenhuma tela deve apresentá-los como sincronizados sem OAuth, escopos mínimos e uma sincronização confirmada.
+
+### Regras de projetos
+
+- O progresso exibido é calculado a partir das tarefas vinculadas: tarefas concluídas divididas pelas tarefas não canceladas.
+- Projetos sem tarefas mostram `Planejamento pendente`, em vez de `0%`.
+- Novas ideias são estacionadas quando os três slots ativos estão ocupados; a ativação exige uma decisão explícita de trade-off.
+- Capas de projeto são renderizadas pelo componente reutilizável `src/components/Projects/ProjectCover.tsx`, sem depender de imagens que possam faltar no deploy.
+
 ---
 
 ## 🛠️ Tecnologias Utilizadas

@@ -6,7 +6,7 @@ export type EnergyLevel = 'low' | 'medium' | 'high';
 export type Priority = 'baixa' | 'media' | 'alta' | 'urgente';
 export type Difficulty = 'facil' | 'medio' | 'dificil';
 export type TaskCategory = 'academico' | 'profissional' | 'pessoal' | 'saude' | 'outros';
-export type TaskStatus = 'inbox' | 'a_fazer' | 'em_andamento' | 'concluido' | 'adiado';
+export type TaskStatus = 'inbox' | 'a_fazer' | 'em_andamento' | 'bloqueada' | 'concluido' | 'cancelado' | 'adiado';
 export type ContextArea = 'Aura' | 'Littera' | 'IDP' | 'Pessoal';
 export type ContextFilter = 'todos' | ContextArea;
 
@@ -51,7 +51,7 @@ export interface Task {
 // ------------------------------------------------------------------------------
 // Projetos
 // ------------------------------------------------------------------------------
-export type ProjectStatus = 'planejamento' | 'ativo' | 'pausado' | 'concluido';
+export type ProjectStatus = 'planejamento' | 'ativo' | 'pausado' | 'concluido' | 'cancelado';
 
 export interface ProjectStage {
   id: string;
