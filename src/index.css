@@ -50,71 +50,43 @@ html.light {
   --framer-btn-hover: #222222;
 }
 
-html, body {
-  height: 100%;
-  min-width: 0;
-  overflow-x: hidden;
-  font-family: var(--font-sans);
-  font-feature-settings: "cv01" 1, "cv05" 1, "cv09" 1, "cv11" 1, "ss03" 1, "ss07" 1, "dlig" 1;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: var(--framer-canvas);
-  color: var(--framer-ink);
-  letter-spacing: -0.01em;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-button,
-input,
-textarea,
-select { max-width: 100%; }
-
+html, body { height: 100%; min-width: 0; overflow-x: hidden; font-family: var(--font-sans); font-feature-settings: "cv01" 1, "cv05" 1, "cv09" 1, "cv11" 1, "ss03" 1, "ss07" 1, "dlig" 1; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background-color: var(--framer-canvas); color: var(--framer-ink); letter-spacing: -0.01em; transition: background-color 0.2s ease, color 0.2s ease; }
+button, input, textarea, select { max-width: 100%; }
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: var(--framer-canvas); }
 ::-webkit-scrollbar-thumb { background: var(--framer-hairline); border-radius: 9999px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--framer-ink-muted); }
 
-.framer-display-xl { font-family: var(--font-display); font-weight: 500; line-height: 0.95; letter-spacing: -0.05em; }
-.framer-display-lg { font-family: var(--font-display); font-weight: 500; line-height: 1; letter-spacing: -0.045em; }
+.framer-display-xl { font-family: var(--font-display); font-weight: 500; line-height: .95; letter-spacing: -.05em; }
+.framer-display-lg { font-family: var(--font-display); font-weight: 500; line-height: 1; letter-spacing: -.045em; }
 .framer-display-md { font-family: var(--font-display); font-weight: 500; line-height: 1.1; letter-spacing: -1px; }
-.framer-headline { font-family: var(--font-sans); font-weight: 700; line-height: 1.2; letter-spacing: -0.8px; }
-
-.framer-card {
-  background-color: var(--framer-surface-1);
-  border: 1px solid var(--framer-hairline);
-  border-radius: 20px;
-  box-shadow: inset 0 0.5px 0 rgba(255,255,255,.08), 0 10px 30px rgba(0,0,0,.06);
-  transition: all .18s cubic-bezier(.16,1,.3,1);
-}
+.framer-headline { font-family: var(--font-sans); font-weight: 700; line-height: 1.2; letter-spacing: -.8px; }
+.framer-card { background-color: var(--framer-surface-1); border: 1px solid var(--framer-hairline); border-radius: 20px; box-shadow: inset 0 .5px 0 rgba(255,255,255,.08), 0 10px 30px rgba(0,0,0,.06); transition: all .18s cubic-bezier(.16,1,.3,1); }
 html.light .framer-card { box-shadow: 0 2px 12px rgba(0,0,0,.04); }
 .framer-card-featured { background-color: var(--framer-surface-2); border: 1px solid var(--framer-hairline); border-radius: 20px; box-shadow: inset 0 .5px 0 rgba(255,255,255,.12), 0 14px 36px rgba(0,0,0,.12); }
-
-.card-focus-refined,
-.framer-spotlight-violet {
-  background: radial-gradient(120% 120% at 88% 15%, rgba(212,77,240,.48), rgba(106,76,245,.38) 42%, rgba(20,20,20,.94) 88%), linear-gradient(135deg,#1a1230,#141414 65%,#090909);
-  border: 1px solid rgba(255,255,255,.14);
-  border-radius: 30px;
-  box-shadow: inset 0 .5px 0 rgba(255,255,255,.22), 0 20px 50px -10px rgba(106,76,245,.22), 0 10px 30px rgba(0,0,0,.5);
-}
-html.light .card-focus-refined,
-html.light .framer-spotlight-violet { background: radial-gradient(120% 120% at 88% 15%, rgba(212,77,240,.85), rgba(106,76,245,.92) 48%, #4328b8); border-color: rgba(106,76,245,.25); box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 20px 45px -12px rgba(106,76,245,.35); }
+.card-focus-refined, .framer-spotlight-violet { background: radial-gradient(120% 120% at 88% 15%, rgba(212,77,240,.48), rgba(106,76,245,.38) 42%, rgba(20,20,20,.94) 88%), linear-gradient(135deg,#1a1230,#141414 65%,#090909); border: 1px solid rgba(255,255,255,.14); border-radius: 30px; box-shadow: inset 0 .5px 0 rgba(255,255,255,.22), 0 20px 50px -10px rgba(106,76,245,.22), 0 10px 30px rgba(0,0,0,.5); }
+html.light .card-focus-refined, html.light .framer-spotlight-violet { background: radial-gradient(120% 120% at 88% 15%, rgba(212,77,240,.85), rgba(106,76,245,.92) 48%, #4328b8); border-color: rgba(106,76,245,.25); box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 20px 45px -12px rgba(106,76,245,.35); }
 .framer-spotlight-magenta { background: radial-gradient(110% 110% at 85% 20%, rgba(212,77,240,.52), rgba(255,85,119,.32) 45%, rgba(20,20,20,.95) 90%), linear-gradient(135deg,#28112b,#141414 70%); border: 1px solid rgba(255,255,255,.14); border-radius: 30px; box-shadow: inset 0 .5px 0 rgba(255,255,255,.2), 0 14px 40px -8px rgba(212,77,240,.22); }
 .framer-spotlight-orange { background: radial-gradient(110% 110% at 85% 20%, rgba(255,122,61,.5), rgba(255,85,119,.32) 45%, rgba(20,20,20,.95) 90%), linear-gradient(135deg,#2b1610,#141414 70%); border: 1px solid rgba(255,255,255,.14); border-radius: 30px; box-shadow: inset 0 .5px 0 rgba(255,255,255,.2), 0 14px 40px -8px rgba(255,122,61,.2); }
-
-.btn-electric-clean,
-.framer-btn-primary { background-color: var(--framer-btn-bg); color: var(--framer-btn-fg); font-family: var(--font-sans); font-size: 14px; font-weight: 500; line-height: 1; letter-spacing: -.14px; border-radius: 100px; padding: 10px 16px; transition: transform .15s ease, background-color .15s ease, box-shadow .15s ease; }
-.btn-electric-clean:hover,
-.framer-btn-primary:hover { background-color: var(--framer-btn-hover); }
-.btn-electric-clean:active,
-.framer-btn-primary:active { transform: scale(.97); }
+.btn-electric-clean, .framer-btn-primary { background-color: var(--framer-btn-bg); color: var(--framer-btn-fg); font-family: var(--font-sans); font-size: 14px; font-weight: 500; line-height: 1; letter-spacing: -.14px; border-radius: 100px; padding: 10px 16px; transition: transform .15s ease, background-color .15s ease, box-shadow .15s ease; }
+.btn-electric-clean:hover, .framer-btn-primary:hover { background-color: var(--framer-btn-hover); }
+.btn-electric-clean:active, .framer-btn-primary:active { transform: scale(.97); }
 .framer-btn-secondary { background-color: var(--framer-surface-1); color: var(--framer-ink); font-family: var(--font-sans); font-size: 14px; font-weight: 500; line-height: 1; letter-spacing: -.14px; border: 1px solid var(--framer-hairline); border-radius: 100px; padding: 10px 16px; transition: all .15s ease; }
 .framer-btn-secondary:hover { background-color: var(--framer-surface-2); }
 .framer-input { background-color: var(--framer-surface-1); color: var(--framer-ink); border: 1px solid var(--framer-hairline); border-radius: 10px; padding: 10px 14px; font-size: 14px; letter-spacing: -.14px; transition: border-color .15s ease, box-shadow .15s ease; }
 .framer-input::placeholder { color: var(--framer-ink-muted); }
 .framer-input:focus { outline: none; border-color: #0099ff; box-shadow: 0 0 0 3px rgba(0,153,255,.15); }
 
-[aria-label^="Capa do projeto"] { border-radius: 28px !important; border-color: rgba(255,255,255,.18) !important; background: linear-gradient(145deg, rgba(20,20,20,.08), rgba(7,10,20,.96)), radial-gradient(circle at 88% 8%, rgba(212,77,240,.62), transparent 40%), linear-gradient(135deg,#4328b8,#141414 68%) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 20px 45px -12px rgba(106,76,245,.35) !important; transition: transform .2s ease, box-shadow .2s ease; }
-[aria-label^="Capa do projeto"]:hover { transform: translateY(-4px); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 24px 48px -12px rgba(106,76,245,.48) !important; }
+/* DestinationCard-inspired project covers: image, gradient veil, tall poster proportions and glow. */
+[aria-label^="Capa do projeto"] { min-height: 32rem !important; border-radius: 28px !important; border-color: rgba(255,255,255,.2) !important; background-image: linear-gradient(180deg, rgba(7,10,20,.06) 20%, rgba(7,10,20,.42) 58%, rgba(7,10,20,.96) 100%), url('https://cdn.21st.dev/assets/mirror/76/76b04e380c8a1579e5047b5b26cf44addf4bac4b832d9c8cb5cad421ed653172.jpg') !important; background-position: center; background-size: cover; box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 22px 48px -12px rgba(34,197,94,.32) !important; transition: transform .2s ease, box-shadow .2s ease; }
+[aria-label^="Capa do projeto"]:hover { transform: translateY(-5px); box-shadow: inset 0 1px 0 rgba(255,255,255,.32), 0 28px 54px -12px rgba(34,197,94,.46) !important; }
+[aria-label^="Capa do projeto"] > div { min-height: 100%; }
 
-[class*="grid-cols-1"][class*="md:grid-cols-2"][class*="lg:grid-cols-3"][class*="gap-5"] > div { position: relative; overflow: hidden; border-radius: 28px !important; border-color: rgba(255,255,255,.16) !important; background: linear-gradient(145deg, rgba(20,20,20,.08), rgba(7,10,20,.97)), radial-gradient(circle at 88% 8%, rgba(34,211,238,.5), transparent 42%), linear-gradient(135deg,#173b74,#141414 70%) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 18px 40px -14px rgba(34,211,238,.28) !important; transition: transform .2s ease, box-shadow .2s ease; }
-[class*="grid-cols-1"][class*="md:grid-cols-2"][class*="lg:grid-cols-3"][class*="gap-5"] > div:hover { transform: translateY(-4px); box-shadow: inset 0 1px 0 rgba(255,255,255,.26), 0 24px 48px -12px rgba(34,211,238,.42) !important; }
+/* Study cards use the same poster language, with a cooler research palette. */
+[class*="grid-cols-1"][class*="md:grid-cols-2"][class*="lg:grid-cols-3"][class*="gap-5"] > div { position: relative; isolation: isolate; overflow: hidden; min-height: 38rem; border-radius: 28px !important; border-color: rgba(255,255,255,.2) !important; background-image: linear-gradient(180deg, rgba(9,14,30,.12) 15%, rgba(9,14,30,.56) 52%, rgba(6,9,20,.98) 100%), url('https://cdn.21st.dev/assets/mirror/83/8387e5a1a7f334327ef1f645f87f577c51162d52065a1b913c323c3f4e8e7960.jpg') !important; background-position: center; background-size: cover; box-shadow: inset 0 1px 0 rgba(255,255,255,.24), 0 22px 48px -12px rgba(59,130,246,.38) !important; transition: transform .2s ease, box-shadow .2s ease; }
+[class*="grid-cols-1"][class*="md:grid-cols-2"][class*="lg:grid-cols-3"][class*="gap-5"] > div:hover { transform: translateY(-5px); box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 28px 56px -12px rgba(59,130,246,.54) !important; }
+[class*="grid-cols-1"][class*="md:grid-cols-2"][class*="lg:grid-cols-3"][class*="gap-5"] > div::after { content: ''; position: absolute; inset: auto 1rem 1rem; height: 3.5rem; border: 1px solid rgba(255,255,255,.22); border-radius: 1rem; background: rgba(255,255,255,.12); backdrop-filter: blur(12px); pointer-events: none; z-index: -1; }
+
+@media (max-width: 640px) {
+  [aria-label^="Capa do projeto"], [class*="grid-cols-1"][class*="md:grid-cols-2"][class*="lg:grid-cols-3"][class*="gap-5"] > div { min-height: 30rem !important; }
+}
